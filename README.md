@@ -1,16 +1,23 @@
-# hopenglish
+# HopEnglish
 
-A new Flutter project.
+**一款面向 2-5 岁幼儿的沉浸式“因果反馈”英语启蒙工具。**
 
-## Getting Started
+## 核心理念
 
-This project is a starting point for a Flutter application.
+*   **直觉交互**：无需学习，点一点就会玩。
+*   **零翻译**：建立“图像=声音”的直接联系，不依赖中文解释。
+*   **因果一致**：每一次点击都有即时、愉悦的反馈。
 
-A few resources to get you started if this is your first Flutter project:
+## 学习主题 (MVP)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+*   🦁 动物世界
+*   🍎 美味食物
+*   🚗 交通工具
+*   🏃 动作与状态
+*   🏠 居家生活
+*   🎵 乐器与声音
+*   🌤️ 天气与自然
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 技术栈
+
+*   Flutter
