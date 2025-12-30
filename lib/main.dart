@@ -115,6 +115,8 @@ class _CategoryCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+          splashColor: category.color.withValues(alpha: 0.2), // 点击时的水波纹扩散色
+          highlightColor: category.color.withValues(alpha: 0.1), // 按住时的背景高亮色
           onTap: () {},
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
