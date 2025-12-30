@@ -8,9 +8,6 @@ class AppStrings {
   /// 应用名称
   static const String appName = 'HopEnglish';
 
-  /// 应用标语
-  static const String appSlogan = '幼儿英语启蒙';
-
   // ==================== 按钮文案 ====================
 
   /// 下一个
