@@ -22,7 +22,7 @@ class AppTheme {
   static const Color primaryDark = Color(0xFFE86A30);
 
   /// 辅助色 - 薄荷青
-  /// 平静信任，用于次要元素和休息提示
+  /// 平静信任，用于次要按钮、信息提示等“非奖励/非警示”的状态
   static const Color secondary = Color(0xFF4ECDC4);
   static const Color secondaryLight = Color(0xFF7EEEE6);
 
@@ -77,22 +77,27 @@ class AppTheme {
   static const Color categoryAnimals = Color(0xFFFFB347);
 
   /// 🍎 美味食物
-  static const Color categoryFoods = Color(0xFFFF6B6B);
+  /// 说明：避免与温和提醒色 warmAlert 语义混用（两者不应同色）
+  static const Color categoryFoods = Color(0xFFFF5C7A);
 
   /// 🚗 交通工具
-  static const Color categoryVehicles = Color(0xFF4ECDC4);
+  /// 说明：避免与辅助色 secondary 语义混用（分类色用于“识别”，非“状态”）
+  static const Color categoryVehicles = Color(0xFF2EC4B6);
 
   /// 🏃 动作与状态
-  static const Color categoryActions = Color(0xFFFFE066);
+  /// 说明：避免与强调色 accent 语义混用；同时更利于在白底上呈现（边框/水波纹）
+  static const Color categoryActions = Color(0xFFFFD166);
 
   /// 🏠 居家生活
-  static const Color categoryHome = Color(0xFFB388FF);
+  /// 说明：避免与魔法色 magic（魔术棒）语义混用
+  static const Color categoryHome = Color(0xFFC3A6FF);
 
   /// 🎵 乐器与声音
   static const Color categoryMusic = Color(0xFFFF85A2);
 
   /// 🌤️ 天气与自然
-  static const Color categoryNature = Color(0xFF7ED957);
+  /// 说明：避免与成功色 success 语义混用
+  static const Color categoryNature = Color(0xFF4CBF8A);
 
   // ==================== 主题配置 ====================
 
@@ -122,9 +127,9 @@ class AppTheme {
     cardTheme: CardTheme(
       color: surface,
       elevation: 4,
-      shadowColor: textHint.withValues(alpha: 0.2),
+      shadowColor: textHint.withValues(alpha: 0.12),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(radiusLarge),
       ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(

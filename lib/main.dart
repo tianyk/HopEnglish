@@ -128,7 +128,7 @@ class _CategoryCard extends StatelessWidget {
               const SizedBox(height: AppTheme.spacingSmall),
               Text(
                 category.title,
-                style: AppTheme.cardTitle.copyWith(color: category.color),
+                style: AppTheme.cardTitle,
               ),
             ],
           ),
