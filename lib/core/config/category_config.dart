@@ -12,43 +12,43 @@ class CategoryConfig {
     CategoryItem(
       id: 'animals',
       emoji: '🦁',
-      name: 'Animals',
+      name: 'Animals', // 动物世界
       color: Color(0xFFFFB347),
     ),
     CategoryItem(
       id: 'foods',
       emoji: '🍎',
-      name: 'Foods',
+      name: 'Foods', // 美味食物
       color: Color(0xFFFF5C7A),
     ),
     CategoryItem(
       id: 'vehicles',
       emoji: '🚗',
-      name: 'Vehicles',
+      name: 'Vehicles', // 交通工具
       color: Color(0xFF2EC4B6),
     ),
     CategoryItem(
       id: 'actions',
       emoji: '🏃',
-      name: 'Actions',
+      name: 'Actions', // 动作与状态
       color: Color(0xFFFFD166),
     ),
     CategoryItem(
       id: 'home',
       emoji: '🏠',
-      name: 'My Home',
+      name: 'My Home', // 居家生活
       color: Color(0xFFC3A6FF),
     ),
     CategoryItem(
       id: 'music',
       emoji: '🎵',
-      name: 'Music',
+      name: 'Music', // 乐器与声音
       color: Color(0xFFFF85A2),
     ),
     CategoryItem(
       id: 'nature',
       emoji: '🌤️',
-      name: 'Nature',
+      name: 'Nature', // 天气与自然
       color: Color(0xFF4CBF8A),
     ),
   ];
