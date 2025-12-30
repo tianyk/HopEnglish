@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'core/config/category_config.dart';
 import 'core/constants/app_strings.dart';
 import 'core/theme/app_theme.dart';
 
@@ -46,9 +47,9 @@ class HomePage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(AppStrings.appName, style: AppTheme.categoryTitle),
-                const SizedBox(height: AppTheme.spacingSmall),
-                Text(AppStrings.appSlogan, style: AppTheme.body),
-                const SizedBox(height: AppTheme.spacingXLarge),
+                // const SizedBox(height: AppTheme.spacingSmall),
+                // Text(AppStrings.appSlogan, style: AppTheme.body),
+                const SizedBox(height: AppTheme.spacingLarge),
                 Expanded(
                   child: _buildCategoryGrid(),
                 ),
@@ -61,15 +62,6 @@ class HomePage extends StatelessWidget {
   }
 
   Widget _buildCategoryGrid() {
-    final categories = [
-      _CategoryItem('🦁', AppStrings.categoryAnimals, AppTheme.categoryAnimals),
-      _CategoryItem('🍎', AppStrings.categoryFoods, AppTheme.categoryFoods),
-      _CategoryItem('🚗', AppStrings.categoryVehicles, AppTheme.categoryVehicles),
-      _CategoryItem('🏃', AppStrings.categoryActions, AppTheme.categoryActions),
-      _CategoryItem('🏠', AppStrings.categoryHome, AppTheme.categoryHome),
-      _CategoryItem('🎵', AppStrings.categoryMusic, AppTheme.categoryMusic),
-      _CategoryItem('🌤️', AppStrings.categoryNature, AppTheme.categoryNature),
-    ];
     return GridView.builder(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
@@ -77,60 +69,59 @@ class HomePage extends StatelessWidget {
         mainAxisSpacing: AppTheme.spacingMedium,
         childAspectRatio: 1.1,
       ),
-      itemCount: categories.length,
+      itemCount: CategoryConfig.categories.length,
       itemBuilder: (context, index) {
-        final category = categories[index];
+        final category = CategoryConfig.categories[index];
         return _CategoryCard(category: category);
       },
     );
   }
 }
 
-class _CategoryItem {
-  final String emoji;
-  final String title;
-  final Color color;
-
-  _CategoryItem(this.emoji, this.title, this.color);
-}
-
 class _CategoryCard extends StatelessWidget {
-  final _CategoryItem category;
+  final CategoryItem category;
 
   const _CategoryCard({required this.category});
 
+  static const _borderWidth = 2.0;
+
   @override
   Widget build(BuildContext context) {
+    final outerRadius = BorderRadius.circular(AppTheme.radiusLarge);
+    final innerRadius = BorderRadius.circular(AppTheme.radiusLarge - _borderWidth);
+
     return Container(
       decoration: BoxDecoration(
         color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+        borderRadius: outerRadius,
         boxShadow: AppTheme.cardShadow,
         border: Border.all(
           color: category.color.withValues(alpha: 0.3),
-          width: 2,
+          width: _borderWidth,
         ),
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
-          splashColor: category.color.withValues(alpha: 0.2), // 点击时的水波纹扩散色
-          highlightColor: category.color.withValues(alpha: 0.1), // 按住时的背景高亮色
-          onTap: () {},
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                category.emoji,
-                style: const TextStyle(fontSize: 48),
-              ),
-              const SizedBox(height: AppTheme.spacingSmall),
-              Text(
-                category.title,
-                style: AppTheme.cardTitle,
-              ),
-            ],
+      child: ClipRRect(
+        borderRadius: innerRadius,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            splashColor: category.color.withValues(alpha: 0.2),
+            highlightColor: category.color.withValues(alpha: 0.1),
+            onTap: () {},
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  category.emoji,
+                  style: const TextStyle(fontSize: 48),
+                ),
+                const SizedBox(height: AppTheme.spacingSmall),
+                Text(
+                  category.name,
+                  style: AppTheme.cardTitle,
+                ),
+              ],
+            ),
           ),
         ),
       ),

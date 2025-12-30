@@ -84,17 +84,19 @@
 
 ### 2.7 分类主题色
 
-每个学习主题有专属代表色，帮助孩子形成视觉记忆：
+每个学习主题有专属代表色，帮助孩子形成视觉记忆。
 
-| 主题 | 色值 | 预览 |
-|------|------|------|
-| 🦁 动物世界 | `#FFB347` | 🟠 |
-| 🍎 美味食物 | `#FF5C7A` | 🔴 |
-| 🚗 交通工具 | `#2EC4B6` | 🔵 |
-| 🏃 动作状态 | `#FFD166` | 🟡 |
-| 🏠 居家生活 | `#C3A6FF` | 🟣 |
-| 🎵 乐器声音 | `#FF85A2` | 🩷 |
-| 🌤️ 天气自然 | `#4CBF8A` | 🟢 |
+> **注意**：分类颜色属于业务配置，定义在 `CategoryConfig` 中（而非 `AppTheme`），便于动态新增分类。
+
+| 主题 | 色值 | 预览 | 配置位置 |
+|------|------|------|----------|
+| 🦁 动物世界 | `#FFB347` | 🟠 | `CategoryConfig.categories` |
+| 🍎 美味食物 | `#FF5C7A` | 🔴 | `CategoryConfig.categories` |
+| 🚗 交通工具 | `#2EC4B6` | 🔵 | `CategoryConfig.categories` |
+| 🏃 动作状态 | `#FFD166` | 🟡 | `CategoryConfig.categories` |
+| 🏠 居家生活 | `#C3A6FF` | 🟣 | `CategoryConfig.categories` |
+| 🎵 乐器声音 | `#FF85A2` | 🩷 | `CategoryConfig.categories` |
+| 🌤️ 天气自然 | `#4CBF8A` | 🟢 | `CategoryConfig.categories` |
 
 ### 2.8 颜色语义使用规范（重要）
 
@@ -417,9 +419,14 @@ MaterialApp(
 ### 10.3 使用示例
 
 ```dart
-// 颜色
+// 功能色（主题/状态/反馈）
 Container(color: AppTheme.primary)
-Container(color: AppTheme.categoryAnimals)
+Container(color: AppTheme.accent)
+
+// 分类颜色（业务配置，在 CategoryConfig 中）
+import 'package:hopenglish/core/config/category_config.dart';
+final category = CategoryConfig.categories.first;
+Container(color: category.color)
 
 // 文字样式
 Text('Apple', style: AppTheme.wordDisplay)

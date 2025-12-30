@@ -71,34 +71,6 @@ class AppTheme {
   /// 浅色背景上的反色文字
   static const Color textOnColor = Color(0xFFFFFFFF);
 
-  // ==================== 分类主题色 ====================
-
-  /// 🦁 动物世界
-  static const Color categoryAnimals = Color(0xFFFFB347);
-
-  /// 🍎 美味食物
-  /// 说明：避免与温和提醒色 warmAlert 语义混用（两者不应同色）
-  static const Color categoryFoods = Color(0xFFFF5C7A);
-
-  /// 🚗 交通工具
-  /// 说明：避免与辅助色 secondary 语义混用（分类色用于“识别”，非“状态”）
-  static const Color categoryVehicles = Color(0xFF2EC4B6);
-
-  /// 🏃 动作与状态
-  /// 说明：避免与强调色 accent 语义混用；同时更利于在白底上呈现（边框/水波纹）
-  static const Color categoryActions = Color(0xFFFFD166);
-
-  /// 🏠 居家生活
-  /// 说明：避免与魔法色 magic（魔术棒）语义混用
-  static const Color categoryHome = Color(0xFFC3A6FF);
-
-  /// 🎵 乐器与声音
-  static const Color categoryMusic = Color(0xFFFF85A2);
-
-  /// 🌤️ 天气与自然
-  /// 说明：避免与成功色 success 语义混用
-  static const Color categoryNature = Color(0xFF4CBF8A);
-
   // ==================== 主题配置 ====================
 
   /// 应用主题
@@ -225,13 +197,14 @@ class AppTheme {
   );
 
   /// 撒花粒子色
+  /// 注：使用功能色组合，分类色可通过 CategoryConfig.allColors 获取
   static const List<Color> celebrationColors = [
     accent,
     primary,
     magic,
     success,
     secondary,
-    categoryMusic,
+    Color(0xFFFF85A2), // 樱花粉
   ];
 
   // ==================== 阴影 ====================
