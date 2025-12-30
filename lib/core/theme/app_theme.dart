@@ -13,6 +13,14 @@ import 'package:flutter/material.dart';
 class AppTheme {
   AppTheme._();
 
+  // ==================== 字体 ====================
+
+  /// 单词展示字体（圆润童趣）
+  static const String fontFamilyDisplay = 'Fredoka';
+
+  /// 正文字体（简洁易读）
+  static const String fontFamilyBody = 'Nunito';
+
   // ==================== 主色调 ====================
 
   /// 主色 - 蜜橘橙
@@ -139,7 +147,9 @@ class AppTheme {
   // ==================== 文本样式 ====================
 
   /// 单词展示 - 超大醒目（大图学习仓）
+  /// 使用 Fredoka 字体，圆润童趣
   static const TextStyle wordDisplay = TextStyle(
+    fontFamily: fontFamilyDisplay,
     fontSize: 64,
     fontWeight: FontWeight.w700,
     color: textPrimary,
@@ -147,28 +157,36 @@ class AppTheme {
   );
 
   /// 短语展示
+  /// 使用 Fredoka 字体
   static const TextStyle phraseDisplay = TextStyle(
+    fontFamily: fontFamilyDisplay,
     fontSize: 40,
     fontWeight: FontWeight.w600,
     color: textPrimary,
   );
 
-  /// 分类标题
+  /// 分类标题（英文单词）
+  /// 使用 Fredoka 字体
   static const TextStyle categoryTitle = TextStyle(
+    fontFamily: fontFamilyDisplay,
     fontSize: 22,
     fontWeight: FontWeight.w600,
     color: textPrimary,
   );
 
-  /// 卡片标题
+  /// 卡片标题（英文单词）
+  /// 使用 Fredoka 字体
   static const TextStyle cardTitle = TextStyle(
+    fontFamily: fontFamilyDisplay,
     fontSize: 16,
     fontWeight: FontWeight.w500,
     color: textPrimary,
   );
 
-  /// 正文
+  /// 正文（说明文字）
+  /// 使用 Nunito 字体，简洁易读
   static const TextStyle body = TextStyle(
+    fontFamily: fontFamilyBody,
     fontSize: 14,
     color: textSecondary,
   );

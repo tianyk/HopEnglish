@@ -141,35 +141,54 @@
 
 ### 3.1 字体选择
 
-| 场景 | 推荐字体 | 备选 |
-|------|----------|------|
-| 单词展示 | **Fredoka** | Nunito |
-| 短语/正文 | **Nunito** | Quicksand |
-| 教育规范 | **ABeeZee** | Andika |
+| 场景 | 字体 | 代码常量 | 说明 |
+|------|------|----------|------|
+| 单词/标题展示 | **Fredoka** | `AppTheme.fontFamilyDisplay` | 圆润童趣，适合幼儿 |
+| 正文/说明 | **Nunito** | `AppTheme.fontFamilyBody` | 简洁易读 |
 
-### 3.2 文字样式
+### 3.2 字体文件
 
-| 样式名称 | 字号 | 字重 | 用途 |
-|----------|------|------|------|
-| `wordDisplay` | 64px | Bold (700) | 大图学习仓单词展示 |
-| `phraseDisplay` | 40px | SemiBold (600) | 短语展示 |
-| `categoryTitle` | 22px | SemiBold (600) | 分类标题 |
-| `cardTitle` | 16px | Medium (500) | 卡片标题 |
-| `body` | 14px | Regular (400) | 正文/说明 |
+字体文件存放在 `assets/fonts/` 目录：
 
-### 3.3 文字层级示意
+```
+assets/fonts/
+├── Fredoka-Regular.ttf    (400)
+├── Fredoka-Medium.ttf     (500)
+├── Fredoka-SemiBold.ttf   (600)
+├── Fredoka-Bold.ttf       (700)
+├── Nunito-Regular.ttf     (400)
+├── Nunito-Medium.ttf      (500)
+├── Nunito-SemiBold.ttf    (600)
+└── Nunito-Bold.ttf        (700)
+```
+
+**下载来源**：[Google Fonts](https://fonts.google.com/)
+- Fredoka: https://fonts.google.com/specimen/Fredoka
+- Nunito: https://fonts.google.com/specimen/Nunito
+
+### 3.3 文字样式
+
+| 样式名称 | 字体 | 字号 | 字重 | 用途 |
+|----------|------|------|------|------|
+| `wordDisplay` | Fredoka | 64px | Bold (700) | 大图学习仓单词展示 |
+| `phraseDisplay` | Fredoka | 40px | SemiBold (600) | 短语展示 |
+| `categoryTitle` | Fredoka | 22px | SemiBold (600) | 分类标题 |
+| `cardTitle` | Fredoka | 16px | Medium (500) | 卡片标题 |
+| `body` | Nunito | 14px | Regular (400) | 正文/说明 |
+
+### 3.4 文字层级示意
 
 ```
 ┌──────────────────────────────────────┐
 │                                      │
-│         Apple                        │  ← wordDisplay (64px)
+│         Apple                        │  ← wordDisplay (Fredoka 64px)
 │                                      │
-│      Big Apple                       │  ← phraseDisplay (40px)
+│      Big Apple                       │  ← phraseDisplay (Fredoka 40px)
 │                                      │
-│   🍎 美味食物                         │  ← categoryTitle (22px)
+│   🍎 Foods                           │  ← categoryTitle (Fredoka 22px)
 │                                      │
-│   苹果                               │  ← cardTitle (16px)
-│   点击图片听发音                       │  ← body (14px)
+│   Animals                            │  ← cardTitle (Fredoka 16px)
+│   点击图片听发音                       │  ← body (Nunito 14px)
 │                                      │
 └──────────────────────────────────────┘
 ```
@@ -428,9 +447,14 @@ import 'package:hopenglish/core/config/category_config.dart';
 final category = CategoryConfig.categories.first;
 Container(color: category.color)
 
-// 文字样式
-Text('Apple', style: AppTheme.wordDisplay)
-Text('动物世界', style: AppTheme.categoryTitle)
+// 字体（已内置在文字样式中）
+// Fredoka: AppTheme.fontFamilyDisplay
+// Nunito: AppTheme.fontFamilyBody
+
+// 文字样式（自动应用对应字体）
+Text('Apple', style: AppTheme.wordDisplay)      // Fredoka Bold
+Text('Animals', style: AppTheme.cardTitle)      // Fredoka Medium
+Text('点击听发音', style: AppTheme.body)          // Nunito Regular
 
 // 渐变
 Container(
