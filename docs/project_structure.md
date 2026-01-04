@@ -24,7 +24,8 @@ lib/
     │
     ├── pages/                             # 页面（路由入口）
     │   ├── home_page.dart                 # 首页：分类画廊
-    │   └── word_learning_page.dart        # 单词学习页
+    │   ├── word_learning_page.dart        # 单词学习页
+    │   └── celebration_page.dart          # 完成庆祝页
     │
     ├── services/                          # 服务层
     │   └── category_service.dart          # 分类数据服务
@@ -34,7 +35,6 @@ lib/
     │
     └── widgets/                           # 可复用组件
         ├── category_card.dart             # 分类卡片
-        ├── celebration_overlay.dart       # 庆祝撒花动画
         └── word_directory_sheet.dart      # 单词目录弹窗
 ```
 
@@ -80,6 +80,7 @@ lib/
 存放页面级组件（路由入口）：
 - `home_page.dart` - 首页分类画廊
 - `word_learning_page.dart` - 单词学习页
+- `celebration_page.dart` - 完成庆祝页
 
 **命名规范**：文件名以 `_page.dart` 结尾
 
@@ -101,7 +102,6 @@ lib/
 ### 10. widgets/ - 可复用组件
 存放跨页面复用的 UI 组件：
 - `category_card.dart` - 分类卡片
-- `celebration_overlay.dart` - 庆祝撒花动画
 - `word_directory_sheet.dart` - 单词目录弹窗
 
 **命名规范**：组件名称描述其功能
@@ -235,4 +235,4 @@ CategoryCard(
 
 ---
 
-*最后更新：2026-01-04*
+*最后更新：2026-01-05*

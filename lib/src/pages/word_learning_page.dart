@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hopenglish/src/models/category.dart';
 import 'package:hopenglish/src/models/word.dart';
+import 'package:hopenglish/src/pages/celebration_page.dart';
 import 'package:hopenglish/src/theme/app_theme.dart';
-import 'package:hopenglish/src/widgets/celebration_overlay.dart';
 import 'package:hopenglish/src/widgets/word_directory_sheet.dart';
 
 /// 单词学习页 (Word Learning Page)
@@ -30,9 +30,6 @@ class _WordLearningPageState extends State<WordLearningPage> with SingleTickerPr
   // 按钮冷却状态
   bool _isNextButtonCooling = false;
   static const _cooldownDuration = Duration(milliseconds: 500);
-
-  // 庆祝动画状态
-  bool _showCelebration = false;
 
   @override
   void initState() {
@@ -102,13 +99,14 @@ class _WordLearningPageState extends State<WordLearningPage> with SingleTickerPr
   }
 
   void _startCelebration() {
-    setState(() {
-      _showCelebration = true;
-    });
-  }
-
-  void _onCelebrationComplete() {
-    Navigator.of(context).pop();
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => CelebrationPage(
+          words: widget.category.words,
+          themeColor: widget.category.color,
+        ),
+      ),
+    );
   }
 
   void _showWordDirectory() {
@@ -130,28 +128,19 @@ class _WordLearningPageState extends State<WordLearningPage> with SingleTickerPr
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          Container(
-            decoration: const BoxDecoration(
-              gradient: AppTheme.backgroundGradient,
-            ),
-            child: SafeArea(
-              child: Column(
-                children: [
-                  _buildHeader(),
-                  Expanded(child: _buildWordDisplay()),
-                  _buildBottomBar(),
-                ],
-              ),
-            ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppTheme.backgroundGradient,
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              _buildHeader(),
+              Expanded(child: _buildWordDisplay()),
+              _buildBottomBar(),
+            ],
           ),
-          if (_showCelebration)
-            CelebrationOverlay(
-              words: widget.category.words,
-              onComplete: _onCelebrationComplete,
-            ),
-        ],
+        ),
       ),
     );
   }
@@ -213,7 +202,7 @@ class _WordLearningPageState extends State<WordLearningPage> with SingleTickerPr
     return Text(
       widget.category.name,
       style: AppTheme.headlineMedium.copyWith(
-        color: widget.category.color,
+        color: AppTheme.textPrimary,
       ),
       overflow: TextOverflow.ellipsis,
     );
@@ -275,7 +264,7 @@ class _WordLearningPageState extends State<WordLearningPage> with SingleTickerPr
     return Text(
       _currentWord.name,
       style: AppTheme.displayLarge.copyWith(
-        color: widget.category.color,
+        color: AppTheme.primary,
       ),
     );
   }
@@ -288,7 +277,7 @@ class _WordLearningPageState extends State<WordLearningPage> with SingleTickerPr
   }
 
   Widget _buildNextButton() {
-    final buttonColor = _isNextButtonCooling ? widget.category.color.withValues(alpha: 0.5) : widget.category.color;
+    final buttonColor = _isNextButtonCooling ? AppTheme.primary.withValues(alpha: 0.5) : AppTheme.primary;
 
     return GestureDetector(
       onTap: _goToNextWord,
@@ -311,15 +300,15 @@ class _WordLearningPageState extends State<WordLearningPage> with SingleTickerPr
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              _isLastWord ? 'Done' : 'Next',
+              'Next',
               style: AppTheme.headlineMedium.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
               ),
             ),
             const SizedBox(width: AppTheme.spacingSmall),
-            Icon(
-              _isLastWord ? Icons.check_rounded : Icons.arrow_forward_rounded,
+            const Icon(
+              Icons.arrow_forward_rounded,
               color: Colors.white,
               size: 28,
             ),

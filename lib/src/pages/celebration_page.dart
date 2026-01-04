@@ -1,0 +1,351 @@
+import 'dart:async';
+import 'dart:math';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/material.dart';
+import 'package:hopenglish/src/models/word.dart';
+import 'package:hopenglish/src/theme/app_theme.dart';
+
+/// 庆祝撒花动画粒子数据
+class _CelebrationParticle {
+  final String emoji;
+  double x;
+  double y;
+  double velocityX;
+  double velocityY;
+  double rotation;
+  double rotationSpeed;
+  final double scale;
+
+  _CelebrationParticle({
+    required this.emoji,
+    required this.x,
+    required this.y,
+    required this.velocityX,
+    required this.velocityY,
+    required this.rotation,
+    required this.rotationSpeed,
+    required this.scale,
+  });
+}
+
+/// 独立庆祝页面
+///
+/// 学习完成时展示：
+/// - 从底部喷射单词 emoji + 装饰 emoji
+/// - 中央 "Well done!" 大字（弹出动画）
+/// - Done 按钮 + 倒计时
+/// - 语音表扬
+class CelebrationPage extends StatefulWidget {
+  final List<Word> words;
+  final Color themeColor;
+
+  const CelebrationPage({
+    required this.words,
+    required this.themeColor,
+    super.key,
+  });
+
+  @override
+  State<CelebrationPage> createState() => _CelebrationPageState();
+}
+
+class _CelebrationPageState extends State<CelebrationPage> with TickerProviderStateMixin {
+  late AnimationController _particleController;
+  late AnimationController _textController;
+  late Animation<double> _textScaleAnimation;
+  late List<_CelebrationParticle> _particles;
+  final Random _random = Random();
+
+  // 倒计时
+  int _countdown = 5;
+  Timer? _countdownTimer;
+
+  /// 装饰 emoji 配置
+  static const List<String> _decorEmojis = ['🎉', '✨', '🌟', '⭐', '🎊'];
+  static const int _decorParticleCount = 12;
+
+  /// 物理参数
+  static const double _gravity = 0.0006;
+  static const double _drag = 0.012;
+  static const double _startVelocity = 0.035;
+  static const double _spreadAngle = pi * 0.5;
+
+  /// 根据单词数量动态计算每个单词的粒子数
+  int get _particlesPerWord {
+    final count = widget.words.length;
+    if (count <= 4) return 6;
+    if (count <= 7) return 5;
+    if (count <= 12) return 3;
+    return 2;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initParticles();
+    _initAnimations();
+    _playCelebrationAudio();
+    _startCountdown();
+  }
+
+  @override
+  void dispose() {
+    _particleController.dispose();
+    _textController.dispose();
+    _countdownTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startCountdown() {
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_countdown > 1) {
+        setState(() {
+          _countdown--;
+        });
+      } else {
+        timer.cancel();
+        _navigateBack();
+      }
+    });
+  }
+
+  void _navigateBack() {
+    if (mounted) {
+      Navigator.of(context).pop();
+    }
+  }
+
+  /// 播放表扬语音
+  void _playCelebrationAudio() {
+    final player = AudioPlayer();
+    player.play(AssetSource('audio/celebrations/well_done.wav'));
+  }
+
+  void _initParticles() {
+    _particles = [];
+
+    // 1. 生成单词粒子
+    for (final word in widget.words) {
+      final emoji = word.emoji ?? '⭐';
+      for (var i = 0; i < _particlesPerWord; i++) {
+        _particles.add(_createParticle(emoji));
+      }
+    }
+
+    // 2. 生成装饰粒子
+    for (var i = 0; i < _decorParticleCount; i++) {
+      final decorEmoji = _decorEmojis[_random.nextInt(_decorEmojis.length)];
+      _particles.add(_createParticle(decorEmoji, isDecor: true));
+    }
+
+    // 3. 打乱顺序
+    _particles.shuffle(_random);
+  }
+
+  _CelebrationParticle _createParticle(String emoji, {bool isDecor = false}) {
+    final speed = _startVelocity * (0.7 + _random.nextDouble() * 0.6);
+    final angle = -pi / 2 + (_random.nextDouble() - 0.5) * _spreadAngle;
+    final scale = isDecor ? 0.4 + _random.nextDouble() * 0.3 : 0.6 + _random.nextDouble() * 0.4;
+
+    return _CelebrationParticle(
+      emoji: emoji,
+      x: 0.5 + (_random.nextDouble() - 0.5) * 0.08,
+      y: 0.9,
+      velocityX: speed * cos(angle),
+      velocityY: speed * sin(angle),
+      rotation: _random.nextDouble() * 2 * pi,
+      rotationSpeed: (_random.nextDouble() - 0.5) * 0.15,
+      scale: scale,
+    );
+  }
+
+  void _initAnimations() {
+    // 粒子动画控制器
+    _particleController = AnimationController(
+      duration: const Duration(seconds: 6),
+      vsync: this,
+    );
+    _particleController.addListener(_updateParticles);
+    _particleController.forward();
+
+    // 文字弹出动画
+    _textController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+    _textScaleAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.2), weight: 2),
+      TweenSequenceItem(tween: Tween(begin: 1.2, end: 0.9), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: 0.9, end: 1.0), weight: 1),
+    ]).animate(CurvedAnimation(
+      parent: _textController,
+      curve: Curves.easeOut,
+    ));
+    _textController.forward();
+  }
+
+  void _updateParticles() {
+    setState(() {
+      for (final p in _particles) {
+        // 1. 应用空气阻力
+        p.velocityX *= (1 - _drag);
+        p.velocityY *= (1 - _drag);
+
+        // 2. 应用恒定重力
+        p.velocityY += _gravity;
+
+        // 3. 更新位置
+        p.x += p.velocityX;
+        p.y += p.velocityY;
+
+        // 4. 更新旋转
+        p.rotation += p.rotationSpeed;
+        p.rotationSpeed *= (1 - _drag);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: AppTheme.backgroundGradient,
+        ),
+        child: SafeArea(
+          child: Stack(
+            children: [
+              // 粒子层
+              ..._particles.map((p) => _buildParticle(p, size)),
+
+              // 中央内容
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildCelebrationText(),
+                    const SizedBox(height: 80),
+                  ],
+                ),
+              ),
+
+              // Done 按钮（底部）
+              Positioned(
+                left: AppTheme.spacingLarge,
+                right: AppTheme.spacingLarge,
+                bottom: AppTheme.spacingLarge,
+                child: _buildDoneButton(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCelebrationText() {
+    return AnimatedBuilder(
+      animation: _textScaleAnimation,
+      builder: (context, child) {
+        return Transform.scale(
+          scale: _textScaleAnimation.value,
+          child: child,
+        );
+      },
+      child: Text(
+        'Well done!',
+        style: const TextStyle(
+          fontFamily: 'Fredoka',
+          fontSize: 48,
+          fontWeight: FontWeight.bold,
+          color: Color(0xFFFFB347),
+          shadows: [
+            Shadow(
+              color: Color(0x80FFB347),
+              blurRadius: 24,
+              offset: Offset(0, 4),
+            ),
+            Shadow(
+              color: Color(0x40000000),
+              blurRadius: 8,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDoneButton() {
+    return GestureDetector(
+      onTap: _navigateBack,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        decoration: BoxDecoration(
+          color: AppTheme.primary,
+          borderRadius: BorderRadius.circular(AppTheme.radiusXLarge),
+          boxShadow: [
+            BoxShadow(
+              color: AppTheme.primary.withValues(alpha: 0.3),
+              blurRadius: 12,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Done',
+              style: AppTheme.headlineMedium.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(width: AppTheme.spacingSmall),
+            Container(
+              constraints: const BoxConstraints(minWidth: 32),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.3),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                '$_countdown',
+                textAlign: TextAlign.center,
+                style: AppTheme.titleMedium.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildParticle(_CelebrationParticle particle, Size screenSize) {
+    if (particle.y > 1.3 || particle.y < -0.3 || particle.x < -0.2 || particle.x > 1.2) {
+      return const SizedBox.shrink();
+    }
+
+    return Positioned(
+      left: particle.x * screenSize.width - 24,
+      top: particle.y * screenSize.height - 24,
+      child: Transform.rotate(
+        angle: particle.rotation,
+        child: Transform.scale(
+          scale: particle.scale,
+          child: Text(
+            particle.emoji,
+            style: const TextStyle(fontSize: 48),
+          ),
+        ),
+      ),
+    );
+  }
+}

@@ -68,7 +68,7 @@
     "id": "music",
     "emoji": "🎵",
     "name": "Music",
-    "color": "#FF85A2",
+    "color": "#FF4081",
     "words": [
       { "id": "piano", "name": "Piano", "emoji": "🎹", "audio": "music/piano.mp3" },
       { "id": "guitar", "name": "Guitar", "emoji": "🎸", "audio": "music/guitar.mp3" },

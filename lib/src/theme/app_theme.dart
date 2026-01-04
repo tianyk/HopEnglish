@@ -23,9 +23,9 @@ class AppTheme {
 
   // ==================== 主色调 ====================
 
-  /// 主色 - 蜜橘橙
+  /// 主色 - 暖橙色
   /// 温暖活力，代表快乐与探索，用于主要按钮和核心交互
-  static const Color primary = Color(0xFFFF8A50);
+  static const Color primary = Color(0xFFFFB347);
   static const Color primaryLight = Color(0xFFFFBB80);
   static const Color primaryDark = Color(0xFFE86A30);
 
