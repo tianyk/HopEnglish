@@ -170,25 +170,25 @@ assets/fonts/
 
 | 样式名称 | 字体 | 字号 | 字重 | 用途 |
 |----------|------|------|------|------|
-| `wordDisplay` | Fredoka | 64px | Bold (700) | 大图学习仓单词展示 |
-| `phraseDisplay` | Fredoka | 40px | SemiBold (600) | 短语展示 |
-| `categoryTitle` | Fredoka | 22px | SemiBold (600) | 分类标题 |
-| `cardTitle` | Fredoka | 16px | Medium (500) | 卡片标题 |
-| `body` | Nunito | 14px | Regular (400) | 正文/说明 |
+| `displayLarge` | Fredoka | 64px | Bold (700) | 超大展示标题（核心内容） |
+| `displayMedium` | Fredoka | 40px | SemiBold (600) | 大号展示标题（次要内容） |
+| `headlineMedium` | Fredoka | 22px | SemiBold (600) | 页面标题、区块标题 |
+| `titleMedium` | Fredoka | 16px | Medium (500) | 卡片标题、列表项标题 |
+| `bodyMedium` | Nunito | 14px | Regular (400) | 正文、说明文字 |
 
 ### 3.4 文字层级示意
 
 ```
 ┌──────────────────────────────────────┐
 │                                      │
-│         Apple                        │  ← wordDisplay (Fredoka 64px)
+│         Apple                        │  ← displayLarge (Fredoka 64px)
 │                                      │
-│      Big Apple                       │  ← phraseDisplay (Fredoka 40px)
+│      Big Apple                       │  ← displayMedium (Fredoka 40px)
 │                                      │
-│   🍎 Foods                           │  ← categoryTitle (Fredoka 22px)
+│   🍎 Foods                           │  ← headlineMedium (Fredoka 22px)
 │                                      │
-│   Animals                            │  ← cardTitle (Fredoka 16px)
-│   点击图片听发音                       │  ← body (Nunito 14px)
+│   Animals                            │  ← titleMedium (Fredoka 16px)
+│   点击图片听发音                       │  ← bodyMedium (Nunito 14px)
 │                                      │
 └──────────────────────────────────────┘
 ```
@@ -452,9 +452,11 @@ Container(color: category.color)
 // Nunito: AppTheme.fontFamilyBody
 
 // 文字样式（自动应用对应字体）
-Text('Apple', style: AppTheme.wordDisplay)      // Fredoka Bold
-Text('Animals', style: AppTheme.cardTitle)      // Fredoka Medium
-Text('点击听发音', style: AppTheme.body)          // Nunito Regular
+Text('Apple', style: AppTheme.displayLarge)      // Fredoka Bold 64px
+Text('Big Apple', style: AppTheme.displayMedium) // Fredoka SemiBold 40px
+Text('Animals', style: AppTheme.headlineMedium)  // Fredoka SemiBold 22px
+Text('Lion', style: AppTheme.titleMedium)        // Fredoka Medium 16px
+Text('点击听发音', style: AppTheme.bodyMedium)    // Nunito Regular 14px
 
 // 渐变
 Container(

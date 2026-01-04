@@ -53,7 +53,7 @@ class CategoryCard extends StatelessWidget {
         const SizedBox(height: AppTheme.spacingSmall),
         Text(
           category.name,
-          style: AppTheme.cardTitle,
+          style: AppTheme.titleMedium,
         ),
       ],
     );

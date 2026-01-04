@@ -146,9 +146,9 @@ class AppTheme {
 
   // ==================== 文本样式 ====================
 
-  /// 单词展示 - 超大醒目（大图学习仓）
-  /// 使用 Fredoka 字体，圆润童趣
-  static const TextStyle wordDisplay = TextStyle(
+  /// 超大展示文字（64px，Fredoka Bold）
+  /// 用于核心展示内容的醒目标题
+  static const TextStyle displayLarge = TextStyle(
     fontFamily: fontFamilyDisplay,
     fontSize: 64,
     fontWeight: FontWeight.w700,
@@ -156,36 +156,36 @@ class AppTheme {
     letterSpacing: 2,
   );
 
-  /// 短语展示
-  /// 使用 Fredoka 字体
-  static const TextStyle phraseDisplay = TextStyle(
+  /// 大号展示文字（40px，Fredoka SemiBold）
+  /// 用于次要展示内容、强调标题
+  static const TextStyle displayMedium = TextStyle(
     fontFamily: fontFamilyDisplay,
     fontSize: 40,
     fontWeight: FontWeight.w600,
     color: textPrimary,
   );
 
-  /// 分类标题（英文单词）
-  /// 使用 Fredoka 字体
-  static const TextStyle categoryTitle = TextStyle(
+  /// 页面标题（22px，Fredoka SemiBold）
+  /// 用于页面主标题、区块标题
+  static const TextStyle headlineMedium = TextStyle(
     fontFamily: fontFamilyDisplay,
     fontSize: 22,
     fontWeight: FontWeight.w600,
     color: textPrimary,
   );
 
-  /// 卡片标题（英文单词）
-  /// 使用 Fredoka 字体
-  static const TextStyle cardTitle = TextStyle(
+  /// 卡片标题（16px，Fredoka Medium）
+  /// 用于卡片标题、列表项标题
+  static const TextStyle titleMedium = TextStyle(
     fontFamily: fontFamilyDisplay,
     fontSize: 16,
     fontWeight: FontWeight.w500,
     color: textPrimary,
   );
 
-  /// 正文（说明文字）
-  /// 使用 Nunito 字体，简洁易读
-  static const TextStyle body = TextStyle(
+  /// 正文文字（14px，Nunito Regular）
+  /// 用于说明文字、提示文字
+  static const TextStyle bodyMedium = TextStyle(
     fontFamily: fontFamilyBody,
     fontSize: 14,
     color: textSecondary,

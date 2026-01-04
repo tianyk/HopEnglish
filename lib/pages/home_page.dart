@@ -36,7 +36,7 @@ class HomePage extends StatelessWidget {
   Widget _buildHeader() {
     return const Text(
       'HopEnglish',
-      style: AppTheme.categoryTitle,
+      style: AppTheme.headlineMedium,
     );
   }
 
