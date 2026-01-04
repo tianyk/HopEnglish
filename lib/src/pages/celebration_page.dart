@@ -297,18 +297,23 @@ class _CelebrationPageState extends State<CelebrationPage> with TickerProviderSt
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
-              'Done',
-              style: AppTheme.headlineMedium.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
+            Padding(
+              padding: const EdgeInsets.only(bottom: 2), // 微调视觉位置
+              child: Text(
+                'Done',
+                style: AppTheme.headlineMedium.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                  height: 1.0, // 消除默认行高影响
+                ),
               ),
             ),
             const SizedBox(width: AppTheme.spacingSmall),
             Container(
               constraints: const BoxConstraints(minWidth: 32),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), // 增加一点垂直padding
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(12),
@@ -319,6 +324,7 @@ class _CelebrationPageState extends State<CelebrationPage> with TickerProviderSt
                 style: AppTheme.titleMedium.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
+                  height: 1.0, // 消除默认行高影响
                 ),
               ),
             ),
