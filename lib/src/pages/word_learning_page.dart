@@ -311,7 +311,7 @@ class _WordLearningPageState extends State<WordLearningPage> with SingleTickerPr
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              _isLastWord ? '完成' : '下一个',
+              _isLastWord ? 'Done' : 'Next',
               style: AppTheme.headlineMedium.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
