@@ -10,6 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
+  equatable: ^2.0.5
 
 dev_dependencies:
   flutter_test:
@@ -19,8 +20,10 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-  # 图片资源
+  # 资源文件
   assets:
+    # 数据配置
+    - assets/data/
     # 分类主题图标
     - assets/images/categories/
     # 单词插画

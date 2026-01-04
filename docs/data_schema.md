@@ -25,43 +25,18 @@
 ### 1.3 数据层级
 
 ```
-分类 (Category)
-├── 基本信息：id, emoji, name, color
-└── 单词列表 (words)
-    └── 单词 (Word)
-        ├── 基础态：id, name, image, audio
-        └── 短语态：phrase（可选）
-            └── name, attribute, image, audio
+Category → words[] → Word
 ```
 
 ---
 
-## 二、文件结构
-
-### 2.1 文件位置
+## 二、文件位置
 
 ```
-assets/
-└── data/
-    └── categories.json    # 分类与单词配置
+assets/data/categories.json
 ```
 
-### 2.2 根结构
-
-采用**数组结构**作为根节点：
-
-```json
-[
-  { "id": "animals", ... },
-  { "id": "foods", ... },
-  ...
-]
-```
-
-**设计理由：**
-- 文件名 `categories.json` 已表达语义
-- 无需 `version` 等元数据（数据随 App 发布）
-- 更简洁，少一层嵌套
+根结构为**数组**，每个元素是一个 Category。
 
 ---
 
@@ -71,23 +46,14 @@ assets/
 
 | 字段 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| `id` | string | ✅ | 唯一标识，用于路由和存储 |
-| `emoji` | string | ✅ | 分类图标（emoji 字符） |
+| `id` | string | ✅ | 唯一标识 |
+| `emoji` | string | ⚠️ | 分类图标（emoji），与 image 二选一 |
+| `image` | string | ⚠️ | 分类图标（图片路径），与 emoji 二选一 |
 | `name` | string | ✅ | 显示名称（英文） |
-| `color` | string | ✅ | 主题色，十六进制格式 `#RRGGBB` |
+| `color` | string | ✅ | 主题色 `#RRGGBB` |
 | `words` | array | ✅ | 单词列表 |
 
-**示例：**
-
-```json
-{
-  "id": "animals",
-  "emoji": "🦁",
-  "name": "Animals",
-  "color": "#FFB347",
-  "words": [...]
-}
-```
+> ⚠️ `emoji` 和 `image` 至少需要一个，优先使用 `image`。
 
 ### 3.2 Word（单词）
 
@@ -95,45 +61,15 @@ assets/
 |------|------|------|------|
 | `id` | string | ✅ | 唯一标识 |
 | `name` | string | ✅ | 单词名称（英文） |
-| `image` | string | ✅ | 图片相对路径 |
-| `audio` | string | ✅ | 音频相对路径 |
-| `phrase` | object | ❌ | 短语态，可选 |
+| `emoji` | string | ⚠️ | 单词图标（emoji），与 image 二选一 |
+| `image` | string | ⚠️ | 单词图片路径，与 emoji 二选一 |
+| `audio` | string | ✅ | 音频路径 |
 
-**示例：**
-
-```json
-{
-  "id": "lion",
-  "name": "Lion",
-  "image": "animals/lion.png",
-  "audio": "animals/lion.mp3",
-  "phrase": { ... }
-}
-```
-
-### 3.3 Phrase（短语态）
-
-| 字段 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| `name` | string | ✅ | 短语名称（英文） |
-| `attribute` | string | ✅ | 属性标识（如 big, angry, running） |
-| `image` | string | ✅ | 变化后的图片路径 |
-| `audio` | string | ✅ | 短语音频路径 |
-
-**示例：**
-
-```json
-{
-  "name": "Angry Lion",
-  "attribute": "angry",
-  "image": "animals/lion_angry.png",
-  "audio": "animals/angry_lion.mp3"
-}
-```
+> ⚠️ `emoji` 和 `image` 至少需要一个，优先使用 `image`。
 
 ---
 
-## 四、完整示例
+## 四、JSON 示例
 
 ```json
 [
@@ -143,50 +79,8 @@ assets/
     "name": "Animals",
     "color": "#FFB347",
     "words": [
-      {
-        "id": "lion",
-        "name": "Lion",
-        "image": "animals/lion.png",
-        "audio": "animals/lion.mp3",
-        "phrase": {
-          "name": "Angry Lion",
-          "attribute": "angry",
-          "image": "animals/lion_angry.png",
-          "audio": "animals/angry_lion.mp3"
-        }
-      },
-      {
-        "id": "dog",
-        "name": "Dog",
-        "image": "animals/dog.png",
-        "audio": "animals/dog.mp3",
-        "phrase": {
-          "name": "Running Dog",
-          "attribute": "running",
-          "image": "animals/dog_running.png",
-          "audio": "animals/running_dog.mp3"
-        }
-      }
-    ]
-  },
-  {
-    "id": "foods",
-    "emoji": "🍎",
-    "name": "Foods",
-    "color": "#FF5C7A",
-    "words": [
-      {
-        "id": "apple",
-        "name": "Apple",
-        "image": "foods/apple.png",
-        "audio": "foods/apple.mp3",
-        "phrase": {
-          "name": "Big Apple",
-          "attribute": "big",
-          "image": "foods/apple_big.png",
-          "audio": "foods/big_apple.mp3"
-        }
-      }
+      { "id": "lion", "name": "Lion", "emoji": "🦁", "audio": "animals/lion.mp3" },
+      { "id": "dog", "name": "Dog", "emoji": "🐕", "audio": "animals/dog.mp3" }
     ]
   }
 ]
@@ -198,169 +92,50 @@ assets/
 
 ### 5.1 目录结构
 
-```
-assets/
-├── data/
-│   └── categories.json           # 数据配置
-├── images/
-│   └── words/
-│       ├── animals/
-│       │   ├── lion.png          # 基础态
-│       │   ├── lion_angry.png    # 短语态
-│       │   ├── dog.png
-│       │   └── dog_running.png
-│       └── foods/
-│           ├── apple.png
-│           └── apple_big.png
-└── audio/
-    └── words/
-        ├── animals/
-        │   ├── lion.mp3
-        │   ├── angry_lion.mp3
-        │   ├── dog.mp3
-        │   └── running_dog.mp3
-        └── foods/
-            ├── apple.mp3
-            └── big_apple.mp3
-```
+| 类型 | 路径 |
+|------|------|
+| 数据文件 | `assets/data/categories.json` |
+| 分类图片 | `assets/images/categories/` |
+| 单词图片 | `assets/images/words/{category}/` |
+| 单词音频 | `assets/audio/words/{category}/` |
 
-### 5.2 路径规则
+### 5.2 路径映射
 
-| 资源类型 | JSON 中的值 | 完整路径 |
-|----------|-------------|----------|
-| 图片 | `animals/lion.png` | `assets/images/words/animals/lion.png` |
-| 音频 | `animals/lion.mp3` | `assets/audio/words/animals/lion.mp3` |
+| JSON 中的值 | 完整路径 |
+|-------------|----------|
+| `categories/animals.png` | `assets/images/categories/animals.png` |
+| `animals/lion.png` | `assets/images/words/animals/lion.png` |
+| `animals/lion.mp3` | `assets/audio/words/animals/lion.mp3` |
 
-**代码中拼接：**
+### 5.3 网络资源
 
-```dart
-// 图片
-'assets/images/words/${word.image}'
-
-// 音频
-'assets/audio/words/${word.audio}'
-```
-
-### 5.3 命名规范
-
-| 类型 | 命名规则 | 示例 |
-|------|----------|------|
-| 基础态图片 | `{word}.png` | `lion.png` |
-| 短语态图片 | `{word}_{attribute}.png` | `lion_angry.png` |
-| 基础态音频 | `{word}.mp3` | `lion.mp3` |
-| 短语态音频 | `{attribute}_{word}.mp3` | `angry_lion.mp3` |
+以 `http://` 或 `https://` 开头的路径视为网络资源，直接使用。
 
 ---
 
-## 六、扩展说明
+## 六、Dart 模型
 
-### 6.1 结构 vs 内容
+模型位置：`lib/src/models/`
 
-| 概念 | 含义 | 修改方式 |
-|------|------|----------|
-| **结构** | 字段名、类型、嵌套关系 | 需改代码 |
-| **内容** | 具体的分类、单词数据 | 只改 JSON |
+| 模型 | 文件 | 说明 |
+|------|------|------|
+| `Category` | `category.dart` | 分类模型，包含 `fromJson`/`toJson` |
+| `Word` | `word.dart` | 单词模型，包含 `fromJson`/`toJson` |
 
-### 6.2 内容扩展（无需改代码）
+**关键 getter：**
 
-**添加新分类：**
-
-```json
-[
-  { "id": "animals", ... },
-  { "id": "foods", ... },
-  { "id": "colors", "emoji": "🎨", "name": "Colors", "color": "#FF6B6B", "words": [...] }
-]
-```
-
-**添加新单词：**
-
-```json
-{
-  "id": "animals",
-  "words": [
-    { "id": "lion", ... },
-    { "id": "dog", ... },
-    { "id": "elephant", "name": "Elephant", ... }
-  ]
-}
-```
-
-### 6.3 无短语态的单词
-
-部分单词可能没有短语态，`phrase` 字段可省略：
-
-```json
-{
-  "id": "water",
-  "name": "Water",
-  "image": "foods/water.png",
-  "audio": "foods/water.mp3"
-}
-```
-
-代码中需处理 `phrase == null` 的情况。
+| Getter | 说明 |
+|--------|------|
+| `hasImage` | 是否有图片 |
+| `isImageNetwork` | 图片是否为网络资源 |
+| `imagePath` | 完整图片路径（自动拼接） |
+| `audioPath` | 完整音频路径（自动拼接） |
 
 ---
 
-## 七、Dart 模型对照
+## 七、MVP 内容规划
 
-### 7.1 模型类
-
-```dart
-// lib/models/category.dart
-class Category {
-  final String id;
-  final String emoji;
-  final String name;
-  final Color color;
-  final List<Word> words;
-}
-
-// lib/models/word.dart
-class Word {
-  final String id;
-  final String name;
-  final String image;
-  final String audio;
-  final Phrase? phrase;
-}
-
-// lib/models/phrase.dart
-class Phrase {
-  final String name;
-  final String attribute;
-  final String image;
-  final String audio;
-}
-```
-
-### 7.2 使用示例
-
-```dart
-// 加载数据
-final categories = await CategoryService.loadCategories();
-
-// 获取分类
-final animals = categories.firstWhere((c) => c.id == 'animals');
-
-// 获取单词
-final lion = animals.words.firstWhere((w) => w.id == 'lion');
-
-// 获取图片路径
-final imagePath = 'assets/images/words/${lion.image}';
-
-// 判断是否有短语态
-if (lion.phrase != null) {
-  final phraseName = lion.phrase!.name; // "Angry Lion"
-}
-```
-
----
-
-## 八、MVP 内容规划
-
-### 8.1 分类列表
+### 7.1 分类列表
 
 | id | emoji | name | 单词数 |
 |----|-------|------|--------|
@@ -372,37 +147,24 @@ if (lion.phrase != null) {
 | music | 🎵 | Music | 5 |
 | nature | 🌤️ | Nature | 5 |
 
-### 8.2 单词列表（示例）
+### 7.2 单词示例
 
-**Animals:**
-- Lion → Angry Lion
-- Dog → Running Dog
-- Cat → Sleeping Cat
-- Bird → Flying Bird
-- Fish → Swimming Fish
-
-**Foods:**
-- Apple → Big Apple
-- Banana → Yellow Banana
-- Milk → Hot Milk
-- Cookie → Yummy Cookie
-- Water → Cold Water
+- **Animals**: Lion, Dog, Cat, Bird, Fish
+- **Foods**: Apple, Banana, Milk, Cookie, Water
 
 ---
 
-## 九、检查清单
+## 八、检查清单
 
-添加新内容时，确保：
+添加新内容时确保：
 
-- [ ] JSON 格式正确（可用在线 JSON 校验工具）
+- [ ] JSON 格式正确
 - [ ] id 全局唯一
 - [ ] color 使用 `#RRGGBB` 格式
-- [ ] 图片文件已放入对应目录
-- [ ] 音频文件已放入对应目录
+- [ ] emoji 或 image 至少有一个
+- [ ] 资源文件已放入对应目录
 - [ ] 路径与 JSON 中的值匹配
 
 ---
 
-*文档版本：1.0*  
-*最后更新：2026-01-04*
-
+*文档版本：1.2 | 最后更新：2026-01-04*

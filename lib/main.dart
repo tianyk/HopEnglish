@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:hopenglish/constants/app_strings.dart';
-import 'package:hopenglish/pages/home_page.dart';
-import 'package:hopenglish/theme/app_theme.dart';
+import 'package:hopenglish/src/constants/app_strings.dart';
+import 'package:hopenglish/src/pages/home_page.dart';
+import 'package:hopenglish/src/theme/app_theme.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();

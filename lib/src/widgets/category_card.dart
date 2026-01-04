@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:hopenglish/config/category_config.dart';
-import 'package:hopenglish/theme/app_theme.dart';
+import 'package:hopenglish/src/models/category.dart';
+import 'package:hopenglish/src/theme/app_theme.dart';
 
 /// 分类卡片组件
 class CategoryCard extends StatelessWidget {
-  final CategoryItem category;
+  final Category category;
+  final VoidCallback? onTap;
 
   const CategoryCard({
     required this.category,
+    this.onTap,
     super.key,
   });
 
@@ -34,7 +36,7 @@ class CategoryCard extends StatelessWidget {
           child: InkWell(
             splashColor: category.color.withValues(alpha: 0.2),
             highlightColor: category.color.withValues(alpha: 0.1),
-            onTap: () => _handleTap(context),
+            onTap: onTap,
             child: _buildContent(),
           ),
         ),
@@ -46,21 +48,19 @@ class CategoryCard extends StatelessWidget {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(
-          category.emoji,
-          style: const TextStyle(fontSize: 48),
-        ),
+        _buildIcon(),
         const SizedBox(height: AppTheme.spacingSmall),
-        Text(
-          category.name,
-          style: AppTheme.titleMedium,
-        ),
+        Text(category.name, style: AppTheme.titleMedium),
       ],
     );
   }
 
-  void _handleTap(BuildContext context) {
-    // TODO: 导航到单词矩阵列表页
+  Widget _buildIcon() {
+    if (category.hasImage) {
+      return category.isImageNetwork
+          ? Image.network(category.imagePath, width: 48, height: 48)
+          : Image.asset(category.imagePath, width: 48, height: 48);
+    }
+    return Text(category.emoji ?? '', style: const TextStyle(fontSize: 48));
   }
 }
-
