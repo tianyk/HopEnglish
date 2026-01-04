@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:hopenglish/src/utils.dart';
+import 'package:hopenglish/src/libs/utils.dart';
 
 /// 单词数据模型
 class Word extends Equatable {

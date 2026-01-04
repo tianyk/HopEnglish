@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:hopenglish/src/models/word.dart';
-import 'package:hopenglish/src/utils.dart';
+import 'package:hopenglish/src/libs/utils.dart';
 
 /// 分类数据模型
 ///

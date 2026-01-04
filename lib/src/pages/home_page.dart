@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hopenglish/src/libs/logger.dart';
 import 'package:hopenglish/src/models/category.dart';
+import 'package:hopenglish/src/pages/word_learning_page.dart';
 import 'package:hopenglish/src/services/category_service.dart';
 import 'package:hopenglish/src/theme/app_theme.dart';
 import 'package:hopenglish/src/widgets/category_card.dart';
@@ -74,7 +75,10 @@ class HomePage extends StatelessWidget {
   }
 
   void _handleCategoryTap(BuildContext context, Category category) {
-    // TODO: 导航到单词矩阵列表页
-    _logger.debug('Tapped category', {'id': category.id, 'name': category.name});
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => WordLearningPage(category: category),
+      ),
+    );
   }
 }
