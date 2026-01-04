@@ -193,6 +193,140 @@ assets/fonts/
 └──────────────────────────────────────┘
 ```
 
+### 3.5 字体样式使用指南
+
+#### A. 样式选择决策树
+
+根据内容的重要性和层级选择合适的样式：
+
+```
+需要展示文字？
+    │
+    ├── 是页面的核心焦点吗？（用户第一眼看到）
+    │       │
+    │       ├── 是 → displayLarge（64px）
+    │       │        示例：大图学习仓的单词 "Apple"
+    │       │
+    │       └── 否，但仍需突出 → displayMedium（40px）
+    │                示例：短语展示 "Big Apple"
+    │
+    ├── 是页面/区块的标题吗？
+    │       │
+    │       └── 是 → headlineMedium（22px）
+    │                示例：首页标题 "HopEnglish"、分类名称
+    │
+    ├── 是卡片/列表项的标题吗？
+    │       │
+    │       └── 是 → titleMedium（16px）
+    │                示例：分类卡片上的 "Animals"
+    │
+    └── 是说明/描述文字吗？
+            │
+            └── 是 → bodyMedium（14px）
+                     示例：提示文字 "点击图片听发音"
+```
+
+#### B. 使用示例
+
+```dart
+import 'package:hopenglish/theme/app_theme.dart';
+
+// 1. 核心展示内容 - 使用 displayLarge
+Text(
+  'Apple',
+  style: AppTheme.displayLarge,
+)
+
+// 2. 次要展示内容 - 使用 displayMedium
+Text(
+  'Big Apple',
+  style: AppTheme.displayMedium,
+)
+
+// 3. 页面/区块标题 - 使用 headlineMedium
+Text(
+  'HopEnglish',
+  style: AppTheme.headlineMedium,
+)
+
+// 4. 卡片标题 - 使用 titleMedium
+Text(
+  'Animals',
+  style: AppTheme.titleMedium,
+)
+
+// 5. 说明文字 - 使用 bodyMedium
+Text(
+  '点击图片听发音',
+  style: AppTheme.bodyMedium,
+)
+```
+
+#### C. 自定义样式
+
+如需在基础样式上做微调，使用 `copyWith`：
+
+```dart
+// 修改颜色
+Text(
+  'Apple',
+  style: AppTheme.displayLarge.copyWith(
+    color: AppTheme.primary,
+  ),
+)
+
+// 修改字重
+Text(
+  'Important',
+  style: AppTheme.titleMedium.copyWith(
+    fontWeight: FontWeight.w700,
+  ),
+)
+
+// 修改多个属性
+Text(
+  'Special',
+  style: AppTheme.headlineMedium.copyWith(
+    color: AppTheme.magic,
+    letterSpacing: 1.5,
+  ),
+)
+```
+
+#### D. 使用规范
+
+| ✅ 推荐 | ❌ 避免 |
+|--------|--------|
+| 使用预定义样式 `AppTheme.displayLarge` | 直接写 `TextStyle(fontSize: 64)` |
+| 用 `copyWith` 微调样式 | 完全重写新的 TextStyle |
+| 保持层级一致性（标题用 display/headline） | 在正文中使用 display 样式 |
+| 同一层级内容使用相同样式 | 相似内容使用不同大小的字体 |
+
+#### E. 命名规范说明
+
+样式命名遵循 Material Design Typography 规范：
+
+| 前缀 | 含义 | 本项目用途 |
+|------|------|-----------|
+| `display*` | 最大、最醒目的展示文字 | 单词/短语展示 |
+| `headline*` | 页面级标题 | 页面标题、区块标题 |
+| `title*` | 组件级标题 | 卡片标题、列表项 |
+| `body*` | 正文内容 | 说明文字、提示 |
+| `label*` | 标签/按钮文字 | 按钮文字（待添加） |
+
+#### F. 常见场景速查
+
+| 场景 | 推荐样式 | 示例 |
+|------|----------|------|
+| 大图学习仓 - 单词 | `displayLarge` | Apple |
+| 大图学习仓 - 短语 | `displayMedium` | Big Apple |
+| 首页标题 | `headlineMedium` | HopEnglish |
+| 分类卡片名称 | `titleMedium` | Animals |
+| 单词矩阵列表 - 单词 | `titleMedium` | Lion |
+| 按钮文字 | `titleMedium` | Next → |
+| 提示/说明 | `bodyMedium` | 点击图片听发音 |
+| 完成提示 | `bodyMedium` | 太棒了！ |
+
 ---
 
 ## 四、间距与圆角
