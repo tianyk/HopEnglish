@@ -8,14 +8,31 @@ import 'package:hopenglish/src/libs/utils.dart';
 
 /// 庆祝撒花动画粒子数据
 class _CelebrationParticle {
+  /// 粒子内容：emoji 文本（优先级低）
   final String? emoji;
+
+  /// 粒子内容：图片路径/URL（优先级高）
   final String? image;
+
+  /// 粒子中心 x 坐标 (0.0-1.0，相对于屏幕宽度)
   double x;
+
+  /// 粒子中心 y 坐标 (0.0-1.0，相对于屏幕高度)
   double y;
+
+  /// 水平速度（每帧移动的距离比例）
   double velocityX;
+
+  /// 垂直速度（每帧移动的距离比例）
   double velocityY;
+
+  /// 旋转角度（弧度）
   double rotation;
+
+  /// 旋转速度（每帧旋转的弧度）
   double rotationSpeed;
+
+  /// 缩放比例
   final double scale;
 
   _CelebrationParticle({
