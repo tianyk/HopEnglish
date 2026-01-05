@@ -4,10 +4,12 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:hopenglish/src/models/word.dart';
 import 'package:hopenglish/src/theme/app_theme.dart';
+import 'package:hopenglish/src/libs/utils.dart';
 
 /// 庆祝撒花动画粒子数据
 class _CelebrationParticle {
-  final String emoji;
+  final String? emoji;
+  final String? image;
   double x;
   double y;
   double velocityX;
@@ -17,7 +19,8 @@ class _CelebrationParticle {
   final double scale;
 
   _CelebrationParticle({
-    required this.emoji,
+    this.emoji,
+    this.image,
     required this.x,
     required this.y,
     required this.velocityX,
@@ -157,23 +160,25 @@ class _CelebrationPageState extends State<CelebrationPage> with TickerProviderSt
 
     // 1. 生成单词粒子
     for (final word in widget.words) {
-      final emoji = word.emoji ?? '⭐';
       for (var i = 0; i < _particlesPerWord; i++) {
-        _particles.add(_createParticle(emoji));
+        _particles.add(_createParticle(
+          emoji: word.emoji,
+          image: word.image,
+        ));
       }
     }
 
-    // 2. 生成装饰粒子
+    // 2. 生成装饰粒子（使用 emoji）
     for (var i = 0; i < _decorParticleCount; i++) {
       final decorEmoji = _decorEmojis[_random.nextInt(_decorEmojis.length)];
-      _particles.add(_createParticle(decorEmoji, isDecor: true));
+      _particles.add(_createParticle(emoji: decorEmoji, isDecor: true));
     }
 
     // 3. 打乱顺序
     _particles.shuffle(_random);
   }
 
-  _CelebrationParticle _createParticle(String emoji, {bool isDecor = false}) {
+  _CelebrationParticle _createParticle({String? emoji, String? image, bool isDecor = false}) {
     final speed = widget.startVelocity * (0.7 + _random.nextDouble() * 0.6);
     final spreadRad = widget.spread * pi / 180; // 度转弧度
     final angle = -pi / 2 + (_random.nextDouble() - 0.5) * spreadRad;
@@ -181,6 +186,7 @@ class _CelebrationPageState extends State<CelebrationPage> with TickerProviderSt
 
     return _CelebrationParticle(
       emoji: emoji,
+      image: image,
       x: 0.5 + (_random.nextDouble() - 0.5) * 0.08,
       y: 0.9,
       velocityX: speed * cos(angle),
@@ -371,17 +377,45 @@ class _CelebrationPageState extends State<CelebrationPage> with TickerProviderSt
       return const SizedBox.shrink();
     }
 
+    const size = 48.0;
+    final Widget child;
+
+    // 优先使用 image，不存在则用 emoji
+    if (particle.image != null && particle.image!.isNotEmpty) {
+      // 图片粒子：动态判断网络/本地
+      final isNetwork = isNetworkUrl(particle.image!);
+
+      child = isNetwork
+          ? Image.network(
+              particle.image!,
+              width: size,
+              height: size,
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => const Text('⭐', style: TextStyle(fontSize: size)),
+            )
+          : Image.asset(
+              particle.image!,
+              width: size,
+              height: size,
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => const Text('⭐', style: TextStyle(fontSize: size)),
+            );
+    } else {
+      // Emoji 粒子
+      child = Text(
+        particle.emoji ?? '⭐',
+        style: const TextStyle(fontSize: size),
+      );
+    }
+
     return Positioned(
-      left: particle.x * screenSize.width - 24,
-      top: particle.y * screenSize.height - 24,
+      left: particle.x * screenSize.width - size / 2,
+      top: particle.y * screenSize.height - size / 2,
       child: Transform.rotate(
         angle: particle.rotation,
         child: Transform.scale(
           scale: particle.scale,
-          child: Text(
-            particle.emoji,
-            style: const TextStyle(fontSize: 48),
-          ),
+          child: child,
         ),
       ),
     );
