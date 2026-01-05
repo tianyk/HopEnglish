@@ -18,7 +18,7 @@ const DEFAULT_VOICE_NAME = 'Sulafat';
 const DEFAULT_ACCENT = 'General American English';
 const DEFAULT_TEMPERATURE = 1;
 const REQUEST_TIMEOUT_MS = 120000;
-const REQUEST_DELAY_MS = 2000; // 每个请求之间延迟 2 秒，避免触发速率限制
+const REQUEST_DELAY_MS = 7000; // 每个请求之间延迟 7 秒（免费版限制 10 次/分钟，需要 6 秒间隔，设为 7 秒更安全）
 const MAX_RETRY_ATTEMPTS = 3; // 最大重试次数
 
 // 配置 Commander
