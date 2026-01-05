@@ -311,21 +311,19 @@ class _CelebrationPageState extends State<CelebrationPage> with TickerProviderSt
       },
       child: Text(
         'Well done!',
-        style: const TextStyle(
-          fontFamily: 'Fredoka',
+        style: AppTheme.displayLarge.copyWith(
           fontSize: 48,
-          fontWeight: FontWeight.bold,
-          color: Color(0xFFFFB347),
+          color: AppTheme.primary,
           shadows: [
             Shadow(
-              color: Color(0x80FFB347),
+              color: AppTheme.primary.withValues(alpha: 0.5),
               blurRadius: 24,
-              offset: Offset(0, 4),
+              offset: const Offset(0, 4),
             ),
             Shadow(
-              color: Color(0x40000000),
+              color: Colors.black.withValues(alpha: 0.25),
               blurRadius: 8,
-              offset: Offset(0, 2),
+              offset: const Offset(0, 2),
             ),
           ],
         ),
