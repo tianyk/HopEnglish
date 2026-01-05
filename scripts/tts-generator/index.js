@@ -13,7 +13,8 @@ const { program } = require('commander');
 const got = require('got');
 const { HttpsProxyAgent } = require('hpagent');
 
-const DEFAULT_MODEL_ID = 'gemini-2.5-flash-preview-tts';
+// const DEFAULT_MODEL_ID = 'gemini-2.5-flash-preview-tts';
+const DEFAULT_MODEL_ID = 'gemini-2.5-pro-preview-tts';
 const DEFAULT_VOICE_NAME = 'Sulafat';
 const DEFAULT_ACCENT = 'General American English';
 const DEFAULT_TEMPERATURE = 1;
@@ -91,16 +92,16 @@ async function postJson(targetUrl, jsonBody, retryAttempt = 0) {
     headers: {
       'Content-Type': 'application/json',
     },
+    retry: {
+      limit: 0, // 禁用 got 内置重试，使用自定义重试逻辑
+    },
   };
 
   if (proxyUrl) {
+    // 每次请求创建新的 agent，避免连接复用导致的超时问题
     gotOptions.agent = {
       https: new HttpsProxyAgent({
-        keepAlive: true,
-        keepAliveMsecs: 1000,
-        maxSockets: 256,
-        maxFreeSockets: 256,
-        scheduling: 'lifo',
+        keepAlive: false, // 禁用 keep-alive 避免长时间等待后连接失效
         proxy: proxyUrl,
       }),
     };
@@ -110,8 +111,8 @@ async function postJson(targetUrl, jsonBody, retryAttempt = 0) {
     const response = await got.post(targetUrl, gotOptions);
     return response.body;
   } catch (err) {
+    // 处理速率限制错误（429）
     if (err.response && err.response.statusCode === 429) {
-      // 429 速率限制：尝试自动重试
       const status = err.response.statusCode;
       const body = err.response.body;
       const errorMsg = body?.error?.message || JSON.stringify(body);
@@ -127,12 +128,24 @@ async function postJson(targetUrl, jsonBody, retryAttempt = 0) {
       throw new Error(`Gemini API 请求失败：HTTP ${status}\n${errorMsg.slice(0, 500)}`);
     }
     
+    // 处理网络错误（如 TLS 连接断开、超时等）
+    if (!err.response && retryAttempt < MAX_RETRY_ATTEMPTS) {
+      const errorMsg = err.message || String(err);
+      const waitSeconds = 10; // 网络错误等待 10 秒后重试
+      console.log(`  ⚠️  网络错误（${errorMsg.slice(0, 100)}），等待 ${waitSeconds} 秒后重试...（尝试 ${retryAttempt + 1}/${MAX_RETRY_ATTEMPTS}）`);
+      await sleep(waitSeconds * 1000);
+      return postJson(targetUrl, jsonBody, retryAttempt + 1);
+    }
+    
+    // 处理其他 HTTP 错误
     if (err.response) {
       const status = err.response.statusCode;
       const body = err.response.body;
       const errorMsg = body?.error?.message || JSON.stringify(body).slice(0, 500);
       throw new Error(`Gemini API 请求失败：HTTP ${status}\n${errorMsg}`);
     }
+    
+    // 最终网络错误
     throw new Error(`请求失败：${err.message}`);
   }
 }
