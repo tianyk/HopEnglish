@@ -161,7 +161,10 @@ class _CelebrationPageState extends State<CelebrationPage> with TickerProviderSt
   }
 
   void _navigateBack() {
-    if (mounted) {
+    _countdownTimer?.cancel();
+
+    final route = ModalRoute.of(context);
+    if (route != null && route.isCurrent) {
       Navigator.of(context).pop();
     }
   }

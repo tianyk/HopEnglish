@@ -1,0 +1,30 @@
+{
+  "name": "hopenglish-tts-generator",
+  "version": "1.0.0",
+  "description": "Batch generate word audio (Normal/Slow) using Gemini TTS API",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "bin": {
+    "tts-generator": "./index.js"
+  },
+  "dependencies": {
+    "commander": "^11.1.0",
+    "got": "^11.8.6",
+    "hpagent": "^1.2.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "tts",
+    "gemini",
+    "audio",
+    "generation"
+  ],
+  "author": "",
+  "license": "MIT"
+}
+

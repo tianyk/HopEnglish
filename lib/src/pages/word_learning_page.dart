@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:hopenglish/src/models/category.dart';
 import 'package:hopenglish/src/models/word.dart';
@@ -26,6 +27,7 @@ class _WordLearningPageState extends State<WordLearningPage> with SingleTickerPr
   late int _currentIndex;
   late AnimationController _bounceController;
   late Animation<double> _bounceAnimation;
+  late AudioPlayer _audioPlayer;
 
   // 按钮冷却状态
   bool _isNextButtonCooling = false;
@@ -35,6 +37,9 @@ class _WordLearningPageState extends State<WordLearningPage> with SingleTickerPr
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
+
+    // 初始化音频播放器
+    _audioPlayer = AudioPlayer();
 
     // Q弹动画控制器
     _bounceController = AnimationController(
@@ -49,20 +54,44 @@ class _WordLearningPageState extends State<WordLearningPage> with SingleTickerPr
       parent: _bounceController,
       curve: Curves.easeInOut,
     ));
+
+    // 进入页面后自动播放第一个单词
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _playWordSound();
+    });
   }
 
   @override
   void dispose() {
     _bounceController.dispose();
+    _audioPlayer.dispose();
     super.dispose();
   }
 
   Word get _currentWord => widget.category.words[_currentIndex];
   bool get _isLastWord => _currentIndex >= widget.category.words.length - 1;
 
-  void _playWordSound() {
-    // TODO: 播放单词发音
+  void _playWordSound() async {
+    // 播放Q弹动画
     _bounceController.forward(from: 0);
+
+    // 播放单词音频
+    try {
+      await _audioPlayer.stop(); // 停止当前播放
+
+      if (_currentWord.isAudioNetwork) {
+        // 网络音频：直接使用完整 URL
+        await _audioPlayer.play(UrlSource(_currentWord.audioPath));
+      } else {
+        // 本地音频：使用相对于 assets/ 的路径（去掉 assets/ 前缀）
+        // audioPath = 'assets/audio/words/lion_normal.wav'
+        // AssetSource 需要 = 'audio/words/lion_normal.wav'
+        final assetPath = _currentWord.audioPath.replaceFirst('assets/', '');
+        await _audioPlayer.play(AssetSource(assetPath));
+      }
+    } catch (e) {
+      debugPrint('播放音频失败: $e');
+    }
   }
 
   void _goToNextWord() {

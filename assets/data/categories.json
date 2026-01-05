@@ -5,11 +5,11 @@
     "name": "Animals",
     "color": "#FFB347",
     "words": [
-      { "id": "lion", "name": "Lion", "emoji": "🦁", "audio": "animals/lion.mp3" },
-      { "id": "dog", "name": "Dog", "emoji": "🐕", "audio": "animals/dog.mp3" },
-      { "id": "cat", "name": "Cat", "emoji": "🐈", "audio": "animals/cat.mp3" },
-      { "id": "bird", "name": "Bird", "emoji": "🐦", "audio": "animals/bird.mp3" },
-      { "id": "fish", "name": "Fish", "emoji": "🐟", "audio": "animals/fish.mp3" }
+      { "id": "lion", "name": "Lion", "emoji": "🦁", "audio": "lion_normal.wav" },
+      { "id": "dog", "name": "Dog", "emoji": "🐕", "audio": "dog_normal.wav" },
+      { "id": "cat", "name": "Cat", "emoji": "🐈", "audio": "cat_normal.wav" },
+      { "id": "bird", "name": "Bird", "emoji": "🐦", "audio": "bird_normal.wav" },
+      { "id": "fish", "name": "Fish", "emoji": "🐟", "audio": "fish_normal.wav" }
     ]
   },
   {
@@ -18,11 +18,11 @@
     "name": "Foods",
     "color": "#FF5C7A",
     "words": [
-      { "id": "apple", "name": "Apple", "emoji": "🍎", "audio": "foods/apple.mp3" },
-      { "id": "banana", "name": "Banana", "emoji": "🍌", "audio": "foods/banana.mp3" },
-      { "id": "milk", "name": "Milk", "emoji": "🥛", "audio": "foods/milk.mp3" },
-      { "id": "cookie", "name": "Cookie", "emoji": "🍪", "audio": "foods/cookie.mp3" },
-      { "id": "water", "name": "Water", "emoji": "💧", "audio": "foods/water.mp3" }
+      { "id": "apple", "name": "Apple", "emoji": "🍎", "audio": "apple_normal.wav" },
+      { "id": "banana", "name": "Banana", "emoji": "🍌", "audio": "banana_normal.wav" },
+      { "id": "milk", "name": "Milk", "emoji": "🥛", "audio": "milk_normal.wav" },
+      { "id": "cookie", "name": "Cookie", "emoji": "🍪", "audio": "cookie_normal.wav" },
+      { "id": "water", "name": "Water", "emoji": "💧", "audio": "water_normal.wav" }
     ]
   },
   {
@@ -31,11 +31,11 @@
     "name": "Vehicles",
     "color": "#2EC4B6",
     "words": [
-      { "id": "car", "name": "Car", "emoji": "🚗", "audio": "vehicles/car.mp3" },
-      { "id": "bus", "name": "Bus", "emoji": "🚌", "audio": "vehicles/bus.mp3" },
-      { "id": "train", "name": "Train", "emoji": "🚂", "audio": "vehicles/train.mp3" },
-      { "id": "plane", "name": "Plane", "emoji": "✈️", "audio": "vehicles/plane.mp3" },
-      { "id": "boat", "name": "Boat", "emoji": "⛵", "audio": "vehicles/boat.mp3" }
+      { "id": "car", "name": "Car", "emoji": "🚗", "audio": "car_normal.wav" },
+      { "id": "bus", "name": "Bus", "emoji": "🚌", "audio": "bus_normal.wav" },
+      { "id": "train", "name": "Train", "emoji": "🚂", "audio": "train_normal.wav" },
+      { "id": "plane", "name": "Plane", "emoji": "✈️", "audio": "plane_normal.wav" },
+      { "id": "boat", "name": "Boat", "emoji": "⛵", "audio": "boat_normal.wav" }
     ]
   },
   {
@@ -44,11 +44,11 @@
     "name": "Actions",
     "color": "#FFD166",
     "words": [
-      { "id": "run", "name": "Run", "emoji": "🏃", "audio": "actions/run.mp3" },
-      { "id": "jump", "name": "Jump", "emoji": "🦘", "audio": "actions/jump.mp3" },
-      { "id": "sleep", "name": "Sleep", "emoji": "😴", "audio": "actions/sleep.mp3" },
-      { "id": "eat", "name": "Eat", "emoji": "🍽️", "audio": "actions/eat.mp3" },
-      { "id": "dance", "name": "Dance", "emoji": "💃", "audio": "actions/dance.mp3" }
+      { "id": "run", "name": "Run", "emoji": "🏃", "audio": "run_normal.wav" },
+      { "id": "jump", "name": "Jump", "emoji": "🦘", "audio": "jump_normal.wav" },
+      { "id": "sleep", "name": "Sleep", "emoji": "😴", "audio": "sleep_normal.wav" },
+      { "id": "eat", "name": "Eat", "emoji": "🍽️", "audio": "eat_normal.wav" },
+      { "id": "dance", "name": "Dance", "emoji": "💃", "audio": "dance_normal.wav" }
     ]
   },
   {
@@ -57,11 +57,11 @@
     "name": "My Home",
     "color": "#C3A6FF",
     "words": [
-      { "id": "bed", "name": "Bed", "emoji": "🛏️", "audio": "home/bed.mp3" },
-      { "id": "chair", "name": "Chair", "emoji": "🪑", "audio": "home/chair.mp3" },
-      { "id": "table", "name": "Table", "emoji": "🪵", "audio": "home/table.mp3" },
-      { "id": "door", "name": "Door", "emoji": "🚪", "audio": "home/door.mp3" },
-      { "id": "window", "name": "Window", "emoji": "🪟", "audio": "home/window.mp3" }
+      { "id": "bed", "name": "Bed", "emoji": "🛏️", "audio": "bed_normal.wav" },
+      { "id": "chair", "name": "Chair", "emoji": "🪑", "audio": "chair_normal.wav" },
+      { "id": "table", "name": "Table", "emoji": "🪵", "audio": "table_normal.wav" },
+      { "id": "door", "name": "Door", "emoji": "🚪", "audio": "door_normal.wav" },
+      { "id": "window", "name": "Window", "emoji": "🪟", "audio": "window_normal.wav" }
     ]
   },
   {
@@ -70,11 +70,11 @@
     "name": "Music",
     "color": "#FF4081",
     "words": [
-      { "id": "piano", "name": "Piano", "emoji": "🎹", "audio": "music/piano.mp3" },
-      { "id": "guitar", "name": "Guitar", "emoji": "🎸", "audio": "music/guitar.mp3" },
-      { "id": "drum", "name": "Drum", "emoji": "🥁", "audio": "music/drum.mp3" },
-      { "id": "violin", "name": "Violin", "emoji": "🎻", "audio": "music/violin.mp3" },
-      { "id": "trumpet", "name": "Trumpet", "emoji": "🎺", "audio": "music/trumpet.mp3" }
+      { "id": "piano", "name": "Piano", "emoji": "🎹", "audio": "piano_normal.wav" },
+      { "id": "guitar", "name": "Guitar", "emoji": "🎸", "audio": "guitar_normal.wav" },
+      { "id": "drum", "name": "Drum", "emoji": "🥁", "audio": "drum_normal.wav" },
+      { "id": "violin", "name": "Violin", "emoji": "🎻", "audio": "violin_normal.wav" },
+      { "id": "trumpet", "name": "Trumpet", "emoji": "🎺", "audio": "trumpet_normal.wav" }
     ]
   },
   {
@@ -83,12 +83,13 @@
     "name": "Nature",
     "color": "#4CBF8A",
     "words": [
-      { "id": "sun", "name": "Sun", "emoji": "☀️", "audio": "nature/sun.mp3" },
-      { "id": "moon", "name": "Moon", "emoji": "🌙", "audio": "nature/moon.mp3" },
-      { "id": "star", "name": "Star", "emoji": "⭐", "audio": "nature/star.mp3" },
-      { "id": "rain", "name": "Rain", "emoji": "🌧️", "audio": "nature/rain.mp3" },
-      { "id": "flower", "name": "Flower", "emoji": "🌸", "audio": "nature/flower.mp3" }
+      { "id": "sun", "name": "Sun", "emoji": "☀️", "audio": "sun_normal.wav" },
+      { "id": "moon", "name": "Moon", "emoji": "🌙", "audio": "moon_normal.wav" },
+      { "id": "star", "name": "Star", "emoji": "⭐", "audio": "star_normal.wav" },
+      { "id": "rain", "name": "Rain", "emoji": "🌧️", "audio": "rain_normal.wav" },
+      { "id": "flower", "name": "Flower", "emoji": "🌸", "audio": "flower_normal.wav" }
     ]
   }
 ]
+
 

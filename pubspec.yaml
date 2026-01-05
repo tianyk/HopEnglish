@@ -27,6 +27,7 @@ flutter:
     - assets/data/
     # 音频资源
     - assets/audio/celebrations/
+    - assets/audio/words/
     # 分类主题图标
     - assets/images/categories/
     # 单词插画
