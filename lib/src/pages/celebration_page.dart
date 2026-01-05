@@ -39,9 +39,36 @@ class CelebrationPage extends StatefulWidget {
   final List<Word> words;
   final Color themeColor;
 
+  /// 重力加速度
+  /// 控制粒子下落的速度，值越大下落越快
+  /// 1 为全重力，0.5 为半重力，0 为无重力
+  final double gravity;
+
+  /// 速度保留系数 (0-1)
+  /// 每帧保留的速度比例，值越大粒子飞得越远
+  /// 0.9 表示每帧保留 90% 速度（损失 10%）
+  final double decay;
+
+  /// 初始速度（像素）
+  /// 控制粒子喷射的高度和力度，值越大喷得越高
+  final double startVelocity;
+
+  /// 扩散角度（度）
+  /// 粒子喷射的扩散范围，45 表示在发射角度 ±22.5° 范围内
+  final double spread;
+
+  /// 粒子总数
+  /// 控制整体粒子密度，值越大粒子越多
+  final int particleCount;
+
   const CelebrationPage({
     required this.words,
     required this.themeColor,
+    this.gravity = 1.0,
+    this.decay = 0.988,
+    this.startVelocity = 0.035,
+    this.spread = 45,
+    this.particleCount = 50,
     super.key,
   });
 
@@ -62,21 +89,25 @@ class _CelebrationPageState extends State<CelebrationPage> with TickerProviderSt
 
   /// 装饰 emoji 配置
   static const List<String> _decorEmojis = ['🎉', '✨', '🌟', '⭐', '🎊'];
-  static const int _decorParticleCount = 12;
-
-  /// 物理参数
-  static const double _gravity = 0.0006;
-  static const double _drag = 0.012;
-  static const double _startVelocity = 0.035;
-  static const double _spreadAngle = pi * 0.5;
 
   /// 根据单词数量动态计算每个单词的粒子数
   int get _particlesPerWord {
     final count = widget.words.length;
-    if (count <= 4) return 6;
-    if (count <= 7) return 5;
-    if (count <= 12) return 3;
-    return 2;
+    // 预留 20% 给装饰粒子
+    final maxWordParticles = (widget.particleCount * 0.8).floor();
+    final calculated = (maxWordParticles / count).floor();
+
+    // 至少 1 个，最多 6 个
+    return calculated.clamp(1, 6);
+  }
+
+  /// 根据单词粒子总数计算装饰粒子数量
+  int get _decorParticleCount {
+    final wordParticleCount = widget.words.length * _particlesPerWord;
+    final remaining = widget.particleCount - wordParticleCount;
+
+    // 至少 4 个装饰粒子，最多不超过剩余空间
+    return remaining.clamp(4, 12);
   }
 
   @override
@@ -143,8 +174,9 @@ class _CelebrationPageState extends State<CelebrationPage> with TickerProviderSt
   }
 
   _CelebrationParticle _createParticle(String emoji, {bool isDecor = false}) {
-    final speed = _startVelocity * (0.7 + _random.nextDouble() * 0.6);
-    final angle = -pi / 2 + (_random.nextDouble() - 0.5) * _spreadAngle;
+    final speed = widget.startVelocity * (0.7 + _random.nextDouble() * 0.6);
+    final spreadRad = widget.spread * pi / 180; // 度转弧度
+    final angle = -pi / 2 + (_random.nextDouble() - 0.5) * spreadRad;
     final scale = isDecor ? 0.4 + _random.nextDouble() * 0.3 : 0.6 + _random.nextDouble() * 0.4;
 
     return _CelebrationParticle(
@@ -187,12 +219,12 @@ class _CelebrationPageState extends State<CelebrationPage> with TickerProviderSt
   void _updateParticles() {
     setState(() {
       for (final p in _particles) {
-        // 1. 应用空气阻力
-        p.velocityX *= (1 - _drag);
-        p.velocityY *= (1 - _drag);
+        // 1. 应用速度衰减
+        p.velocityX *= widget.decay;
+        p.velocityY *= widget.decay;
 
-        // 2. 应用恒定重力
-        p.velocityY += _gravity;
+        // 2. 应用重力加速度（缩放到合适的值）
+        p.velocityY += widget.gravity * 0.0006;
 
         // 3. 更新位置
         p.x += p.velocityX;
@@ -200,7 +232,7 @@ class _CelebrationPageState extends State<CelebrationPage> with TickerProviderSt
 
         // 4. 更新旋转
         p.rotation += p.rotationSpeed;
-        p.rotationSpeed *= (1 - _drag);
+        p.rotationSpeed *= widget.decay;
       }
     });
   }
