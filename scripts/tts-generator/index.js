@@ -19,6 +19,8 @@ const DEFAULT_VOICE_NAME = 'Sulafat';
 const DEFAULT_ACCENT = 'General American English';
 const DEFAULT_TEMPERATURE = 1;
 const REQUEST_TIMEOUT_MS = 120000;
+const CONNECT_TIMEOUT_MS = 30000; // 连接建立超时 30 秒
+const SOCKET_TIMEOUT_MS = 120000; // 套接字读写超时 120 秒
 const REQUEST_DELAY_MS = 7000; // 每个请求之间延迟 7 秒（免费版限制 10 次/分钟，需要 6 秒间隔，设为 7 秒更安全）
 const MAX_RETRY_ATTEMPTS = 3; // 最大重试次数
 
@@ -88,6 +90,8 @@ async function postJson(targetUrl, jsonBody, retryAttempt = 0) {
     responseType: 'json',
     timeout: {
       request: REQUEST_TIMEOUT_MS,
+      connect: CONNECT_TIMEOUT_MS,
+      socket: SOCKET_TIMEOUT_MS,
     },
     headers: {
       'Content-Type': 'application/json',
@@ -95,6 +99,9 @@ async function postJson(targetUrl, jsonBody, retryAttempt = 0) {
     retry: {
       limit: 0, // 禁用 got 内置重试，使用自定义重试逻辑
     },
+    // 添加 HTTP/2 支持和更好的错误处理
+    http2: false, // 禁用 HTTP/2，使用更稳定的 HTTP/1.1
+    throwHttpErrors: false, // 不自动抛出 HTTP 错误，手动处理
   };
 
   if (proxyUrl) {
@@ -102,6 +109,9 @@ async function postJson(targetUrl, jsonBody, retryAttempt = 0) {
     gotOptions.agent = {
       https: new HttpsProxyAgent({
         keepAlive: false, // 禁用 keep-alive 避免长时间等待后连接失效
+        keepAliveMsecs: 0, // 禁用 keep-alive 时间
+        timeout: CONNECT_TIMEOUT_MS, // 代理连接超时
+        scheduling: 'lifo', // 使用后进先出策略，优先使用新连接
         proxy: proxyUrl,
       }),
     };
@@ -109,40 +119,43 @@ async function postJson(targetUrl, jsonBody, retryAttempt = 0) {
 
   try {
     const response = await got.post(targetUrl, gotOptions);
-    return response.body;
-  } catch (err) {
-    // 处理速率限制错误（429）
-    if (err.response && err.response.statusCode === 429) {
-      const status = err.response.statusCode;
-      const body = err.response.body;
-      const errorMsg = body?.error?.message || JSON.stringify(body);
+    
+    // 手动检查 HTTP 状态码（因为禁用了 throwHttpErrors）
+    if (response.statusCode >= 400) {
+      const errorBody = response.body;
+      const errorMsg = errorBody?.error?.message || JSON.stringify(errorBody);
       
-      if (retryAttempt < MAX_RETRY_ATTEMPTS) {
-        const retryAfter = extractRetryAfterSeconds(errorMsg);
-        const waitSeconds = retryAfter || 30; // 默认等待 30 秒
-        console.log(`  ⚠️  遇到速率限制（429），等待 ${waitSeconds.toFixed(1)} 秒后重试...（尝试 ${retryAttempt + 1}/${MAX_RETRY_ATTEMPTS}）`);
-        await sleep(waitSeconds * 1000);
-        return postJson(targetUrl, jsonBody, retryAttempt + 1);
+      // 处理速率限制错误（429）
+      if (response.statusCode === 429) {
+        if (retryAttempt < MAX_RETRY_ATTEMPTS) {
+          const retryAfter = extractRetryAfterSeconds(errorMsg);
+          const waitSeconds = retryAfter || 30; // 默认等待 30 秒
+          console.log(`  ⚠️  遇到速率限制（429），等待 ${waitSeconds.toFixed(1)} 秒后重试...（尝试 ${retryAttempt + 1}/${MAX_RETRY_ATTEMPTS}）`);
+          await sleep(waitSeconds * 1000);
+          return postJson(targetUrl, jsonBody, retryAttempt + 1);
+        }
       }
       
-      throw new Error(`Gemini API 请求失败：HTTP ${status}\n${errorMsg.slice(0, 500)}`);
+      throw new Error(`Gemini API 请求失败：HTTP ${response.statusCode}\n${errorMsg.slice(0, 500)}`);
     }
     
-    // 处理网络错误（如 TLS 连接断开、超时等）
-    if (!err.response && retryAttempt < MAX_RETRY_ATTEMPTS) {
-      const errorMsg = err.message || String(err);
-      const waitSeconds = 10; // 网络错误等待 10 秒后重试
-      console.log(`  ⚠️  网络错误（${errorMsg.slice(0, 100)}），等待 ${waitSeconds} 秒后重试...（尝试 ${retryAttempt + 1}/${MAX_RETRY_ATTEMPTS}）`);
-      await sleep(waitSeconds * 1000);
-      return postJson(targetUrl, jsonBody, retryAttempt + 1);
-    }
-    
-    // 处理其他 HTTP 错误
+    return response.body;
+  } catch (err) {
+    // 如果是 Error 对象且有 response 属性，说明是 HTTP 错误（理论上不应该到这里，因为已经禁用了 throwHttpErrors）
     if (err.response) {
       const status = err.response.statusCode;
       const body = err.response.body;
       const errorMsg = body?.error?.message || JSON.stringify(body).slice(0, 500);
       throw new Error(`Gemini API 请求失败：HTTP ${status}\n${errorMsg}`);
+    }
+    
+    // 处理网络错误（如 TLS 连接断开、超时等）
+    if (retryAttempt < MAX_RETRY_ATTEMPTS) {
+      const errorMsg = err.message || String(err);
+      const waitSeconds = 10; // 网络错误等待 10 秒后重试
+      console.log(`  ⚠️  网络错误（${errorMsg.slice(0, 100)}），等待 ${waitSeconds} 秒后重试...（尝试 ${retryAttempt + 1}/${MAX_RETRY_ATTEMPTS}）`);
+      await sleep(waitSeconds * 1000);
+      return postJson(targetUrl, jsonBody, retryAttempt + 1);
     }
     
     // 最终网络错误
