@@ -21,6 +21,7 @@
         "id": "fish",
         "name": "Fish",
         "emoji": "🐠",
+        "image": "fish.png",
         "audio": "fish_normal.wav"
       },
       {
