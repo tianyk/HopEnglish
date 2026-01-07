@@ -291,10 +291,17 @@ class _WordLearningPageState extends State<WordLearningPage> with SingleTickerPr
   }
 
   Widget _buildWordName() {
-    return Text(
-      _currentWord.name,
-      style: AppTheme.displayLarge.copyWith(
-        color: AppTheme.primary,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingLarge),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          _currentWord.name,
+          style: AppTheme.displayLarge.copyWith(
+            color: AppTheme.primary,
+          ),
+          maxLines: 1,
+        ),
       ),
     );
   }

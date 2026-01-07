@@ -174,12 +174,14 @@
         "id": "snake",
         "name": "Snake",
         "emoji": "🐍",
+        "image": "snake.png",
         "audio": "snake_normal.wav"
       },
       {
         "id": "crocodile",
         "name": "Crocodile",
         "emoji": "🐊",
+        "image": "crocodile.png",
         "audio": "crocodile_normal.wav"
       },
       {
