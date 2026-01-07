@@ -22,7 +22,7 @@ class WordDirectorySheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.6,
+        maxHeight: MediaQuery.of(context).size.height * 0.75,
       ),
       decoration: const BoxDecoration(
         color: AppTheme.surface,
