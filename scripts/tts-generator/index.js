@@ -385,11 +385,15 @@ async function main() {
   for (let index = 0; index < words.length; index += 1) {
     const word = words[index];
     const normalFilePath = path.join(outputPath, `${word.id}_normal.wav`);
-    const slowFilePath = path.join(outputPath, `${word.id}_slow.wav`);
+    // 暂时跳过 slow 版本
+    // const slowFilePath = path.join(outputPath, `${word.id}_slow.wav`);
 
     const isNormalExists = await isFileExists(normalFilePath);
-    const isSlowExists = await isFileExists(slowFilePath);
-    if (isNormalExists && isSlowExists) {
+    // 暂时跳过 slow 版本
+    // const isSlowExists = await isFileExists(slowFilePath);
+    
+    // 暂时只检查 normal 版本是否存在
+    if (isNormalExists) {
       console.log(`[${index + 1}/${words.length}] 跳过 ${word.id}（已存在）`);
       continue;
     }
@@ -410,27 +414,23 @@ async function main() {
       console.log(`  → 转换并保存 ${word.id}_normal.wav`);
       const wav = convertToWav(tts.audioBase64, tts.mimeType);
       await fsp.writeFile(normalFilePath, wav);
-      
-      // 请求之间延迟，避免触发速率限制
-      if (!isSlowExists) {
-        await sleep(REQUEST_DELAY_MS);
-      }
     }
 
-    if (!isSlowExists) {
-      console.log(`  → 请求 API（Slow）...`);
-      const prompt = buildSlowPromptInEnglish(word.name, options.accent);
-      const tts = await requestTextToSpeech({
-        apiKey: options.apiKey,
-        modelId: options.model,
-        text: prompt,
-        voiceName: options.voice,
-        temperature: options.temperature,
-      });
-      console.log(`  → 转换并保存 ${word.id}_slow.wav`);
-      const wav = convertToWav(tts.audioBase64, tts.mimeType);
-      await fsp.writeFile(slowFilePath, wav);
-    }
+    // 暂时跳过 slow 版本的下载
+    // if (!isSlowExists) {
+    //   console.log(`  → 请求 API（Slow）...`);
+    //   const prompt = buildSlowPromptInEnglish(word.name, options.accent);
+    //   const tts = await requestTextToSpeech({
+    //     apiKey: options.apiKey,
+    //     modelId: options.model,
+    //     text: prompt,
+    //     voiceName: options.voice,
+    //     temperature: options.temperature,
+    //   });
+    //   console.log(`  → 转换并保存 ${word.id}_slow.wav`);
+    //   const wav = convertToWav(tts.audioBase64, tts.mimeType);
+    //   await fsp.writeFile(slowFilePath, wav);
+    // }
     
     // 单词之间延迟，避免触发速率限制
     if (index < words.length - 1) {
