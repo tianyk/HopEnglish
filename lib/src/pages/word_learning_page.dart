@@ -5,6 +5,7 @@ import 'package:hopenglish/src/models/word.dart';
 import 'package:hopenglish/src/pages/celebration_page.dart';
 import 'package:hopenglish/src/theme/app_theme.dart';
 import 'package:hopenglish/src/widgets/word_directory_sheet.dart';
+import 'package:hopenglish/src/widgets/word_icon.dart';
 
 /// 单词学习页 (Word Learning Page)
 ///
@@ -32,6 +33,9 @@ class _WordLearningPageState extends State<WordLearningPage> with SingleTickerPr
   // 按钮冷却状态
   bool _isNextButtonCooling = false;
   static const _cooldownDuration = Duration(milliseconds: 500);
+
+  // 单词图标尺寸
+  static const double _wordIconSize = 180;
 
   @override
   void initState() {
@@ -280,12 +284,9 @@ class _WordLearningPageState extends State<WordLearningPage> with SingleTickerPr
   }
 
   Widget _buildWordIcon() {
-    if (_currentWord.hasImage) {
-      return _currentWord.isImageNetwork ? Image.network(_currentWord.imagePath, width: 180, height: 180) : Image.asset(_currentWord.imagePath, width: 180, height: 180);
-    }
-    return Text(
-      _currentWord.emoji ?? '',
-      style: const TextStyle(fontSize: 120),
+    return WordIcon(
+      word: _currentWord,
+      size: _wordIconSize,
     );
   }
 

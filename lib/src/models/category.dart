@@ -40,6 +40,9 @@ class Category extends Equatable {
   /// 图片是否为网络地址
   bool get isImageNetwork => image != null && isNetworkUrl(image!);
 
+  /// 图片是否为 SVG 格式
+  bool get isImageSvg => image != null && image!.toLowerCase().endsWith('.svg');
+
   /// 单词数量
   int get wordCount => words.length;
 

@@ -4,7 +4,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:hopenglish/src/models/word.dart';
 import 'package:hopenglish/src/theme/app_theme.dart';
-import 'package:hopenglish/src/libs/utils.dart';
+import 'package:hopenglish/src/widgets/adaptive_image.dart';
 
 /// 庆祝撒花动画粒子数据
 class _CelebrationParticle {
@@ -183,7 +183,7 @@ class _CelebrationPageState extends State<CelebrationPage> with TickerProviderSt
       for (var i = 0; i < _particlesPerWord; i++) {
         _particles.add(_createParticle(
           emoji: word.emoji,
-          image: word.image,
+          image: word.imagePath, // 使用完整路径而不是短路径
         ));
       }
     }
@@ -400,24 +400,15 @@ class _CelebrationPageState extends State<CelebrationPage> with TickerProviderSt
 
     // 优先使用 image，不存在则用 emoji
     if (particle.image != null && particle.image!.isNotEmpty) {
-      // 图片粒子：动态判断网络/本地
-      final isNetwork = isNetworkUrl(particle.image!);
-
-      child = isNetwork
-          ? Image.network(
-              particle.image!,
-              width: size,
-              height: size,
-              fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => const Text('⭐', style: TextStyle(fontSize: size)),
-            )
-          : Image.asset(
-              particle.image!,
-              width: size,
-              height: size,
-              fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => const Text('⭐', style: TextStyle(fontSize: size)),
-            );
+      // 图片粒子：使用 AdaptiveImage 自动处理
+      child = AdaptiveImage(
+        imagePath: particle.image!,
+        width: size,
+        height: size,
+        fit: BoxFit.contain,
+        errorWidget: const Text('⭐', style: TextStyle(fontSize: size)),
+        placeholder: const Text('⭐', style: TextStyle(fontSize: size)),
+      );
     } else {
       // Emoji 粒子
       child = Text(

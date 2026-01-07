@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hopenglish/src/models/category.dart';
 import 'package:hopenglish/src/theme/app_theme.dart';
+import 'package:hopenglish/src/widgets/adaptive_image.dart';
 
 /// 分类卡片组件
 class CategoryCard extends StatelessWidget {
@@ -57,9 +58,11 @@ class CategoryCard extends StatelessWidget {
 
   Widget _buildIcon() {
     if (category.hasImage) {
-      return category.isImageNetwork
-          ? Image.network(category.imagePath, width: 48, height: 48)
-          : Image.asset(category.imagePath, width: 48, height: 48);
+      return AdaptiveImage(
+        imagePath: category.imagePath,
+        width: 48,
+        height: 48,
+      );
     }
     return Text(category.emoji ?? '', style: const TextStyle(fontSize: 48));
   }

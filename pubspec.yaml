@@ -12,6 +12,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   equatable: ^2.0.5
   audioplayers: ^6.1.0
+  flutter_svg: ^2.0.10
 
 dev_dependencies:
   flutter_test:
@@ -31,13 +32,7 @@ flutter:
     # 分类主题图标
     - assets/images/categories/
     # 单词插画
-    - assets/images/words/animals/
-    - assets/images/words/foods/
-    - assets/images/words/vehicles/
-    - assets/images/words/actions/
-    - assets/images/words/home/
-    - assets/images/words/instruments/
-    - assets/images/words/nature/
+    - assets/images/words/
 
   # 自定义字体
   fonts:

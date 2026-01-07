@@ -166,7 +166,7 @@
       { "id": "bed", "name": "Bed", "emoji": "🛏️", "audio": "bed_normal.wav" },
       { "id": "chair", "name": "Chair", "emoji": "🪑", "audio": "chair_normal.wav" },
       { "id": "sofa", "name": "Sofa", "emoji": "🛋️", "audio": "sofa_normal.wav" },
-      { "id": "table", "name": "Table", "emoji": "🪵", "audio": "table_normal.wav" },
+      { "id": "table", "name": "Table", "image": "table.svg", "audio": "table_normal.wav" },
       { "id": "lamp", "name": "Lamp", "emoji": "💡", "audio": "lamp_normal.wav" },
       { "id": "tv", "name": "TV", "emoji": "📺", "audio": "tv_normal.wav" },
       { "id": "phone", "name": "Phone", "emoji": "📱", "audio": "phone_normal.wav" },

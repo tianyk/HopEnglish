@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hopenglish/src/models/category.dart';
 import 'package:hopenglish/src/theme/app_theme.dart';
+import 'package:hopenglish/src/widgets/word_icon.dart';
 
 /// 单词目录 BottomSheet
 ///
@@ -131,12 +132,9 @@ class WordDirectorySheet extends StatelessWidget {
   }
 
   Widget _buildWordIcon(word) {
-    if (word.hasImage) {
-      return word.isImageNetwork ? Image.network(word.imagePath, width: 40, height: 40) : Image.asset(word.imagePath, width: 40, height: 40);
-    }
-    return Text(
-      word.emoji ?? '',
-      style: const TextStyle(fontSize: 36),
+    return WordIcon(
+      word: word,
+      size: 40,
     );
   }
 }
