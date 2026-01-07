@@ -10,9 +10,6 @@ class CategoryService {
 
   /// 加载所有分类数据
   static Future<List<Category>> loadCategories() async {
-    // TODO: 移除模拟延迟
-    await Future.delayed(const Duration(seconds: 1));
-
     final jsonString = await rootBundle.loadString(_dataPath);
     final jsonList = json.decode(jsonString) as List<dynamic>;
     return jsonList.map((item) => Category.fromJson(item as Map<String, dynamic>)).toList();
