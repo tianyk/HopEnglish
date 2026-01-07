@@ -214,17 +214,6 @@ class AppTheme {
     end: Alignment.bottomRight,
   );
 
-  /// 撒花粒子色
-  /// 注：使用功能色组合，分类色可通过 CategoryConfig.allColors 获取
-  static const List<Color> celebrationColors = [
-    accent,
-    primary,
-    magic,
-    success,
-    secondary,
-    Color(0xFFFF85A2), // 樱花粉
-  ];
-
   // ==================== 阴影 ====================
 
   /// 卡片阴影
