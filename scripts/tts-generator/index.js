@@ -13,8 +13,8 @@ const { program } = require('commander');
 const got = require('got');
 const { HttpsProxyAgent } = require('hpagent');
 
-// const DEFAULT_MODEL_ID = 'gemini-2.5-flash-preview-tts';
-const DEFAULT_MODEL_ID = 'gemini-2.5-pro-preview-tts';
+const DEFAULT_MODEL_ID = 'gemini-2.5-flash-preview-tts';
+// const DEFAULT_MODEL_ID = 'gemini-2.5-pro-preview-tts';
 const DEFAULT_VOICE_NAME = 'Sulafat';
 const DEFAULT_ACCENT = 'General American English';
 const DEFAULT_TEMPERATURE = 1;
@@ -119,7 +119,7 @@ async function postJson(targetUrl, jsonBody, retryAttempt = 0) {
 
   try {
     const response = await got.post(targetUrl, gotOptions);
-    
+
     // 手动检查 HTTP 状态码（因为禁用了 throwHttpErrors）
     if (response.statusCode >= 400) {
       const errorBody = response.body;
@@ -351,23 +351,6 @@ function extractWords(jsonValue) {
 }
 
 /**
- * @param {Array<{id: string, name: string}>} words
- */
-function assertUniqueWordIds(words) {
-  const counts = new Map();
-  for (const word of words) {
-    counts.set(word.id, (counts.get(word.id) || 0) + 1);
-  }
-  const duplicates = [];
-  for (const [id, count] of counts.entries()) {
-    if (count > 1) duplicates.push(id);
-  }
-  if (duplicates.length > 0) {
-    throw new Error(`发现重复 word id：${duplicates.join(', ')}。请确保 id 全局唯一。`);
-  }
-}
-
-/**
  * @param {string} filePath
  * @returns {Promise<boolean>}
  */
@@ -388,7 +371,6 @@ async function main() {
   const categoriesRaw = await fsp.readFile(inputPath, 'utf8');
   const categoriesJson = JSON.parse(categoriesRaw);
   const words = extractWords(categoriesJson);
-  assertUniqueWordIds(words);
 
   await fsp.mkdir(outputPath, { recursive: true });
 
