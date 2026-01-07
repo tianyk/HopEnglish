@@ -21,3 +21,7 @@
 ## 技术栈
 
 *   Flutter
+
+## 资源
+
+*   图标素材：[Flaticon](https://www.flaticon.com/)
