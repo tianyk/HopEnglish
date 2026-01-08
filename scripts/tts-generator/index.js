@@ -494,41 +494,78 @@ async function main() {
   for (let index = 0; index < words.length; index += 1) {
     const word = words[index];
     const normalFilePath = path.join(outputPath, `${word.id}_normal.wav`);
+    const slowFilePath = path.join(outputPath, `${word.id}_slow.wav`);
 
-    // 检查文件是否已存在
-    if (await isFileExists(normalFilePath)) {
-      console.log(`[${index + 1}/${words.length}] ⏭️  跳过 ${word.id}（已存在）`);
-      stats.skipped += 1;
+    const normalExists = await isFileExists(normalFilePath);
+    const slowExists = await isFileExists(slowFilePath);
+
+    // 检查是否两个文件都已存在
+    if (normalExists && slowExists) {
+      console.log(`[${index + 1}/${words.length}] ⏭️  跳过 ${word.id}（Normal & Slow 已存在）`);
+      stats.skipped += 2;
       continue;
     }
 
     console.log(`[${index + 1}/${words.length}] 🎙️  生成 ${word.id} / ${word.name}`);
 
-    try {
-      console.log(`  → 请求 API（使用 Key #${currentKeyIndex + 1}）...`);
-      const prompt = buildNormalPromptInEnglish(word.name, options.accent);
-      const tts = await requestTextToSpeech({
-        modelId: options.model,
-        text: prompt,
-        voiceName: options.voice,
-        temperature: options.temperature,
-      });
+    // ========== 生成 Normal 版本 ==========
+    if (!normalExists) {
+      try {
+        console.log(`  → [Normal] 请求 API（使用 Key #${currentKeyIndex + 1}）...`);
+        const prompt = buildNormalPromptInEnglish(word.name, options.accent);
+        const tts = await requestTextToSpeech({
+          modelId: options.model,
+          text: prompt,
+          voiceName: options.voice,
+          temperature: options.temperature,
+        });
+        
+        const wav = convertToWav(tts.audioBase64, tts.mimeType);
+        await fsp.writeFile(normalFilePath, wav);
+        console.log(`  ✅ [Normal] 完成`);
+        stats.success += 1;
+      } catch (err) {
+        console.error(`  ❌ [Normal] 失败（跳过）：${err.message}`);
+        stats.failed += 1;
+        stats.failedWords.push({ id: word.id, name: word.name, type: 'normal', error: err.message });
+      }
       
-      const wav = convertToWav(tts.audioBase64, tts.mimeType);
-      await fsp.writeFile(normalFilePath, wav);
-      console.log(`  ✅ 完成`);
-      stats.success += 1;
-    } catch (err) {
-      // 致命错误：记录失败，继续处理下一个
-      console.error(`  ❌ 失败（跳过）：${err.message}`);
-      stats.failed += 1;
-      stats.failedWords.push({ id: word.id, name: word.name, error: err.message });
-      // 不 throw，继续处理下一个单词
+      // 请求间隔
+      await sleep(REQUEST_DELAY_MS);
+    } else {
+      console.log(`  ⏭️  [Normal] 跳过（已存在）`);
+      stats.skipped += 1;
     }
 
-    // 请求间隔
-    if (index < words.length - 1) {
-      await sleep(REQUEST_DELAY_MS);
+    // ========== 生成 Slow 版本 ==========
+    if (!slowExists) {
+      try {
+        console.log(`  → [Slow] 请求 API（使用 Key #${currentKeyIndex + 1}）...`);
+        const prompt = buildSlowPromptInEnglish(word.name, options.accent);
+        const tts = await requestTextToSpeech({
+          modelId: options.model,
+          text: prompt,
+          voiceName: options.voice,
+          temperature: options.temperature,
+        });
+        
+        const wav = convertToWav(tts.audioBase64, tts.mimeType);
+        await fsp.writeFile(slowFilePath, wav);
+        console.log(`  ✅ [Slow] 完成`);
+        stats.success += 1;
+      } catch (err) {
+        console.error(`  ❌ [Slow] 失败（跳过）：${err.message}`);
+        stats.failed += 1;
+        stats.failedWords.push({ id: word.id, name: word.name, type: 'slow', error: err.message });
+      }
+      
+      // 请求间隔（如果不是最后一个单词）
+      if (index < words.length - 1) {
+        await sleep(REQUEST_DELAY_MS);
+      }
+    } else {
+      console.log(`  ⏭️  [Slow] 跳过（已存在）`);
+      stats.skipped += 1;
     }
   }
 
@@ -548,7 +585,8 @@ async function main() {
     console.log('');
     console.log('❌ 失败的单词：');
     for (const item of stats.failedWords) {
-      console.log(`   - ${item.id} (${item.name}): ${item.error.slice(0, 80)}`);
+      const typeLabel = item.type ? `[${item.type}]` : '';
+      console.log(`   - ${item.id} (${item.name}) ${typeLabel}: ${item.error.slice(0, 80)}`);
     }
   }
 
