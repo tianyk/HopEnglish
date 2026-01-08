@@ -994,7 +994,7 @@
         "id": "orange",
         "name": "Orange",
         "emoji": "🟠",
-        "audio": "orange_color_normal.wav"
+        "audio": "orange_normal.wav"
       },
       {
         "id": "purple",
