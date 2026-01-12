@@ -24,7 +24,7 @@ const { HttpsProxyAgent } = require('hpagent');
 const DEFAULT_MODEL_ID = 'gemini-2.5-flash-preview-tts';
 const DEFAULT_VOICE_NAME = 'Sulafat';
 const DEFAULT_ACCENT = 'General American English';
-const DEFAULT_TEMPERATURE = 1;
+const DEFAULT_TEMPERATURE = 0.3;
 
 // 超时配置
 const REQUEST_TIMEOUT_MS = 120000;
@@ -61,7 +61,7 @@ program
   .version('1.0.0')
   .requiredOption('--api-key <key>', 'Gemini API Key（多个用逗号分隔，或通过环境变量 GEMINI_API_KEY）', process.env.GEMINI_API_KEY)
   .requiredOption('--input <path>', '输入 JSON 文件路径', '../../assets/data/categories.json')
-  .requiredOption('--output <path>', '输出目录路径', '../../assets/audio/words')
+  .requiredOption('--output <path>', '输出目录路径', '../../assets/audio/words/v2')
   .option('--model <id>', '模型 ID', DEFAULT_MODEL_ID)
   .option('--voice <name>', '语音名称', DEFAULT_VOICE_NAME)
   .option('--accent <desc>', '口音描述', DEFAULT_ACCENT)
@@ -249,23 +249,30 @@ async function postJson(url, jsonBody) {
 
 function buildNormalPromptInEnglish(word, accent) {
   return `You are a professional voice actor for preschool kids (age 2-5).
-Your goal is to help a child map "image = sound" with maximum clarity and consistency.
+Speak ONLY the target word, once.
 
 TARGET WORD:
 ${word}
 
-PRONUNCIATION RULES:
-- Speak ONLY the target word. No extra words.
-- One clean pronunciation. No repetitions.
-- Keep the same voice identity across all recordings (same timbre, mood, loudness).
+GLOBAL CONSISTENCY (must follow):
+- Same voice identity, mood, loudness across all words and all recordings.
+- No extra words, no repetition, no sound effects.
+- Natural pronunciation for this accent: ${accent}.
 
-DIRECTOR'S NOTES
-Style: Warm, cheerful, supportive. A gentle "vocal smile". Like praising a child during a fun game.
-Accent: ${accent}
-Pacing: Natural, clear, not rushed.
-Articulation: Very clear consonants, clean vowels, natural stress. No mumbling.
-Energy: Medium-high, positive, calm excitement.
-Audio: Close-mic clarity, no background noise, no reverb.
+DIRECTOR'S NOTES (delivery — important):
+- Tone: Warm, cheerful, encouraging. A gentle "vocal smile".
+- Intonation: Bright, playful, slightly animated (kid-friendly). Avoid monotone.
+- Energy: Medium-high, positive, calm excitement. Not shouting.
+- Audio: Close-mic clarity, no reverb, no background noise.
+
+PACE (NORMAL):
+- One natural, clear pronunciation.
+- Do NOT add deliberate pauses between syllables.
+- Do NOT slow down intentionally.
+
+ARTICULATION:
+- Very clear consonants, clean vowels, natural stress.
+- No mumbling.
 
 OUTPUT:
 Return audio only.`;
@@ -273,23 +280,35 @@ Return audio only.`;
 
 function buildSlowPromptInEnglish(word, accent) {
   return `You are a professional voice actor for preschool kids (age 2-5).
-Your goal is to help a child map "image = sound" with maximum clarity and consistency.
+Speak ONLY the target word, once.
 
 TARGET WORD:
 ${word}
 
-PRONUNCIATION RULES:
-- Speak ONLY the target word. No extra words.
-- One clean pronunciation. No repetitions.
-- Keep the same voice identity across all recordings (same timbre, mood, loudness).
+GLOBAL CONSISTENCY (must follow):
+- Keep the same voice identity, mood, loudness, and delivery defined below. Only change pacing per PACE (SLOW).
+- No extra words, no repetition, no sound effects.
+- Same accent: ${accent}.
 
-DIRECTOR'S NOTES
-Style: Warm, cheerful, supportive. A gentle "vocal smile". Like praising a child during a fun game.
-Accent: ${accent}
-Pacing: Slow, extra clear, with tiny natural pauses; not robotic; do not unnaturally stretch vowels.
-Articulation: Very clear consonants, clean vowels, natural stress. No mumbling.
-Energy: Medium-high, positive, calm excitement.
-Audio: Close-mic clarity, no background noise, no reverb.
+DIRECTOR'S NOTES (delivery — important):
+- Tone: Warm, cheerful, encouraging. A gentle "vocal smile".
+- Intonation: Bright, playful, slightly animated (kid-friendly). Avoid monotone.
+- Energy: Medium-high, positive, calm excitement. Not shouting.
+- Audio: Close-mic clarity, no reverb, no background noise.
+
+PACE (SLOW) — must be noticeably slow:
+- Keep natural stress, but slow the tempo to about 70% of normal speaking rate.
+- Add tiny, natural micro-pauses at syllable boundaries (about 100–180 ms each).
+- Target total spoken word duration:
+  - 1-syllable word: ~0.8–1.0s
+  - 2-syllable word: ~1.1–1.4s
+  - 3+ syllables: ~1.4–1.8s
+- Do NOT unnaturally stretch vowels. Use pauses + slower consonant transitions instead.
+- IF the word has 1 syllable:
+  - Add a brief lead-in pause (~120 ms) before speaking.
+
+ARTICULATION:
+- Extra clear consonants, clean vowels, no mumbling.
 
 OUTPUT:
 Return audio only.`;

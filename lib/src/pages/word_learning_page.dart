@@ -12,10 +12,15 @@ import 'package:hopenglish/src/widgets/word_icon.dart';
 /// 核心学习页面，沉浸式展示单词
 class WordLearningPage extends StatefulWidget {
   final Category category;
+
+  /// 洗牌后的单词列表
+  /// 每次进入时由调用方洗牌，本次会话内顺序固定
+  final List<Word> words;
   final int initialIndex;
 
   const WordLearningPage({
     required this.category,
+    required this.words,
     this.initialIndex = 0,
     super.key,
   });
@@ -72,8 +77,8 @@ class _WordLearningPageState extends State<WordLearningPage> with SingleTickerPr
     super.dispose();
   }
 
-  Word get _currentWord => widget.category.words[_currentIndex];
-  bool get _isLastWord => _currentIndex >= widget.category.words.length - 1;
+  Word get _currentWord => widget.words[_currentIndex];
+  bool get _isLastWord => _currentIndex >= widget.words.length - 1;
 
   void _playWordSound() async {
     // 播放Q弹动画
@@ -135,7 +140,7 @@ class _WordLearningPageState extends State<WordLearningPage> with SingleTickerPr
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) => CelebrationPage(
-          words: widget.category.words,
+          words: widget.words,
           themeColor: widget.category.color,
         ),
       ),
@@ -149,6 +154,7 @@ class _WordLearningPageState extends State<WordLearningPage> with SingleTickerPr
       isScrollControlled: true,
       builder: (context) => WordDirectorySheet(
         category: widget.category,
+        words: widget.words,
         currentIndex: _currentIndex,
         onWordSelected: (index) {
           Navigator.pop(context);

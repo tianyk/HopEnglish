@@ -27,11 +27,11 @@ node index.js --api-key "your-key"
 |------|------|--------|
 | `--api-key <key>` | Gemini API Key（必填，或通过环境变量 `GEMINI_API_KEY`） | - |
 | `--input <path>` | 输入 JSON 文件路径 | `../../assets/data/categories.json` |
-| `--output <path>` | 输出目录路径 | `../../assets/audio/words` |
+| `--output <path>` | 输出目录路径 | `../../assets/audio/words/v4` |
 | `--model <id>` | 模型 ID | `gemini-2.5-flash-preview-tts` |
 | `--voice <name>` | 语音名称 | `Sulafat` |
 | `--accent <desc>` | 口音描述 | `General American English` |
-| `--temperature <n>` | 温度 | `1` |
+| `--temperature <n>` | 温度 | `0.3` |
 | `--dry-run` | 只打印计划，不请求 API | `false` |
 | `-h, --help` | 显示帮助 | - |
 | `-V, --version` | 显示版本 | - |

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hopenglish/src/libs/logger.dart';
 import 'package:hopenglish/src/models/category.dart';
+import 'package:hopenglish/src/models/word.dart';
 import 'package:hopenglish/src/pages/word_learning_page.dart';
 import 'package:hopenglish/src/services/category_service.dart';
 import 'package:hopenglish/src/theme/app_theme.dart';
@@ -75,9 +76,16 @@ class HomePage extends StatelessWidget {
   }
 
   void _handleCategoryTap(BuildContext context, Category category) {
+    // 复制单词列表并洗牌（不修改原数据）
+    // 每次进入时洗牌一次，本次会话内顺序固定
+    final shuffledWords = List<Word>.from(category.words)..shuffle();
+
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => WordLearningPage(category: category),
+        builder: (context) => WordLearningPage(
+          category: category,
+          words: shuffledWords,
+        ),
       ),
     );
   }

@@ -42,10 +42,11 @@ audio/
 
 ### 使用方式
 
-- 生成同一个词的两版音频时，**只修改 `Pacing` 一行**：
-  - **Normal**：自然语速，但不赶、咬字清晰
-  - **Slow**：更慢、更清晰，但保持自然韵律（不要机械拉长元音）
+- 生成同一个词的两版音频时，**只修改 `PACE` 段落**：
+  - **Normal**：自然语速，但不赶、咬字清晰（不刻意加停顿）
+  - **Slow**：必须明显更慢：用“音节边界的微停顿 + 更慢的节奏”实现，不要靠拖长元音“伪慢速”
 - 建议固定同一个声音（如 **Sulafat**）与同一个口音（例如 “General American English”），全项目一致。
+- 建议把生成端的 `temperature` 调低（例如 `0.2–0.4`），减少风格漂移，提升 Normal/Slow 的可对照一致性。
 
 ### 占位符说明
 
@@ -79,23 +80,30 @@ audio/
 
 ```
 You are a professional voice actor for preschool kids (age 2-5).
-Your goal is to help a child map "image = sound" with maximum clarity and consistency.
+Speak ONLY the target word, once.
 
 TARGET WORD:
 {WORD}
 
-PRONUNCIATION RULES:
-- Speak ONLY the target word. No extra words.
-- One clean pronunciation. No repetitions.
-- Keep the same voice identity across all recordings (same timbre, mood, loudness).
+GLOBAL CONSISTENCY (must follow):
+- Same voice identity, mood, loudness across all words and all recordings.
+- No extra words, no repetition, no sound effects.
+- Natural pronunciation for this accent: {ACCENT}.
 
-DIRECTOR'S NOTES
-Style: Warm, cheerful, supportive. A gentle "vocal smile". Like praising a child during a fun game.
-Accent: {ACCENT} (be specific, e.g., "General American English")
-Pacing: Natural, clear, not rushed.
-Articulation: Very clear consonants, clean vowels, natural stress. No mumbling.
-Energy: Medium-high, positive, calm excitement.
-Audio: Close-mic clarity, no background noise, no reverb.
+DIRECTOR'S NOTES (delivery — important):
+- Tone: Warm, cheerful, encouraging. A gentle "vocal smile".
+- Intonation: Bright, playful, slightly animated (kid-friendly). Avoid monotone.
+- Energy: Medium-high, positive, calm excitement. Not shouting.
+- Audio: Close-mic clarity, no reverb, no background noise.
+
+PACE (NORMAL):
+- One natural, clear pronunciation.
+- Do NOT add deliberate pauses between syllables.
+- Do NOT slow down intentionally.
+
+ARTICULATION:
+- Very clear consonants, clean vowels, natural stress.
+- No mumbling.
 
 OUTPUT:
 Return audio only.
@@ -115,13 +123,24 @@ Return audio only.
 - 只读一遍，干净利落，不要重复。
 - 所有录音保持同一个声音身份（音色、情绪、响度一致）。
 
-导演备注：
-风格：温暖、开心、鼓励感；带“微笑音色”；像在玩游戏时夸奖小朋友。
-口音：{ACCENT}（请具体，例如“美式英语-通用”）
-语速：自然语速，清晰但不赶。
-咬字：辅音清晰、元音干净、重音自然；不要含糊。
-能量：中等偏高，积极但不吵闹。
-音频：近讲清晰，无背景噪音，无混响。
+全局一致性（必须遵守）：
+- 所有单词、所有录音保持同一个声音身份（音色、情绪、响度一致）。
+- 不要添加任何额外词语，不要重复，不要加入音效。
+- 口音：{ACCENT}（请具体，例如“美式英语-通用”）
+
+导演备注（语调/情绪 —— 很重要）：
+- 语气：温暖、开心、鼓励；带“微笑音色”。
+- 语调：明亮、童趣、略带起伏（更像在陪孩子玩），避免平铺直叙/播报腔。
+- 能量：中等偏高，积极但不吵闹。
+- 音频：近讲清晰，无混响，无背景噪音。
+
+节奏（Normal）：
+- 自然且清晰地读一遍。
+- 不要刻意在音节之间停顿。
+- 不要刻意放慢。
+
+咬字：
+- 辅音清晰、元音干净、重音自然；不要含糊。
 
 输出要求：
 只输出音频。
@@ -131,23 +150,35 @@ Return audio only.
 
 ```
 You are a professional voice actor for preschool kids (age 2-5).
-Your goal is to help a child map "image = sound" with maximum clarity and consistency.
+Speak ONLY the target word, once.
 
 TARGET WORD:
 {WORD}
 
-PRONUNCIATION RULES:
-- Speak ONLY the target word. No extra words.
-- One clean pronunciation. No repetitions.
-- Keep the same voice identity across all recordings (same timbre, mood, loudness).
+GLOBAL CONSISTENCY (must follow):
+- Keep the same voice identity, mood, loudness, and delivery defined below. Only change pacing per PACE (SLOW).
+- No extra words, no repetition, no sound effects.
+- Same accent: {ACCENT}.
 
-DIRECTOR'S NOTES
-Style: Warm, cheerful, supportive. A gentle "vocal smile". Like praising a child during a fun game.
-Accent: {ACCENT} (be specific, e.g., "General American English")
-Pacing: Slow, extra clear, with tiny natural pauses; not robotic; do not unnaturally stretch vowels.
-Articulation: Very clear consonants, clean vowels, natural stress. No mumbling.
-Energy: Medium-high, positive, calm excitement.
-Audio: Close-mic clarity, no background noise, no reverb.
+DIRECTOR'S NOTES (delivery — important):
+- Tone: Warm, cheerful, encouraging. A gentle "vocal smile".
+- Intonation: Bright, playful, slightly animated (kid-friendly). Avoid monotone.
+- Energy: Medium-high, positive, calm excitement. Not shouting.
+- Audio: Close-mic clarity, no reverb, no background noise.
+
+PACE (SLOW) — must be noticeably slow:
+- Keep natural stress, but slow the tempo to about 70% of normal speaking rate.
+- Add tiny, natural micro-pauses at syllable boundaries (about 100–180 ms each).
+- Target total spoken word duration:
+  - 1-syllable word: ~0.8–1.0s
+  - 2-syllable word: ~1.1–1.4s
+  - 3+ syllables: ~1.4–1.8s
+- Do NOT unnaturally stretch vowels. Use pauses + slower consonant transitions instead.
+- IF the word has 1 syllable:
+  - Add a brief lead-in pause (~120 ms) before speaking.
+
+ARTICULATION:
+- Extra clear consonants, clean vowels, no mumbling.
 
 OUTPUT:
 Return audio only.
@@ -167,13 +198,30 @@ Return audio only.
 - 只读一遍，干净利落，不要重复。
 - 所有录音保持同一个声音身份（音色、情绪、响度一致）。
 
-导演备注：
-风格：温暖、开心、鼓励感；带“微笑音色”；像在玩游戏时夸奖小朋友。
-口音：{ACCENT}（请具体，例如“美式英语-通用”）
-语速：慢速、更加清晰，允许非常轻微的自然停顿；不要机械；不要不自然地把元音拉长。
-咬字：辅音清晰、元音干净、重音自然；不要含糊。
-能量：中等偏高，积极但不吵闹。
-音频：近讲清晰，无背景噪音，无混响。
+全局一致性（必须遵守）：
+- 保持下方“导演备注”定义的声音人设不变（音色、情绪、响度、语调与能量一致）；Slow 只允许按“节奏（Slow）”改变语速与微停顿。
+- 不要添加任何额外词语，不要重复，不要加入音效。
+- 口音：{ACCENT}（请具体，例如“美式英语-通用”）
+
+导演备注（语调/情绪 —— 很重要）：
+- 语气：温暖、开心、鼓励；带“微笑音色”。
+- 语调：明亮、童趣、略带起伏（更像在陪孩子玩），避免平铺直叙/播报腔。
+- 能量：中等偏高，积极但不吵闹。
+- 音频：近讲清晰，无混响，无背景噪音。
+
+节奏（Slow）——必须明显慢：
+- 保持自然重音与韵律，但把整体语速降低到“大约正常语速的 70%”。
+- 在“音节边界”加入非常轻微的自然停顿（每处约 100–180ms）。
+- 目标总时长（仅作节奏参考，不要机械拖音）：
+  - 1 音节词：约 0.8–1.0s
+  - 2 音节词：约 1.1–1.4s
+  - 3+ 音节词：约 1.4–1.8s
+- 不要不自然地把元音拉长；优先用“更慢的节奏 + 音节微停顿 + 更慢的辅音过渡”实现慢速。
+- 如果是 1 音节词：
+  - 在开口前加入一个很短的“起始停顿”（约 120ms），保证听感上更慢、更可区分。
+
+咬字：
+- 辅音更清晰、元音更干净；不要含糊。
 
 输出要求：
 只输出音频。

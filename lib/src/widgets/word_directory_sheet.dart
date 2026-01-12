@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:hopenglish/src/models/category.dart';
+import 'package:hopenglish/src/models/word.dart';
 import 'package:hopenglish/src/theme/app_theme.dart';
 import 'package:hopenglish/src/widgets/word_icon.dart';
 
 /// 单词目录 BottomSheet
 ///
-/// 展示当前分类下所有单词的缩略图列表
+/// 展示当前分类下所有单词的缩略图列表（按洗牌后的顺序）
 class WordDirectorySheet extends StatelessWidget {
   final Category category;
+
+  /// 洗牌后的单词列表
+  final List<Word> words;
   final int currentIndex;
   final void Function(int index) onWordSelected;
 
   const WordDirectorySheet({
     required this.category,
+    required this.words,
     required this.currentIndex,
     required this.onWordSelected,
     super.key,
@@ -89,7 +94,7 @@ class WordDirectorySheet extends StatelessWidget {
         mainAxisSpacing: AppTheme.spacingMedium,
         childAspectRatio: 0.9,
       ),
-      itemCount: category.words.length,
+      itemCount: words.length,
       itemBuilder: (context, index) {
         final isCurrentWord = index == currentIndex;
         return _buildWordItem(index, isCurrentWord);
@@ -98,7 +103,7 @@ class WordDirectorySheet extends StatelessWidget {
   }
 
   Widget _buildWordItem(int index, bool isCurrent) {
-    final word = category.words[index];
+    final word = words[index];
     return GestureDetector(
       onTap: () => onWordSelected(index),
       child: Container(
