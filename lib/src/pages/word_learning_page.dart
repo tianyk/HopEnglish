@@ -39,11 +39,11 @@ class _WordLearningPageState extends State<WordLearningPage> with SingleTickerPr
   /// 学习进度记录（vNext）：记录"看到/听到 + 时间"，用于后续自适应排序。
   final LearningProgressService _progressService = LearningProgressService.instance;
 
-  /// 记录切后台的时间戳（用于 2 分钟会话恢复阈值判断）。
+  /// 记录切后台的时间戳（用于 30 分钟会话恢复阈值判断）。
   int? _pausedAtMs;
 
   /// 会话恢复阈值：切后台/锁屏超过该阈值后返回，视为新会话（用于久别/复习分档）。
-  static const Duration _sessionResumeThreshold = Duration(minutes: 2);
+  static const Duration _sessionResumeThreshold = Duration(minutes: 30);
 
   // 按钮冷却状态
   bool _isNextButtonCooling = false;

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hopenglish/src/libs/logger.dart';
 import 'package:hopenglish/src/models/category.dart';
-import 'package:hopenglish/src/models/word.dart';
 import 'package:hopenglish/src/pages/word_learning_page.dart';
+import 'package:hopenglish/src/services/adaptive_sorting_service.dart';
 import 'package:hopenglish/src/services/category_service.dart';
 import 'package:hopenglish/src/theme/app_theme.dart';
 import 'package:hopenglish/src/widgets/category_card.dart';
@@ -75,16 +75,20 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  void _handleCategoryTap(BuildContext context, Category category) {
-    // 复制单词列表并洗牌（不修改原数据）
-    // 每次进入时洗牌一次，本次会话内顺序固定
-    final shuffledWords = List<Word>.from(category.words)..shuffle();
-
+  void _handleCategoryTap(BuildContext context, Category category) async {
+    // 使用自适应排序服务生成本次会话的单词顺序
+    // 根据学习进度数据（viewCount/playCount/lastSeenAt）+ 时间分档（日常/复习/久别）
+    // 生成优化的顺序，会话内固定
+    final sortedWords = await AdaptiveSortingService.instance.generateSessionOrder(
+      category: category,
+      words: category.words,
+    );
+    if (!context.mounted) return;
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => WordLearningPage(
           category: category,
-          words: shuffledWords,
+          words: sortedWords,
         ),
       ),
     );

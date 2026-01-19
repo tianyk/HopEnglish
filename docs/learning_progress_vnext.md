@@ -75,7 +75,7 @@
 | 规则 | 定义 |
 |------|------|
 | 会话范围 | 从进入某主题学习页开始，到离开该页结束 |
-| 中断恢复 | 切后台/锁屏后 **≤2 分钟** 返回仍算同一会话；超过阈值视为新会话 |
+| 中断恢复 | 切后台/锁屏后 **≤30 分钟** 返回仍算同一会话；超过阈值视为新会话 |
 
 ### 4.2 时间分档（主题维度）
 
@@ -152,13 +152,60 @@
 
 ---
 
-## 七、为自适应排序提供的查询接口（DAO 层建议）
+## 七、自适应排序（已实现）
 
-- `getCategoryProgress(categoryId)`：获取 `lastSessionAt` 判断模式
+### 7.1 整体流程
+
+```
+用户点击主题卡片
+    ↓
+AdaptiveSortingService.generateSessionOrder()
+    ↓
+┌─────────────────────────────────────────────────────┐
+│ 1. 读取 lastSessionAt → 判断 LearningMode          │
+│    - daily:   距上次 < 2 天                         │
+│    - review:  距上次 2-7 天                         │
+│    - restart: 距上次 ≥ 7 天（或首次）                │
+├─────────────────────────────────────────────────────┤
+│ 2. 读取所有 word_progress → 分桶                    │
+│    - Overdue:  daysSince(lastSeenAt) >= 7          │
+│                或 viewCount <= 1                    │
+│    - Favorite: playCount - viewCount >= 2          │
+│    - Warm:     其他                                 │
+├─────────────────────────────────────────────────────┤
+│ 3. 根据 Mode 决定配比，混排生成顺序                  │
+│    - daily:   Overdue 2 + Warm 3 + Favorite 1      │
+│    - review:  Overdue 3 + Warm 2                   │
+│    - restart: Favorite 2 + Overdue 2 + Warm 1      │
+└─────────────────────────────────────────────────────┘
+    ↓
+传入 WordLearningPage（会话内固定）
+```
+
+### 7.2 核心类与文件
+
+| 文件 | 说明 |
+|------|------|
+| `lib/src/models/learning_mode.dart` | LearningMode 枚举 + LearningModeResolver |
+| `lib/src/models/word_bucket.dart` | WordBucket 枚举 + WordProgress + WordBucketClassifier |
+| `lib/src/services/adaptive_sorting_service.dart` | 自适应排序服务（单例） |
+| `lib/src/pages/home_page.dart` | 调用 AdaptiveSortingService 生成顺序 |
+
+### 7.3 DAO 层查询接口
+
+- `getCategoryLastSessionAt(categoryId)`：获取 `lastSessionAt` 判断模式
 - `getWordProgressByCategory(categoryId)`：获取该主题全部学习项的 `view/play/lastSeen`
 - `incrementView(wordKey, nowMs)` / `incrementPlay(wordKey, nowMs)`：原子更新
 
-> 排序算法（分桶 + 混排）应放在 Service/UseCase 层，不应散落在 UI 层。
+### 7.4 配比规则（PRD D 节）
+
+| 模式 | 前 5 个建议构成 | 设计意图 |
+|------|------------------|----------|
+| 日常巩固 | Overdue 2 + Warm 3 + Favorite 1 | 覆盖均匀，少量复习穿插 |
+| 复习加强 | Overdue 3 + Warm 2 | 复习比例更高 |
+| 久别重启 | Favorite 2 + Overdue 2 + Warm 1 | 先熟后新，恢复规则感 |
+
+> 前几张卡片最关键，因为幼儿常出现"只玩前几个就退出"的短会话行为。
 
 ---
 

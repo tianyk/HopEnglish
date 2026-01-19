@@ -20,6 +20,8 @@ lib/
     ├── models/                            # 数据模型
     │   ├── category.dart                  # 分类模型
     │   ├── word.dart                      # 单词模型
+    │   ├── learning_mode.dart             # 学习模式枚举（日常/复习/久别）
+    │   ├── word_bucket.dart               # 单词分桶（Overdue/Warm/Favorite）
     │   └── models.dart                    # 模型导出
     │
     ├── data/                              # 数据持久化（SQLite 等）
@@ -33,7 +35,8 @@ lib/
     │
     ├── services/                          # 服务层
     │   ├── category_service.dart          # 分类数据服务
-    │   └── learning_progress_service.dart # 学习进度服务（口径/节流/会话）
+    │   ├── learning_progress_service.dart # 学习进度服务（口径/节流/会话）
+    │   └── adaptive_sorting_service.dart  # 自适应排序服务（分桶/混排）
     │
     ├── theme/                             # 主题样式
     │   └── app_theme.dart                 # 应用主题
@@ -241,4 +244,4 @@ CategoryCard(
 
 ---
 
-*最后更新：2026-01-05*
+*最后更新：2026-01-19*
