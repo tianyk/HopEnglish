@@ -22,13 +22,18 @@ lib/
     │   ├── word.dart                      # 单词模型
     │   └── models.dart                    # 模型导出
     │
+    ├── data/                              # 数据持久化（SQLite 等）
+    │   ├── app_database.dart              # SQLite 数据库（建表/迁移/连接管理）
+    │   └── learning_progress_dao.dart     # 学习进度 DAO（SQL 读写）
+    │
     ├── pages/                             # 页面（路由入口）
     │   ├── home_page.dart                 # 首页：分类画廊
     │   ├── word_learning_page.dart        # 单词学习页
     │   └── celebration_page.dart          # 完成庆祝页
     │
     ├── services/                          # 服务层
-    │   └── category_service.dart          # 分类数据服务
+    │   ├── category_service.dart          # 分类数据服务
+    │   └── learning_progress_service.dart # 学习进度服务（口径/节流/会话）
     │
     ├── theme/                             # 主题样式
     │   └── app_theme.dart                 # 应用主题
@@ -87,6 +92,7 @@ lib/
 ### 8. services/ - 服务层
 存放业务服务：
 - `category_service.dart` - 分类数据加载
+- `learning_progress_service.dart` - 学习进度记录与会话管理
 
 **特点**：封装数据获取逻辑，支持本地/网络切换
 

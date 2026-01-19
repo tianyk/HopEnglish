@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hopenglish/src/models/category.dart';
 import 'package:hopenglish/src/models/word.dart';
 import 'package:hopenglish/src/pages/celebration_page.dart';
+import 'package:hopenglish/src/services/learning_progress_service.dart';
 import 'package:hopenglish/src/theme/app_theme.dart';
 import 'package:hopenglish/src/widgets/word_directory_sheet.dart';
 import 'package:hopenglish/src/widgets/word_icon.dart';
@@ -29,11 +30,20 @@ class WordLearningPage extends StatefulWidget {
   State<WordLearningPage> createState() => _WordLearningPageState();
 }
 
-class _WordLearningPageState extends State<WordLearningPage> with SingleTickerProviderStateMixin {
+class _WordLearningPageState extends State<WordLearningPage> with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late int _currentIndex;
   late AnimationController _bounceController;
   late Animation<double> _bounceAnimation;
   late AudioPlayer _audioPlayer;
+
+  /// 学习进度记录（vNext）：记录"看到/听到 + 时间"，用于后续自适应排序。
+  final LearningProgressService _progressService = LearningProgressService.instance;
+
+  /// 记录切后台的时间戳（用于 2 分钟会话恢复阈值判断）。
+  int? _pausedAtMs;
+
+  /// 会话恢复阈值：切后台/锁屏超过该阈值后返回，视为新会话（用于久别/复习分档）。
+  static const Duration _sessionResumeThreshold = Duration(minutes: 2);
 
   // 按钮冷却状态
   bool _isNextButtonCooling = false;
@@ -46,6 +56,7 @@ class _WordLearningPageState extends State<WordLearningPage> with SingleTickerPr
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
+    WidgetsBinding.instance.addObserver(this);
 
     // 初始化音频播放器
     _audioPlayer = AudioPlayer();
@@ -64,14 +75,19 @@ class _WordLearningPageState extends State<WordLearningPage> with SingleTickerPr
       curve: Curves.easeInOut,
     ));
 
-    // 进入页面后自动播放第一个单词
+    // 进入页面后：记录会话锚点 + 看到 + 听到
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _touchSession();
+      _recordView();
       _playWordSound();
     });
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    // 记录离开时间，便于调试/统计（以及未来更稳的会话边界处理）
+    _progressService.saveCategoryExitedAt(categoryId: widget.category.id);
     _bounceController.dispose();
     _audioPlayer.dispose();
     super.dispose();
@@ -80,7 +96,37 @@ class _WordLearningPageState extends State<WordLearningPage> with SingleTickerPr
   Word get _currentWord => widget.words[_currentIndex];
   bool get _isLastWord => _currentIndex >= widget.words.length - 1;
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final nowMs = DateTime.now().millisecondsSinceEpoch;
+    if (state == AppLifecycleState.paused) {
+      _pausedAtMs = nowMs;
+      return;
+    }
+    if (state == AppLifecycleState.resumed) {
+      final pausedAtMs = _pausedAtMs;
+      _pausedAtMs = null;
+      if (pausedAtMs == null) return;
+      final deltaMs = nowMs - pausedAtMs;
+      // 超过阈值则认为新会话：更新主题 lastSessionAt（用于“日常/久别重启”判断）
+      if (deltaMs >= _sessionResumeThreshold.inMilliseconds) {
+        _touchSession();
+      }
+    }
+  }
+
+  void _touchSession() {
+    _progressService.touchCategorySession(categoryId: widget.category.id);
+  }
+
+  /// 记录"看到一次"（viewCount +1）。
+  void _recordView() {
+    _progressService.recordView(category: widget.category, word: _currentWord);
+  }
+
   void _playWordSound() async {
+    // 记录"听到一次"：以"触发播放"为准（播放成功与否不影响口径），服务层做连点合并。
+    _progressService.recordPlay(category: widget.category, word: _currentWord);
     // 播放Q弹动画
     _bounceController.forward(from: 0);
 
@@ -124,7 +170,7 @@ class _WordLearningPageState extends State<WordLearningPage> with SingleTickerPr
       setState(() {
         _currentIndex++;
       });
-      // 自动播放新单词发音
+      _recordView();
       _playWordSound();
     }
   }
@@ -133,6 +179,7 @@ class _WordLearningPageState extends State<WordLearningPage> with SingleTickerPr
     setState(() {
       _currentIndex = index;
     });
+    _recordView();
     _playWordSound();
   }
 

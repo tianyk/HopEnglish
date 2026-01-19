@@ -59,13 +59,17 @@ assets/data/categories.json
 
 | 字段 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| `id` | string | ✅ | 唯一标识 |
+| `id` | string | ✅ | 单词/学习项标识（**在同一分类内唯一**；允许跨分类重复） |
 | `name` | string | ✅ | 单词名称（英文） |
 | `emoji` | string | ⚠️ | 单词图标（emoji），与 image 二选一 |
 | `image` | string | ⚠️ | 单词图片路径，与 emoji 二选一 |
 | `audio` | string | ✅ | 音频路径 |
 
 > ⚠️ `emoji` 和 `image` 至少需要一个，优先使用 `image`。
+
+**稳定标识建议（用于统计/存储/调度）：**
+
+- `wordKey = $categoryId:$wordId`（例如：`foods:orange`、`colors:orange`）
 
 ---
 
@@ -159,7 +163,8 @@ assets/data/categories.json
 添加新内容时确保：
 
 - [ ] JSON 格式正确
-- [ ] id 全局唯一
+- [ ] Category.id 全局唯一
+- [ ] Word.id 在分类内唯一（允许跨分类重复）
 - [ ] color 使用 `#RRGGBB` 格式
 - [ ] emoji 或 image 至少有一个
 - [ ] 资源文件已放入对应目录
