@@ -248,72 +248,60 @@ async function postJson(url, jsonBody) {
 // ============================================================
 
 function buildNormalPromptInEnglish(word, accent) {
-  return `You are a professional voice actor for preschool kids (age 2-5).
-Speak ONLY the target word, once.
+  return `You are recording a single-word TTS clip for preschool kids (age 2-5).
 
-TARGET WORD (verbatim):
+Say ONLY the target word exactly once. No extra words. No repetition. No sound effects.
+Read ONLY the text inside <target_word>. Do NOT read the tags.
+
 <target_word>${word}</target_word>
 
-GLOBAL CONSISTENCY (must follow):
-- Same voice identity, mood, loudness across all words and all recordings.
-- No extra words, no repetition, no sound effects.
-- Natural pronunciation for this accent: ${accent}.
+Accent: ${accent}
 
-DIRECTOR'S NOTES (delivery — important):
-- Tone: Warm, cheerful, encouraging. A gentle "vocal smile".
-- Intonation: Bright, playful, slightly animated (kid-friendly). Avoid monotone.
-- Energy: Medium-high, positive, calm excitement. Not shouting.
-- Audio: Close-mic clarity, no reverb, no background noise.
+Delivery:
+- Voice timbre is set by the TTS voice parameter; keep delivery stable with steady mood and loudness.
+- Warm, cheerful, encouraging. A gentle "vocal smile".
+- Close-mic clarity. No background noise. No reverb.
+- Clear consonants, clean vowels. No mumbling.
 
-PACE (NORMAL):
-- One natural, clear pronunciation.
-- Do NOT add deliberate pauses between syllables.
-- Do NOT slow down intentionally.
+Pacing (NORMAL):
+- Natural speaking rate. One continuous utterance.
+- No deliberate pauses between syllables.
 
-ARTICULATION:
-- Very clear consonants, clean vowels, natural stress.
-- No mumbling.
+Duration (HARD LIMITS):
+- Total audio MUST be <= 1.2 seconds (including silence).
+- Silence at start <= 0.08 seconds.
+- Silence at end <= 0.10 seconds.
 
-OUTPUT:
-Return audio only.`;
+Output: audio only.`;
 }
 
 function buildSlowPromptInEnglish(word, accent) {
-  return `You are a professional voice actor for preschool kids (age 2-5).
-Speak ONLY the target word, once.
+  return `You are recording a single-word (or short-phrase) TTS clip for preschool kids (age 2-5).
 
-TARGET WORD (verbatim):
+Say ONLY the target word exactly once. No extra words. No repetition. No sound effects.
+Read ONLY the text inside <target_word>. Do NOT read the tags.
+
 <target_word>${word}</target_word>
 
-GLOBAL CONSISTENCY (must follow):
-- Keep the same voice identity, mood, loudness, and delivery defined below. Only change pacing per PACE (SLOW).
-- No extra words, no repetition, no sound effects.
-- Same accent: ${accent}.
+Accent: ${accent}
 
-DIRECTOR'S NOTES (delivery — important):
-- Tone: Warm, cheerful, encouraging. A gentle "vocal smile".
-- Intonation: Bright, playful, slightly animated (kid-friendly). Avoid monotone.
-- Energy: Medium-high, positive, calm excitement. Not shouting.
-- Audio: Close-mic clarity, no reverb, no background noise.
+Delivery:
+- Voice timbre is set by the TTS voice parameter; keep delivery stable with steady mood and loudness.
+- Warm, cheerful, encouraging. A gentle "vocal smile".
+- Close-mic clarity. No background noise. No reverb.
+- Clear consonants, clean vowels. No mumbling.
 
-PACE (SLOW) — must be noticeably slow:
-- Keep natural stress, but slow the overall tempo to about 85–90% of normal speaking rate.
-- Speak the target word/short phrase as ONE continuous utterance: no splitting into letters/phonemes.
-- Do NOT insert audible pauses inside the word (avoid syllable gaps). Any pause, if needed, must be imperceptible and only between consonant transitions.
-- Target total spoken word/phrase duration (upper-bounded; do not exceed):
-  - 1-syllable word: ~0.6–0.9s (max 1.1s)
-  - 2-syllable word: ~0.9–1.2s (max 1.4s)
-  - 3+ syllables: ~1.2–1.6s (max 1.8s)
-- Do NOT stretch vowels (no “D.....o..g”). Slow down using smoother, slightly slower consonant transitions while keeping vowels natural-length.
-- If the target is a short phrase with spaces/hyphens (e.g., "Hot Dog", "Ice Cream", "T-shirt"):
-  - Speak it naturally as ONE phrase. Spaces/hyphens are only a tiny, connected boundary — never a noticeable pause.
-- Optional: add a very brief lead-in silence (~80–120 ms) BEFORE the word only (never inside the word).
+Pacing (SLOW, controlled):
+- Clearly slower than a natural speaking rate (about 0.85x) but still natural.
+- One continuous utterance. Do NOT add pauses inside the word/phrase.
+- Do NOT stretch vowels or prolong any sound (no drawn-out ending).
 
-ARTICULATION:
-- Extra clear consonants, clean vowels, no mumbling.
+Duration (HARD LIMITS):
+- Total audio MUST be <= 1.6 seconds (including silence).
+- Silence at start <= 0.10 seconds.
+- Silence at end <= 0.12 seconds.
 
-OUTPUT:
-Return audio only.`;
+Output: audio only.`;
 }
 
 // ============================================================

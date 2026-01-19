@@ -42,9 +42,9 @@ audio/
 
 ### 使用方式
 
-- 生成同一个词的两版音频时，**只修改 `PACE` 段落**：
-  - **Normal**：自然语速，但不赶、咬字清晰（不刻意加停顿）
-  - **Slow**：必须明显更慢：用“音节边界的微停顿 + 更慢的节奏”实现，不要靠拖长元音“伪慢速”
+- 生成同一个词的两版音频时，建议直接分别使用下方 **Normal / Slow** 两套模板（除 `{WORD}` / `{ACCENT}` 外尽量不要改动），以保证风格一致与稳定性。
+  - **Normal**：自然语速、清晰、不刻意放慢或加停顿
+  - **Slow**：明显更慢但仍自然；**不允许拖长元音/拖尾**，也不允许在词/短语内部插入可听见停顿
 - 建议固定同一个声音（如 **Sulafat**）与同一个口音（例如 “General American English”），全项目一致。
 - 建议把生成端的 `temperature` 调低（例如 `0.2–0.4`），减少风格漂移，提升 Normal/Slow 的可对照一致性。
 
@@ -79,156 +79,123 @@ audio/
 ### 模板（Normal）
 
 ```
-You are a professional voice actor for preschool kids (age 2-5).
-Speak ONLY the target word, once.
+You are recording a single-word TTS clip for preschool kids (age 2-5).
 
-TARGET WORD (verbatim):
+Say ONLY the target word exactly once. No extra words. No repetition. No sound effects.
+Read ONLY the text inside <target_word>. Do NOT read the tags.
+
 <target_word>{WORD}</target_word>
 
-GLOBAL CONSISTENCY (must follow):
-- Same voice identity, mood, loudness across all words and all recordings.
-- No extra words, no repetition, no sound effects.
-- Natural pronunciation for this accent: {ACCENT}.
+Accent: {ACCENT}
 
-DIRECTOR'S NOTES (delivery — important):
-- Tone: Warm, cheerful, encouraging. A gentle "vocal smile".
-- Intonation: Bright, playful, slightly animated (kid-friendly). Avoid monotone.
-- Energy: Medium-high, positive, calm excitement. Not shouting.
-- Audio: Close-mic clarity, no reverb, no background noise.
+Delivery:
+- Voice timbre is set by the TTS voice parameter; keep delivery stable with steady mood and loudness.
+- Warm, cheerful, encouraging. A gentle "vocal smile".
+- Close-mic clarity. No background noise. No reverb.
+- Clear consonants, clean vowels. No mumbling.
 
-PACE (NORMAL):
-- One natural, clear pronunciation.
-- Do NOT add deliberate pauses between syllables.
-- Do NOT slow down intentionally.
+Pacing (NORMAL):
+- Natural speaking rate. One continuous utterance.
+- No deliberate pauses between syllables.
 
-ARTICULATION:
-- Very clear consonants, clean vowels, natural stress.
-- No mumbling.
+Duration (HARD LIMITS):
+- Total audio MUST be <= 1.2 seconds (including silence).
+- Silence at start <= 0.08 seconds.
+- Silence at end <= 0.10 seconds.
 
-OUTPUT:
-Return audio only.
+Output: audio only.
 ```
 
 ### 模板（Normal，中文提示词）
 
 ```
-你是一位面向 2-5 岁幼儿的专业配音演员。
-你的目标是帮助孩子建立“图像 = 声音”的稳定映射，要求发音清晰、风格一致、可重复。
+你正在为 2-5 岁幼儿录制“单词 TTS 音频”。
 
-目标单词（逐字照读，只读标签内文本）：
+只读目标单词，且只读一遍：不要添加其它词语、不要重复、不要音效。
+只读取 `<target_word>` 标签内的文本，不要读出标签本身。
+
 <target_word>{WORD}</target_word>
 
-发音规则：
-- 只读“目标单词”，不要添加任何其它词语或解释。
-- 只读一遍，干净利落，不要重复。
-- 所有录音保持同一个声音身份（音色、情绪、响度一致）。
+口音：{ACCENT}
 
-全局一致性（必须遵守）：
-- 所有单词、所有录音保持同一个声音身份（音色、情绪、响度一致）。
-- 不要添加任何额外词语，不要重复，不要加入音效。
-- 口音：{ACCENT}（请具体，例如“美式英语-通用”）
+声音与风格：
+- 音色由 TTS 的 voice 参数决定；这里仅约束情绪、语气与响度保持稳定，不要刻意变化。
+- 温暖、开心、鼓励，带“微笑音色”。
+- 近讲清晰：无背景噪音、无混响。
+- 辅音清晰、元音干净，不要含糊。
 
-导演备注（语调/情绪 —— 很重要）：
-- 语气：温暖、开心、鼓励；带“微笑音色”。
-- 语调：明亮、童趣、略带起伏（更像在陪孩子玩），避免平铺直叙/播报腔。
-- 能量：中等偏高，积极但不吵闹。
-- 音频：近讲清晰，无混响，无背景噪音。
-
-节奏（Normal）：
-- 自然且清晰地读一遍。
+语速（Normal）：
+- 自然语速，一口气连贯读完。
 - 不要刻意在音节之间停顿。
-- 不要刻意放慢。
 
-咬字：
-- 辅音清晰、元音干净、重音自然；不要含糊。
+时长（硬约束）：
+- 总音频时长必须 <= 1.2 秒（包含静音）。
+- 开头静音 <= 0.08 秒。
+- 结尾静音 <= 0.10 秒。
 
-输出要求：
-只输出音频。
+输出：只输出音频。
 ```
 
 ### 模板（Slow）
 
 ```
-You are a professional voice actor for preschool kids (age 2-5).
-Speak ONLY the target word, once.
+You are recording a single-word (or short-phrase) TTS clip for preschool kids (age 2-5).
 
-TARGET WORD (verbatim):
+Say ONLY the target word exactly once. No extra words. No repetition. No sound effects.
+Read ONLY the text inside <target_word>. Do NOT read the tags.
+
 <target_word>{WORD}</target_word>
 
-GLOBAL CONSISTENCY (must follow):
-- Keep the same voice identity, mood, loudness, and delivery defined below. Only change pacing per PACE (SLOW).
-- No extra words, no repetition, no sound effects.
-- Same accent: {ACCENT}.
+Accent: {ACCENT}
 
-DIRECTOR'S NOTES (delivery — important):
-- Tone: Warm, cheerful, encouraging. A gentle "vocal smile".
-- Intonation: Bright, playful, slightly animated (kid-friendly). Avoid monotone.
-- Energy: Medium-high, positive, calm excitement. Not shouting.
-- Audio: Close-mic clarity, no reverb, no background noise.
+Delivery:
+- Voice timbre is set by the TTS voice parameter; keep delivery stable with steady mood and loudness.
+- Warm, cheerful, encouraging. A gentle "vocal smile".
+- Close-mic clarity. No background noise. No reverb.
+- Clear consonants, clean vowels. No mumbling.
 
-PACE (SLOW) — must be noticeably slow:
-- Keep natural stress, but slow the overall tempo to about 85–90% of normal speaking rate.
-- Speak the target word/short phrase as ONE continuous utterance: no splitting into letters/phonemes.
-- Do NOT insert audible pauses inside the word (avoid syllable gaps). Any pause, if needed, must be imperceptible and only between consonant transitions.
-- Target total spoken word/phrase duration (upper-bounded; do not exceed):
-  - 1-syllable word: ~0.6–0.9s (max 1.1s)
-  - 2-syllable word: ~0.9–1.2s (max 1.4s)
-  - 3+ syllables: ~1.2–1.6s (max 1.8s)
-- Do NOT stretch vowels (no “D.....o..g”). Slow down using smoother, slightly slower consonant transitions while keeping vowels natural-length.
-- If the target is a short phrase with spaces/hyphens (e.g., "Hot Dog", "Ice Cream", "T-shirt"):
-  - Speak it naturally as ONE phrase. Spaces/hyphens are only a tiny, connected boundary — never a noticeable pause.
-- Optional: add a very brief lead-in silence (~80–120 ms) BEFORE the word only (never inside the word).
+Pacing (SLOW, controlled):
+- Clearly slower than a natural speaking rate (about 0.85x) but still natural.
+- One continuous utterance. Do NOT add pauses inside the word/phrase.
+- Do NOT stretch vowels or prolong any sound (no drawn-out ending).
 
-ARTICULATION:
-- Extra clear consonants, clean vowels, no mumbling.
+Duration (HARD LIMITS):
+- Total audio MUST be <= 1.6 seconds (including silence).
+- Silence at start <= 0.10 seconds.
+- Silence at end <= 0.12 seconds.
 
-OUTPUT:
-Return audio only.
+Output: audio only.
 ```
 
 ### 模板（Slow，中文提示词）
 
 ```
-你是一位面向 2-5 岁幼儿的专业配音演员。
-你的目标是帮助孩子建立“图像 = 声音”的稳定映射，要求发音清晰、风格一致、可重复。
+你正在为 2-5 岁幼儿录制“单词/短语 TTS 音频（Slow 版）”。
 
-目标单词（逐字照读，只读标签内文本）：
+只读目标单词，且只读一遍：不要添加其它词语、不要重复、不要音效。
+只读取 `<target_word>` 标签内的文本，不要读出标签本身。
+
 <target_word>{WORD}</target_word>
 
-发音规则：
-- 只读“目标单词”，不要添加任何其它词语或解释。
-- 只读一遍，干净利落，不要重复。
-- 所有录音保持同一个声音身份（音色、情绪、响度一致）。
+口音：{ACCENT}
 
-全局一致性（必须遵守）：
-- 保持下方“导演备注”定义的声音人设不变（音色、情绪、响度、语调与能量一致）；Slow 只允许按“节奏（Slow）”改变语速与微停顿。
-- 不要添加任何额外词语，不要重复，不要加入音效。
-- 口音：{ACCENT}（请具体，例如“美式英语-通用”）
+声音与风格：
+- 音色由 TTS 的 voice 参数决定；这里仅约束情绪、语气与响度保持稳定，不要刻意变化。
+- 温暖、开心、鼓励，带“微笑音色”。
+- 近讲清晰：无背景噪音、无混响。
+- 辅音清晰、元音干净，不要含糊。
 
-导演备注（语调/情绪 —— 很重要）：
-- 语气：温暖、开心、鼓励；带“微笑音色”。
-- 语调：明亮、童趣、略带起伏（更像在陪孩子玩），避免平铺直叙/播报腔。
-- 能量：中等偏高，积极但不吵闹。
-- 音频：近讲清晰，无混响，无背景噪音。
+语速（Slow，受控）：
+- 比自然语速明显更慢（约 0.85x），但仍然自然。
+- 一口气连贯读完：不要在词/短语内部插入可听见停顿。
+- 严禁拖长元音或任何声音的尾巴（不要拖尾）。
 
-节奏（Slow）——必须明显慢：
-- 保持自然重音与韵律，把整体语速降低到“大约正常语速的 85–90%”（慢，但不要过慢）。
-- 目标单词/短语必须“一口气连读完”：不要拆成字母/音素来拼读。
-- 不要在词内插入“可听见的停顿”（避免音节间被拉开）。如需停顿，只允许极轻微、几乎不可察觉的“辅音过渡”放慢。
-- 目标总时长（有上限，不能超过上限）：
-  - 1 音节词：约 0.6–0.9s（最大 1.1s）
-  - 2 音节词：约 0.9–1.2s（最大 1.4s）
-  - 3+ 音节词：约 1.2–1.6s（最大 1.8s）
-- 严禁拖长元音或拆读（例如把 Dog 读成 “D.....o..g”）。
-- 如果目标是带空格/连字符的短语（如 “Hot Dog”、“Ice Cream”、“T-shirt”）：
-  - 作为一个短语自然连读，空格/连字符只作为“非常轻微的连读边界”，不要变成明显停顿。
-- 可选：在开口前加入极短的“起始静音”（约 80–120ms），只允许在词/短语之前，绝不允许在词内。
+时长（硬约束）：
+- 总音频时长必须 <= 1.6 秒（包含静音）。
+- 开头静音 <= 0.10 秒。
+- 结尾静音 <= 0.12 秒。
 
-咬字：
-- 辅音更清晰、元音更干净；不要含糊。
-
-输出要求：
-只输出音频。
+输出：只输出音频。
 ```
 
 ### （可选）词级覆盖：仅对少数“容易读错”的词启用
