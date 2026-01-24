@@ -34,7 +34,7 @@
         "id": "bird",
         "name": "Bird",
         "emoji": "🐦",
-        "image": "bird2.png",
+        "image": "bird.png",
         "audio": "bird_normal.wav"
       },
       {
