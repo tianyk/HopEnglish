@@ -126,7 +126,8 @@
         "id": "elephant",
         "name": "Elephant",
         "emoji": "🐘",
-        "audio": "elephant_normal.wav"
+        "audio": "elephant_normal.wav",
+        "image": "elephant.png"
       },
       {
         "id": "giraffe",
@@ -144,7 +145,8 @@
         "id": "hippo",
         "name": "Hippo",
         "emoji": "🦛",
-        "audio": "hippo_normal.wav"
+        "audio": "hippo_normal.wav",
+        "image": "hippo.png"
       },
       {
         "id": "kangaroo",
