@@ -779,7 +779,7 @@
       {
         "id": "table",
         "name": "Table",
-        "image": "table.svg",
+        "image": "table.png",
         "audio": "table_normal.wav"
       },
       {
@@ -828,7 +828,8 @@
         "id": "towel",
         "name": "Towel",
         "emoji": "🧖",
-        "audio": "towel_normal.wav"
+        "audio": "towel_normal.wav",
+        "image": "towel.png"
       },
       {
         "id": "door",
@@ -872,7 +873,8 @@
         "id": "stop",
         "name": "Stop",
         "emoji": "🛑",
-        "audio": "stop_normal.wav"
+        "audio": "stop_normal.wav",
+        "image": "stop.png"
       },
       {
         "id": "jump",
@@ -920,7 +922,8 @@
         "id": "eat",
         "name": "Eat",
         "emoji": "🍽️",
-        "audio": "eat_normal.wav"
+        "audio": "eat_normal.wav",
+        "image": "eat.png"
       },
       {
         "id": "drink",
