@@ -38,3 +38,23 @@
 ## 资源
 
 *   图标素材：[Flaticon](https://www.flaticon.com/)
+
+## 语言版本
+
+*   [English](README.en.md) | [中文](README.md)
+
+## 许可证
+
+本项目采用 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)（署名-非商业性使用-相同方式共享 4.0 国际）许可证。
+
+### 您可以：
+- ✅ **分享**：复制和重新分发本材料
+- ✅ **修改**：重新混合、转换和基于本材料创作
+
+### 您必须：
+- 📝 **署名**：提供适当的署名，提供指向许可证的链接，并指出是否进行了更改
+- 🚫 **非商业性使用**：不得将本材料用于商业目的
+- 🔄 **相同方式共享**：如果您重新混合、转换或基于本材料创作，您必须根据与原始材料相同的许可证分发您的贡献
+
+### 完整法律文本
+请查看 [LICENSE](LICENSE) 文件或访问 [Creative Commons 网站](https://creativecommons.org/licenses/by-nc-sa/4.0/legalcode) 获取完整的法律文本。
