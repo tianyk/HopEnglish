@@ -20,7 +20,20 @@
 
 ## 技术栈
 
-*   Flutter
+*   Flutter 3.27.4
+*   Dart 3.6.2
+
+## 系统要求
+
+### iOS
+*   **最低版本**: iOS 15.0
+*   **支持设备**: iPhone、iPad
+*   **架构**: arm64（真机）、x86_64（模拟器）
+
+### 开发环境
+*   macOS（用于 iOS 开发）
+*   Xcode 15.0+
+*   CocoaPods
 
 ## 资源
 

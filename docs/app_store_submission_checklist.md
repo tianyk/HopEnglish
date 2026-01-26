@@ -11,6 +11,7 @@
 - ✅ **应用显示名称**: `HopEnglish`（Info.plist 中已配置）
 - ✅ **版本号**: `1.0.0+1`（pubspec.yaml）
 - ✅ **应用图标**: 已配置并生成所有尺寸（1024x1024 主图标已准备）
+- ✅ **iOS 最低版本**: iOS 15.0（覆盖中国大陆主流设备）
 
 ### 2. 技术实现
 - ✅ 应用功能完整（首页、学习页、庆祝页）
@@ -233,6 +234,7 @@ flutter build ios --release
 - [ ] Info.plist 配置正确
 - [ ] 应用图标所有尺寸已生成
 - [ ] 启动页已优化（可选）
+- [ ] iOS 部署目标已设置为 15.0（project.pbxproj、AppFrameworkInfo.plist、Podfile）
 
 ### App Store Connect
 - [ ] 所有必填信息已填写
