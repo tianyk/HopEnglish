@@ -9,6 +9,9 @@ class Word extends Equatable {
   /// 名称（英文）
   final String name;
 
+  /// 名称（中文简体）
+  final String? nameZh;
+
   /// 图标（emoji），与 image 二选一
   final String? emoji;
 
@@ -21,6 +24,7 @@ class Word extends Equatable {
   const Word({
     required this.id,
     required this.name,
+    this.nameZh,
     this.emoji,
     this.image,
     required this.audio,
@@ -54,6 +58,7 @@ class Word extends Equatable {
     return Word(
       id: json['id'] as String,
       name: json['name'] as String,
+      nameZh: json['nameZh'] as String?,
       emoji: json['emoji'] as String?,
       image: json['image'] as String?,
       audio: json['audio'] as String,
@@ -65,6 +70,7 @@ class Word extends Equatable {
     return {
       'id': id,
       'name': name,
+      if (nameZh != null) 'nameZh': nameZh,
       if (emoji != null) 'emoji': emoji,
       if (image != null) 'image': image,
       'audio': audio,
@@ -72,7 +78,7 @@ class Word extends Equatable {
   }
 
   @override
-  List<Object?> get props => [id, name, emoji, image, audio];
+  List<Object?> get props => [id, name, nameZh, emoji, image, audio];
 
   @override
   String toString() {

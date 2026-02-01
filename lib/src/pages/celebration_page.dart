@@ -84,8 +84,8 @@ class CelebrationPage extends StatefulWidget {
   const CelebrationPage({
     required this.words,
     required this.themeColor,
-    this.gravity = 1.0,
-    this.decay = 0.988,
+    this.gravity = 0.78,
+    this.decay = 0.98,
     this.startVelocity = 0.035,
     this.spread = 45,
     this.particleCount = 50,
@@ -96,7 +96,8 @@ class CelebrationPage extends StatefulWidget {
   State<CelebrationPage> createState() => _CelebrationPageState();
 }
 
-class _CelebrationPageState extends State<CelebrationPage> with TickerProviderStateMixin {
+class _CelebrationPageState extends State<CelebrationPage>
+    with TickerProviderStateMixin {
   late AnimationController _particleController;
   late AnimationController _textController;
   late Animation<double> _textScaleAnimation;
@@ -198,11 +199,14 @@ class _CelebrationPageState extends State<CelebrationPage> with TickerProviderSt
     _particles.shuffle(_random);
   }
 
-  _CelebrationParticle _createParticle({String? emoji, String? image, bool isDecor = false}) {
+  _CelebrationParticle _createParticle(
+      {String? emoji, String? image, bool isDecor = false}) {
     final speed = widget.startVelocity * (0.7 + _random.nextDouble() * 0.6);
     final spreadRad = widget.spread * pi / 180; // 度转弧度
     final angle = -pi / 2 + (_random.nextDouble() - 0.5) * spreadRad;
-    final scale = isDecor ? 0.4 + _random.nextDouble() * 0.3 : 0.6 + _random.nextDouble() * 0.4;
+    final scale = isDecor
+        ? 0.4 + _random.nextDouble() * 0.3
+        : 0.6 + _random.nextDouble() * 0.4;
 
     return _CelebrationParticle(
       emoji: emoji,
@@ -369,7 +373,8 @@ class _CelebrationPageState extends State<CelebrationPage> with TickerProviderSt
             const SizedBox(width: AppTheme.spacingSmall),
             Container(
               constraints: const BoxConstraints(minWidth: 32),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), // 增加一点垂直padding
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 8, vertical: 4), // 增加一点垂直padding
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(12),
@@ -391,7 +396,10 @@ class _CelebrationPageState extends State<CelebrationPage> with TickerProviderSt
   }
 
   Widget _buildParticle(_CelebrationParticle particle, Size screenSize) {
-    if (particle.y > 1.3 || particle.y < -0.3 || particle.x < -0.2 || particle.x > 1.2) {
+    if (particle.y > 1.3 ||
+        particle.y < -0.3 ||
+        particle.x < -0.2 ||
+        particle.x > 1.2) {
       return const SizedBox.shrink();
     }
 

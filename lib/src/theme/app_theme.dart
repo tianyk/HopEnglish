@@ -171,7 +171,7 @@ class AppTheme {
     fontFamily: fontFamilyDisplay,
     fontSize: 22,
     fontWeight: FontWeight.w600,
-    color: textPrimary,
+    color: primary,
   );
 
   /// 卡片标题（16px，Fredoka Medium）
@@ -180,7 +180,7 @@ class AppTheme {
     fontFamily: fontFamilyDisplay,
     fontSize: 16,
     fontWeight: FontWeight.w500,
-    color: textPrimary,
+    color: primary,
   );
 
   /// 正文文字（14px，Nunito Regular）

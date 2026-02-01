@@ -30,14 +30,16 @@ class WordLearningPage extends StatefulWidget {
   State<WordLearningPage> createState() => _WordLearningPageState();
 }
 
-class _WordLearningPageState extends State<WordLearningPage> with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+class _WordLearningPageState extends State<WordLearningPage>
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late int _currentIndex;
   late AnimationController _bounceController;
   late Animation<double> _bounceAnimation;
   late AudioPlayer _audioPlayer;
 
   /// 学习进度记录（vNext）：记录"看到/听到 + 时间"，用于后续自适应排序。
-  final LearningProgressService _progressService = LearningProgressService.instance;
+  final LearningProgressService _progressService =
+      LearningProgressService.instance;
 
   /// 记录切后台的时间戳（用于 30 分钟会话恢复阈值判断）。
   int? _pausedAtMs;
@@ -260,7 +262,7 @@ class _WordLearningPageState extends State<WordLearningPage> with SingleTickerPr
         ),
         child: const Icon(
           Icons.arrow_back_rounded,
-          color: AppTheme.textPrimary,
+          color: AppTheme.primary,
         ),
       ),
     );
@@ -288,7 +290,7 @@ class _WordLearningPageState extends State<WordLearningPage> with SingleTickerPr
     return Text(
       widget.category.name,
       style: AppTheme.headlineMedium.copyWith(
-        color: AppTheme.textPrimary,
+        color: AppTheme.primary,
       ),
       overflow: TextOverflow.ellipsis,
     );
@@ -307,7 +309,7 @@ class _WordLearningPageState extends State<WordLearningPage> with SingleTickerPr
         ),
         child: const Icon(
           Icons.grid_view_rounded,
-          color: AppTheme.textPrimary,
+          color: AppTheme.primary,
         ),
       ),
     );
@@ -367,7 +369,9 @@ class _WordLearningPageState extends State<WordLearningPage> with SingleTickerPr
   }
 
   Widget _buildNextButton() {
-    final buttonColor = _isNextButtonCooling ? AppTheme.primary.withValues(alpha: 0.5) : AppTheme.primary;
+    final buttonColor = _isNextButtonCooling
+        ? AppTheme.primary.withValues(alpha: 0.5)
+        : AppTheme.primary;
 
     return GestureDetector(
       onTap: _goToNextWord,
