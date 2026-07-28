@@ -1,0 +1,17 @@
+{
+  "name": "hopenglish-dreamina-word-generator",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Resumable Dreamina image generator for HopEnglish vocabulary assets",
+  "scripts": {
+    "generate": "node src/generate-word-images.mjs",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "sharp": "^0.35.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

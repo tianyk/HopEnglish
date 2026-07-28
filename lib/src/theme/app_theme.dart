@@ -104,7 +104,7 @@ class AppTheme {
       elevation: 0,
       centerTitle: true,
     ),
-    cardTheme: CardTheme(
+    cardTheme: CardThemeData(
       color: surface,
       elevation: 4,
       shadowColor: textHint.withValues(alpha: 0.12),

@@ -10,21 +10,23 @@
         "name": "Dog",
         "nameZh": "狗",
         "emoji": "🐶",
-        "audio": "dog_normal.wav"
+        "audio": "dog_normal.wav",
+        "image": "animals_dog.png"
       },
       {
         "id": "cat",
         "name": "Cat",
         "nameZh": "猫",
         "emoji": "🐱",
-        "audio": "cat_normal.wav"
+        "audio": "cat_normal.wav",
+        "image": "animals_cat.png"
       },
       {
         "id": "fish",
         "name": "Fish",
         "nameZh": "鱼",
         "emoji": "🐠",
-        "image": "fish.png",
+        "image": "animals_fish.png",
         "audio": "fish_normal.wav"
       },
       {
@@ -32,14 +34,15 @@
         "name": "Rabbit",
         "nameZh": "兔子",
         "emoji": "🐰",
-        "audio": "rabbit_normal.wav"
+        "audio": "rabbit_normal.wav",
+        "image": "animals_rabbit.png"
       },
       {
         "id": "bird",
         "name": "Bird",
         "nameZh": "鸟",
         "emoji": "🐦",
-        "image": "bird.png",
+        "image": "animals_bird.png",
         "audio": "bird_normal.wav"
       },
       {
@@ -47,208 +50,232 @@
         "name": "Mouse",
         "nameZh": "老鼠",
         "emoji": "🐭",
-        "audio": "mouse_normal.wav"
+        "audio": "mouse_normal.wav",
+        "image": "animals_mouse.png"
       },
       {
         "id": "turtle",
         "name": "Turtle",
         "nameZh": "乌龟",
         "emoji": "🐢",
-        "image": "turtle.png",
-        "audio": "turtle_normal.wav"
+        "audio": "turtle_normal.wav",
+        "image": "animals_turtle.png"
       },
       {
         "id": "chicken",
         "name": "Chicken",
         "nameZh": "鸡",
         "emoji": "🐔",
-        "audio": "chicken_normal.wav"
+        "audio": "chicken_normal.wav",
+        "image": "animals_chicken.png"
       },
       {
         "id": "duck",
         "name": "Duck",
         "nameZh": "鸭子",
         "emoji": "🦆",
-        "audio": "duck_normal.wav"
+        "audio": "duck_normal.wav",
+        "image": "animals_duck.png"
       },
       {
         "id": "cow",
         "name": "Cow",
         "nameZh": "奶牛",
         "emoji": "🐮",
-        "audio": "cow_normal.wav"
+        "audio": "cow_normal.wav",
+        "image": "animals_cow.png"
       },
       {
         "id": "pig",
         "name": "Pig",
         "nameZh": "猪",
         "emoji": "🐷",
-        "audio": "pig_normal.wav"
+        "audio": "pig_normal.wav",
+        "image": "animals_pig.png"
       },
       {
         "id": "sheep",
         "name": "Sheep",
         "nameZh": "羊",
         "emoji": "🐑",
-        "audio": "sheep_normal.wav"
+        "audio": "sheep_normal.wav",
+        "image": "animals_sheep.png"
       },
       {
         "id": "horse",
         "name": "Horse",
         "nameZh": "马",
         "emoji": "🐴",
-        "audio": "horse_normal.wav"
+        "audio": "horse_normal.wav",
+        "image": "animals_horse.png"
       },
       {
         "id": "frog",
         "name": "Frog",
         "nameZh": "青蛙",
         "emoji": "🐸",
-        "audio": "frog_normal.wav"
+        "audio": "frog_normal.wav",
+        "image": "animals_frog.png"
       },
       {
         "id": "bee",
         "name": "Bee",
         "nameZh": "蜜蜂",
         "emoji": "🐝",
-        "audio": "bee_normal.wav"
+        "audio": "bee_normal.wav",
+        "image": "animals_bee.png"
       },
       {
         "id": "butterfly",
         "name": "Butterfly",
         "nameZh": "蝴蝶",
         "emoji": "🦋",
-        "audio": "butterfly_normal.wav"
+        "audio": "butterfly_normal.wav",
+        "image": "animals_butterfly.png"
       },
       {
         "id": "monkey",
         "name": "Monkey",
         "nameZh": "猴子",
         "emoji": "🐵",
-        "audio": "monkey_normal.wav"
+        "audio": "monkey_normal.wav",
+        "image": "animals_monkey.png"
       },
       {
         "id": "panda",
         "name": "Panda",
         "nameZh": "熊猫",
         "emoji": "🐼",
-        "audio": "panda_normal.wav"
+        "audio": "panda_normal.wav",
+        "image": "animals_panda.png"
       },
       {
         "id": "bear",
         "name": "Bear",
         "nameZh": "熊",
         "emoji": "🐻",
-        "audio": "bear_normal.wav"
+        "audio": "bear_normal.wav",
+        "image": "animals_bear.png"
       },
       {
         "id": "elephant",
         "name": "Elephant",
         "nameZh": "大象",
         "emoji": "🐘",
-        "image": "elephant.png",
-        "audio": "elephant_normal.wav"
+        "audio": "elephant_normal.wav",
+        "image": "animals_elephant.png"
       },
       {
         "id": "giraffe",
         "name": "Giraffe",
         "nameZh": "长颈鹿",
         "emoji": "🦒",
-        "audio": "giraffe_normal.wav"
+        "audio": "giraffe_normal.wav",
+        "image": "animals_giraffe.png"
       },
       {
         "id": "zebra",
         "name": "Zebra",
         "nameZh": "斑马",
         "emoji": "🦓",
-        "audio": "zebra_normal.wav"
+        "audio": "zebra_normal.wav",
+        "image": "animals_zebra.png"
       },
       {
         "id": "hippo",
         "name": "Hippo",
         "nameZh": "河马",
         "emoji": "🦛",
-        "image": "hippo.png",
-        "audio": "hippo_normal.wav"
+        "audio": "hippo_normal.wav",
+        "image": "animals_hippo.png"
       },
       {
         "id": "kangaroo",
         "name": "Kangaroo",
         "nameZh": "袋鼠",
         "emoji": "🦘",
-        "audio": "kangaroo_normal.wav"
+        "audio": "kangaroo_normal.wav",
+        "image": "animals_kangaroo.png"
       },
       {
         "id": "penguin",
         "name": "Penguin",
         "nameZh": "企鹅",
         "emoji": "🐧",
-        "audio": "penguin_normal.wav"
+        "audio": "penguin_normal.wav",
+        "image": "animals_penguin.png"
       },
       {
         "id": "fox",
         "name": "Fox",
         "nameZh": "狐狸",
         "emoji": "🦊",
-        "audio": "fox_normal.wav"
+        "audio": "fox_normal.wav",
+        "image": "animals_fox.png"
       },
       {
         "id": "wolf",
         "name": "Wolf",
         "nameZh": "狼",
         "emoji": "🐺",
-        "audio": "wolf_normal.wav"
+        "audio": "wolf_normal.wav",
+        "image": "animals_wolf.png"
       },
       {
         "id": "snake",
         "name": "Snake",
         "nameZh": "蛇",
         "emoji": "🐍",
-        "image": "snake.png",
-        "audio": "snake_normal.wav"
+        "audio": "snake_normal.wav",
+        "image": "animals_snake.png"
       },
       {
         "id": "crocodile",
         "name": "Crocodile",
         "nameZh": "鳄鱼",
         "emoji": "🐊",
-        "image": "crocodile.png",
-        "audio": "crocodile_normal.wav"
+        "audio": "crocodile_normal.wav",
+        "image": "animals_crocodile.png"
       },
       {
         "id": "whale",
         "name": "Whale",
         "nameZh": "鲸鱼",
         "emoji": "🐳",
-        "audio": "whale_normal.wav"
+        "audio": "whale_normal.wav",
+        "image": "animals_whale.png"
       },
       {
         "id": "dolphin",
         "name": "Dolphin",
         "nameZh": "海豚",
         "emoji": "🐬",
-        "audio": "dolphin_normal.wav"
+        "audio": "dolphin_normal.wav",
+        "image": "animals_dolphin.png"
       },
       {
         "id": "shark",
         "name": "Shark",
         "nameZh": "鲨鱼",
         "emoji": "🦈",
-        "audio": "shark_normal.wav"
+        "audio": "shark_normal.wav",
+        "image": "animals_shark.png"
       },
       {
         "id": "tiger",
         "name": "Tiger",
         "nameZh": "老虎",
         "emoji": "🐯",
-        "audio": "tiger_normal.wav"
+        "audio": "tiger_normal.wav",
+        "image": "animals_tiger.png"
       },
       {
         "id": "lion",
         "name": "Lion",
         "nameZh": "狮子",
         "emoji": "🦁",
-        "audio": "lion_normal.wav"
+        "audio": "lion_normal.wav",
+        "image": "animals_lion.png"
       }
     ]
   },
@@ -263,266 +290,304 @@
         "name": "Apple",
         "nameZh": "苹果",
         "emoji": "🍎",
-        "audio": "apple_normal.wav"
+        "audio": "apple_normal.wav",
+        "image": "foods_apple.png"
       },
       {
         "id": "banana",
         "name": "Banana",
         "nameZh": "香蕉",
         "emoji": "🍌",
-        "audio": "banana_normal.wav"
+        "audio": "banana_normal.wav",
+        "image": "foods_banana.png"
       },
       {
         "id": "orange",
         "name": "Orange",
         "nameZh": "橙子",
         "emoji": "🍊",
-        "audio": "orange_normal.wav"
+        "audio": "orange_normal.wav",
+        "image": "foods_orange.png"
       },
       {
         "id": "grape",
         "name": "Grape",
         "nameZh": "葡萄",
         "emoji": "🍇",
-        "audio": "grape_normal.wav"
+        "audio": "grape_normal.wav",
+        "image": "foods_grape.png"
       },
       {
         "id": "strawberry",
         "name": "Strawberry",
         "nameZh": "草莓",
         "emoji": "🍓",
-        "audio": "strawberry_normal.wav"
+        "audio": "strawberry_normal.wav",
+        "image": "foods_strawberry.png"
       },
       {
         "id": "watermelon",
         "name": "Watermelon",
         "nameZh": "西瓜",
         "emoji": "🍉",
-        "audio": "watermelon_normal.wav"
+        "audio": "watermelon_normal.wav",
+        "image": "foods_watermelon.png"
       },
       {
         "id": "pear",
         "name": "Pear",
         "nameZh": "梨",
         "emoji": "🍐",
-        "audio": "pear_normal.wav"
+        "audio": "pear_normal.wav",
+        "image": "foods_pear.png"
       },
       {
         "id": "peach",
         "name": "Peach",
         "nameZh": "桃子",
         "emoji": "🍑",
-        "audio": "peach_normal.wav"
+        "audio": "peach_normal.wav",
+        "image": "foods_peach.png"
       },
       {
         "id": "cherry",
         "name": "Cherry",
         "nameZh": "樱桃",
         "emoji": "🍒",
-        "audio": "cherry_normal.wav"
+        "audio": "cherry_normal.wav",
+        "image": "foods_cherry.png"
       },
       {
         "id": "pineapple",
         "name": "Pineapple",
         "nameZh": "菠萝",
         "emoji": "🍍",
-        "audio": "pineapple_normal.wav"
+        "audio": "pineapple_normal.wav",
+        "image": "foods_pineapple.png"
       },
       {
         "id": "lemon",
         "name": "Lemon",
         "nameZh": "柠檬",
         "emoji": "🍋",
-        "audio": "lemon_normal.wav"
+        "audio": "lemon_normal.wav",
+        "image": "foods_lemon.png"
       },
       {
         "id": "egg",
         "name": "Egg",
         "nameZh": "鸡蛋",
         "emoji": "🥚",
-        "audio": "egg_normal.wav"
+        "audio": "egg_normal.wav",
+        "image": "foods_egg.png"
       },
       {
         "id": "bread",
         "name": "Bread",
         "nameZh": "面包",
         "emoji": "🍞",
-        "audio": "bread_normal.wav"
+        "audio": "bread_normal.wav",
+        "image": "foods_bread.png"
       },
       {
         "id": "rice",
         "name": "Rice",
         "nameZh": "米饭",
         "emoji": "🍚",
-        "audio": "rice_normal.wav"
+        "audio": "rice_normal.wav",
+        "image": "foods_rice.png"
       },
       {
         "id": "noodles",
         "name": "Noodles",
         "nameZh": "面条",
         "emoji": "🍜",
-        "audio": "noodles_normal.wav"
+        "audio": "noodles_normal.wav",
+        "image": "foods_noodles.png"
       },
       {
         "id": "milk",
         "name": "Milk",
         "nameZh": "牛奶",
         "emoji": "🥛",
-        "audio": "milk_normal.wav"
+        "audio": "milk_normal.wav",
+        "image": "foods_milk.png"
       },
       {
         "id": "water",
         "name": "Water",
         "nameZh": "水",
         "emoji": "💧",
-        "audio": "water_normal.wav"
+        "audio": "water_normal.wav",
+        "image": "foods_water.png"
       },
       {
         "id": "juice",
         "name": "Juice",
         "nameZh": "果汁",
         "emoji": "🧃",
-        "audio": "juice_normal.wav"
+        "audio": "juice_normal.wav",
+        "image": "foods_juice.png"
       },
       {
         "id": "cookie",
         "name": "Cookie",
         "nameZh": "饼干",
         "emoji": "🍪",
-        "audio": "cookie_normal.wav"
+        "audio": "cookie_normal.wav",
+        "image": "foods_cookie.png"
       },
       {
         "id": "cake",
         "name": "Cake",
         "nameZh": "蛋糕",
         "emoji": "🍰",
-        "audio": "cake_normal.wav"
+        "audio": "cake_normal.wav",
+        "image": "foods_cake.png"
       },
       {
         "id": "ice_cream",
         "name": "Ice Cream",
         "nameZh": "冰淇淋",
         "emoji": "🍦",
-        "audio": "ice_cream_normal.wav"
+        "audio": "ice_cream_normal.wav",
+        "image": "foods_ice_cream.png"
       },
       {
         "id": "candy",
         "name": "Candy",
         "nameZh": "糖果",
         "emoji": "🍬",
-        "audio": "candy_normal.wav"
+        "audio": "candy_normal.wav",
+        "image": "foods_candy.png"
       },
       {
         "id": "chocolate",
         "name": "Chocolate",
         "nameZh": "巧克力",
         "emoji": "🍫",
-        "audio": "chocolate_normal.wav"
+        "audio": "chocolate_normal.wav",
+        "image": "foods_chocolate.png"
       },
       {
         "id": "donut",
         "name": "Donut",
         "nameZh": "甜甜圈",
         "emoji": "🍩",
-        "audio": "donut_normal.wav"
+        "audio": "donut_normal.wav",
+        "image": "foods_donut.png"
       },
       {
         "id": "popcorn",
         "name": "Popcorn",
         "nameZh": "爆米花",
         "emoji": "🍿",
-        "audio": "popcorn_normal.wav"
+        "audio": "popcorn_normal.wav",
+        "image": "foods_popcorn.png"
       },
       {
         "id": "pizza",
         "name": "Pizza",
         "nameZh": "披萨",
         "emoji": "🍕",
-        "audio": "pizza_normal.wav"
+        "audio": "pizza_normal.wav",
+        "image": "foods_pizza.png"
       },
       {
         "id": "hamburger",
         "name": "Hamburger",
         "nameZh": "汉堡",
         "emoji": "🍔",
-        "audio": "hamburger_normal.wav"
+        "audio": "hamburger_normal.wav",
+        "image": "foods_hamburger.png"
       },
       {
         "id": "fries",
         "name": "Fries",
         "nameZh": "薯条",
         "emoji": "🍟",
-        "audio": "fries_normal.wav"
+        "audio": "fries_normal.wav",
+        "image": "foods_fries.png"
       },
       {
         "id": "hot_dog",
         "name": "Hot Dog",
         "nameZh": "热狗",
         "emoji": "🌭",
-        "audio": "hot_dog_normal.wav"
+        "audio": "hot_dog_normal.wav",
+        "image": "foods_hot_dog.png"
       },
       {
         "id": "sandwich",
         "name": "Sandwich",
         "nameZh": "三明治",
         "emoji": "🥪",
-        "audio": "sandwich_normal.wav"
+        "audio": "sandwich_normal.wav",
+        "image": "foods_sandwich.png"
       },
       {
         "id": "chicken_leg",
         "name": "Chicken Leg",
         "nameZh": "鸡腿",
         "emoji": "🍗",
-        "audio": "chicken_leg_normal.wav"
+        "audio": "chicken_leg_normal.wav",
+        "image": "foods_chicken_leg.png"
       },
       {
         "id": "carrot",
         "name": "Carrot",
         "nameZh": "胡萝卜",
         "emoji": "🥕",
-        "audio": "carrot_normal.wav"
+        "audio": "carrot_normal.wav",
+        "image": "foods_carrot.png"
       },
       {
         "id": "corn",
         "name": "Corn",
         "nameZh": "玉米",
         "emoji": "🌽",
-        "audio": "corn_normal.wav"
+        "audio": "corn_normal.wav",
+        "image": "foods_corn.png"
       },
       {
         "id": "tomato",
         "name": "Tomato",
         "nameZh": "番茄",
         "emoji": "🍅",
-        "audio": "tomato_normal.wav"
+        "audio": "tomato_normal.wav",
+        "image": "foods_tomato.png"
       },
       {
         "id": "potato",
         "name": "Potato",
         "nameZh": "土豆",
         "emoji": "🥔",
-        "audio": "potato_normal.wav"
+        "audio": "potato_normal.wav",
+        "image": "foods_potato.png"
       },
       {
         "id": "broccoli",
         "name": "Broccoli",
         "nameZh": "西兰花",
         "emoji": "🥦",
-        "audio": "broccoli_normal.wav"
+        "audio": "broccoli_normal.wav",
+        "image": "foods_broccoli.png"
       },
       {
         "id": "pumpkin",
         "name": "Pumpkin",
         "nameZh": "南瓜",
         "emoji": "🎃",
-        "audio": "pumpkin_normal.wav"
+        "audio": "pumpkin_normal.wav",
+        "image": "foods_pumpkin.png"
       },
       {
         "id": "soup",
         "name": "Soup",
         "nameZh": "汤",
         "emoji": "🥣",
-        "audio": "soup_normal.wav"
+        "audio": "soup_normal.wav",
+        "image": "foods_soup.png"
       }
     ]
   },
@@ -537,119 +602,136 @@
         "name": "Car",
         "nameZh": "汽车",
         "emoji": "🚗",
-        "audio": "car_normal.wav"
+        "audio": "car_normal.wav",
+        "image": "vehicles_car.png"
       },
       {
         "id": "bike",
         "name": "Bike",
         "nameZh": "自行车",
         "emoji": "🚲",
-        "audio": "bike_normal.wav"
+        "audio": "bike_normal.wav",
+        "image": "vehicles_bike.png"
       },
       {
         "id": "scooter",
         "name": "Scooter",
         "nameZh": "滑板车",
         "emoji": "🛴",
-        "audio": "scooter_normal.wav"
+        "audio": "scooter_normal.wav",
+        "image": "vehicles_scooter.png"
       },
       {
         "id": "bus",
         "name": "Bus",
         "nameZh": "公交车",
         "emoji": "🚌",
-        "audio": "bus_normal.wav"
+        "audio": "bus_normal.wav",
+        "image": "vehicles_bus.png"
       },
       {
         "id": "taxi",
         "name": "Taxi",
         "nameZh": "出租车",
         "emoji": "🚕",
-        "audio": "taxi_normal.wav"
+        "audio": "taxi_normal.wav",
+        "image": "vehicles_taxi.png"
       },
       {
         "id": "police_car",
         "name": "Police Car",
         "nameZh": "警车",
         "emoji": "🚓",
-        "audio": "police_car_normal.wav"
+        "audio": "police_car_normal.wav",
+        "image": "vehicles_police_car.png"
       },
       {
         "id": "fire_truck",
         "name": "Fire Truck",
         "nameZh": "消防车",
         "emoji": "🚒",
-        "audio": "fire_truck_normal.wav"
+        "audio": "fire_truck_normal.wav",
+        "image": "vehicles_fire_truck.png"
       },
       {
         "id": "ambulance",
         "name": "Ambulance",
         "nameZh": "救护车",
         "emoji": "🚑",
-        "audio": "ambulance_normal.wav"
+        "audio": "ambulance_normal.wav",
+        "image": "vehicles_ambulance.png"
       },
       {
         "id": "truck",
         "name": "Truck",
         "nameZh": "卡车",
         "emoji": "🚚",
-        "audio": "truck_normal.wav"
+        "audio": "truck_normal.wav",
+        "image": "vehicles_truck.png"
       },
       {
         "id": "tractor",
         "name": "Tractor",
         "nameZh": "拖拉机",
         "emoji": "🚜",
-        "audio": "tractor_normal.wav"
+        "audio": "tractor_normal.wav",
+        "image": "vehicles_tractor.png"
       },
       {
         "id": "train",
         "name": "Train",
         "nameZh": "火车",
         "emoji": "🚂",
-        "audio": "train_normal.wav"
+        "audio": "train_normal.wav",
+        "image": "vehicles_train.png"
       },
       {
         "id": "subway",
         "name": "Subway",
         "nameZh": "地铁",
         "emoji": "🚇",
-        "audio": "subway_normal.wav"
+        "audio": "subway_normal.wav",
+        "image": "vehicles_subway.png"
       },
       {
         "id": "plane",
         "name": "Plane",
         "nameZh": "飞机",
         "emoji": "✈️",
-        "audio": "plane_normal.wav"
+        "audio": "plane_normal.wav",
+        "image": "vehicles_plane.png"
       },
       {
         "id": "helicopter",
         "name": "Helicopter",
         "nameZh": "直升机",
         "emoji": "🚁",
-        "audio": "helicopter_normal.wav"
+        "audio": "helicopter_normal.wav",
+        "image": "vehicles_helicopter.png"
       },
       {
         "id": "rocket",
         "name": "Rocket",
         "nameZh": "火箭",
         "emoji": "🚀",
-        "audio": "rocket_normal.wav"
+        "audio": "rocket_normal.wav",
+        "image": "vehicles_rocket.png"
       },
       {
         "id": "boat",
         "name": "Boat",
         "nameZh": "小船",
         "emoji": "⛵",
-        "audio": "boat_normal.wav"
+        "audio": "boat_normal.wav",
+        "image": "vehicles_boat.png"
       },
       {
         "id": "ship",
         "name": "Ship",
         "nameZh": "轮船",
         "emoji": "🚢",
-        "audio": "ship_normal.wav"
+        "audio": "ship_normal.wav",
+        "image": "vehicles_ship.png"
       }
     ]
   },
@@ -664,105 +746,120 @@
         "name": "Eye",
         "nameZh": "眼睛",
         "emoji": "👁️",
-        "audio": "eye_normal.wav"
+        "audio": "eye_normal.wav",
+        "image": "body_eye.png"
       },
       {
         "id": "nose",
         "name": "Nose",
         "nameZh": "鼻子",
         "emoji": "👃",
-        "audio": "nose_normal.wav"
+        "audio": "nose_normal.wav",
+        "image": "body_nose.png"
       },
       {
         "id": "mouth",
         "name": "Mouth",
         "nameZh": "嘴巴",
         "emoji": "👄",
-        "audio": "mouth_normal.wav"
+        "audio": "mouth_normal.wav",
+        "image": "body_mouth.png"
       },
       {
         "id": "ear",
         "name": "Ear",
         "nameZh": "耳朵",
         "emoji": "👂",
-        "audio": "ear_normal.wav"
+        "audio": "ear_normal.wav",
+        "image": "body_ear.png"
       },
       {
         "id": "hand",
         "name": "Hand",
         "nameZh": "手",
         "emoji": "🤚",
-        "audio": "hand_normal.wav"
+        "audio": "hand_normal.wav",
+        "image": "body_hand.png"
       },
       {
         "id": "foot",
         "name": "Foot",
         "nameZh": "脚",
         "emoji": "🦶",
-        "audio": "foot_normal.wav"
+        "audio": "foot_normal.wav",
+        "image": "body_foot.png"
       },
       {
         "id": "head",
         "name": "Head",
         "nameZh": "头",
         "emoji": "👶",
-        "audio": "head_normal.wav"
+        "audio": "head_normal.wav",
+        "image": "body_head.png"
       },
       {
         "id": "hair",
         "name": "Hair",
         "nameZh": "头发",
         "emoji": "💇",
-        "audio": "hair_normal.wav"
+        "audio": "hair_normal.wav",
+        "image": "body_hair.png"
       },
       {
         "id": "smile",
         "name": "Smile",
         "nameZh": "微笑",
         "emoji": "😊",
-        "audio": "smile_normal.wav"
+        "audio": "smile_normal.wav",
+        "image": "body_smile.png"
       },
       {
         "id": "happy",
         "name": "Happy",
         "nameZh": "开心",
         "emoji": "😄",
-        "audio": "happy_normal.wav"
+        "audio": "happy_normal.wav",
+        "image": "body_happy.png"
       },
       {
         "id": "sad",
         "name": "Sad",
         "nameZh": "难过",
         "emoji": "😢",
-        "audio": "sad_normal.wav"
+        "audio": "sad_normal.wav",
+        "image": "body_sad.png"
       },
       {
         "id": "angry",
         "name": "Angry",
         "nameZh": "生气",
         "emoji": "😠",
-        "audio": "angry_normal.wav"
+        "audio": "angry_normal.wav",
+        "image": "body_angry.png"
       },
       {
         "id": "sleepy",
         "name": "Sleepy",
         "nameZh": "困",
         "emoji": "😪",
-        "audio": "sleepy_normal.wav"
+        "audio": "sleepy_normal.wav",
+        "image": "body_sleepy.png"
       },
       {
         "id": "kiss",
         "name": "Kiss",
         "nameZh": "亲亲",
         "emoji": "😘",
-        "audio": "kiss_normal.wav"
+        "audio": "kiss_normal.wav",
+        "image": "body_kiss.png"
       },
       {
         "id": "hug",
         "name": "Hug",
         "nameZh": "拥抱",
         "emoji": "🫂",
-        "audio": "hug_normal.wav"
+        "audio": "hug_normal.wav",
+        "image": "body_hug.png"
       }
     ]
   },
@@ -777,77 +874,88 @@
         "name": "T-shirt",
         "nameZh": "T恤",
         "emoji": "👕",
-        "audio": "t_shirt_normal.wav"
+        "audio": "t_shirt_normal.wav",
+        "image": "clothes_t_shirt.png"
       },
       {
         "id": "pants",
         "name": "Pants",
         "nameZh": "裤子",
         "emoji": "👖",
-        "audio": "pants_normal.wav"
+        "audio": "pants_normal.wav",
+        "image": "clothes_pants.png"
       },
       {
         "id": "dress",
         "name": "Dress",
         "nameZh": "连衣裙",
         "emoji": "👗",
-        "audio": "dress_normal.wav"
+        "audio": "dress_normal.wav",
+        "image": "clothes_dress.png"
       },
       {
         "id": "skirt",
         "name": "Skirt",
         "nameZh": "裙子",
         "emoji": "👚",
-        "audio": "skirt_normal.wav"
+        "audio": "skirt_normal.wav",
+        "image": "clothes_skirt.png"
       },
       {
         "id": "socks",
         "name": "Socks",
         "nameZh": "袜子",
         "emoji": "🧦",
-        "audio": "socks_normal.wav"
+        "audio": "socks_normal.wav",
+        "image": "clothes_socks.png"
       },
       {
         "id": "shoes",
         "name": "Shoes",
         "nameZh": "鞋子",
         "emoji": "👟",
-        "audio": "shoes_normal.wav"
+        "audio": "shoes_normal.wav",
+        "image": "clothes_shoes.png"
       },
       {
         "id": "hat",
         "name": "Hat",
         "nameZh": "帽子",
         "emoji": "🧢",
-        "audio": "hat_normal.wav"
+        "audio": "hat_normal.wav",
+        "image": "clothes_hat.png"
       },
       {
         "id": "coat",
         "name": "Coat",
         "nameZh": "外套",
         "emoji": "🧥",
-        "audio": "coat_normal.wav"
+        "audio": "coat_normal.wav",
+        "image": "clothes_coat.png"
       },
       {
         "id": "scarf",
         "name": "Scarf",
         "nameZh": "围巾",
         "emoji": "🧣",
-        "audio": "scarf_normal.wav"
+        "audio": "scarf_normal.wav",
+        "image": "clothes_scarf.png"
       },
       {
         "id": "gloves",
         "name": "Gloves",
         "nameZh": "手套",
         "emoji": "🧤",
-        "audio": "gloves_normal.wav"
+        "audio": "gloves_normal.wav",
+        "image": "clothes_gloves.png"
       },
       {
         "id": "glasses",
         "name": "Glasses",
         "nameZh": "眼镜",
         "emoji": "👓",
-        "audio": "glasses_normal.wav"
+        "audio": "glasses_normal.wav",
+        "image": "clothes_glasses.png"
       }
     ]
   },
@@ -862,134 +970,152 @@
         "name": "Toy",
         "nameZh": "玩具",
         "emoji": "🧸",
-        "audio": "toy_normal.wav"
+        "audio": "toy_normal.wav",
+        "image": "home_toy.png"
       },
       {
         "id": "ball",
         "name": "Ball",
         "nameZh": "球",
         "emoji": "⚽",
-        "audio": "ball_normal.wav"
+        "audio": "ball_normal.wav",
+        "image": "home_ball.png"
       },
       {
         "id": "book",
         "name": "Book",
         "nameZh": "书",
         "emoji": "📚",
-        "audio": "book_normal.wav"
+        "audio": "book_normal.wav",
+        "image": "home_book.png"
       },
       {
         "id": "bed",
         "name": "Bed",
         "nameZh": "床",
         "emoji": "🛏️",
-        "audio": "bed_normal.wav"
+        "audio": "bed_normal.wav",
+        "image": "home_bed.png"
       },
       {
         "id": "chair",
         "name": "Chair",
         "nameZh": "椅子",
         "emoji": "🪑",
-        "audio": "chair_normal.wav"
+        "audio": "chair_normal.wav",
+        "image": "home_chair.png"
       },
       {
         "id": "sofa",
         "name": "Sofa",
         "nameZh": "沙发",
         "emoji": "🛋️",
-        "audio": "sofa_normal.wav"
+        "audio": "sofa_normal.wav",
+        "image": "home_sofa.png"
       },
       {
         "id": "table",
         "name": "Table",
         "nameZh": "桌子",
-        "image": "table.png",
-        "audio": "table_normal.wav"
+        "emoji": "🍽️",
+        "audio": "table_normal.wav",
+        "image": "home_table.png"
       },
       {
         "id": "lamp",
         "name": "Lamp",
         "nameZh": "台灯",
         "emoji": "💡",
-        "audio": "lamp_normal.wav"
+        "audio": "lamp_normal.wav",
+        "image": "home_lamp.png"
       },
       {
         "id": "tv",
         "name": "TV",
         "nameZh": "电视",
         "emoji": "📺",
-        "audio": "tv_normal.wav"
+        "audio": "tv_normal.wav",
+        "image": "home_tv.png"
       },
       {
         "id": "phone",
         "name": "Phone",
         "nameZh": "手机",
         "emoji": "📱",
-        "audio": "phone_normal.wav"
+        "audio": "phone_normal.wav",
+        "image": "home_phone.png"
       },
       {
         "id": "clock",
         "name": "Clock",
         "nameZh": "时钟",
         "emoji": "⏰",
-        "audio": "clock_normal.wav"
+        "audio": "clock_normal.wav",
+        "image": "home_clock.png"
       },
       {
         "id": "toilet",
         "name": "Toilet",
         "nameZh": "马桶",
         "emoji": "🚽",
-        "audio": "toilet_normal.wav"
+        "audio": "toilet_normal.wav",
+        "image": "home_toilet.png"
       },
       {
         "id": "bathtub",
         "name": "Bathtub",
         "nameZh": "浴缸",
         "emoji": "🛁",
-        "audio": "bathtub_normal.wav"
+        "audio": "bathtub_normal.wav",
+        "image": "home_bathtub.png"
       },
       {
         "id": "toothbrush",
         "name": "Toothbrush",
         "nameZh": "牙刷",
         "emoji": "🪥",
-        "audio": "toothbrush_normal.wav"
+        "audio": "toothbrush_normal.wav",
+        "image": "home_toothbrush.png"
       },
       {
         "id": "towel",
         "name": "Towel",
         "nameZh": "毛巾",
         "emoji": "🧖",
-        "image": "towel.png",
-        "audio": "towel_normal.wav"
+        "audio": "towel_normal.wav",
+        "image": "home_towel.png"
       },
       {
         "id": "door",
         "name": "Door",
         "nameZh": "门",
         "emoji": "🚪",
-        "audio": "door_normal.wav"
+        "audio": "door_normal.wav",
+        "image": "home_door.png"
       },
       {
         "id": "window",
         "name": "Window",
         "nameZh": "窗户",
         "emoji": "🪟",
-        "audio": "window_normal.wav"
+        "audio": "window_normal.wav",
+        "image": "home_window.png"
       },
       {
         "id": "room",
         "name": "Room",
         "nameZh": "房间",
         "emoji": "🚪",
-        "audio": "room_normal.wav"
+        "audio": "room_normal.wav",
+        "image": "home_room.png"
       },
       {
         "id": "house",
         "name": "House",
         "nameZh": "房子",
         "emoji": "🏠",
-        "audio": "house_normal.wav"
+        "audio": "house_normal.wav",
+        "image": "home_house.png"
       }
     ]
   },
@@ -1004,14 +1130,15 @@
         "name": "Run",
         "nameZh": "跑",
         "emoji": "🏃",
-        "audio": "run_normal.wav"
+        "audio": "run_normal.wav",
+        "image": "actions_run.png"
       },
       {
         "id": "stop",
         "name": "Stop",
         "nameZh": "停",
         "emoji": "🛑",
-        "image": "stop.png",
+        "image": "actions_stop.png",
         "audio": "stop_normal.wav"
       },
       {
@@ -1019,99 +1146,112 @@
         "name": "Jump",
         "nameZh": "跳",
         "emoji": "🦘",
-        "audio": "jump_normal.wav"
+        "audio": "jump_normal.wav",
+        "image": "actions_jump.png"
       },
       {
         "id": "walk",
         "name": "Walk",
         "nameZh": "走",
         "emoji": "🚶",
-        "audio": "walk_normal.wav"
+        "audio": "walk_normal.wav",
+        "image": "actions_walk.png"
       },
       {
         "id": "dance",
         "name": "Dance",
         "nameZh": "跳舞",
         "emoji": "💃",
-        "audio": "dance_normal.wav"
+        "audio": "dance_normal.wav",
+        "image": "actions_dance.png"
       },
       {
         "id": "swim",
         "name": "Swim",
         "nameZh": "游泳",
         "emoji": "🏊",
-        "audio": "swim_normal.wav"
+        "audio": "swim_normal.wav",
+        "image": "actions_swim.png"
       },
       {
         "id": "climb",
         "name": "Climb",
         "nameZh": "爬",
         "emoji": "🧗",
-        "audio": "climb_normal.wav"
+        "audio": "climb_normal.wav",
+        "image": "actions_climb.png"
       },
       {
         "id": "sit",
         "name": "Sit",
         "nameZh": "坐",
         "emoji": "🪑",
-        "audio": "sit_normal.wav"
+        "audio": "sit_normal.wav",
+        "image": "actions_sit.png"
       },
       {
         "id": "stand",
         "name": "Stand",
         "nameZh": "站",
         "emoji": "🧍",
-        "audio": "stand_normal.wav"
+        "audio": "stand_normal.wav",
+        "image": "actions_stand.png"
       },
       {
         "id": "eat",
         "name": "Eat",
         "nameZh": "吃",
         "emoji": "🍽️",
-        "image": "eat.png",
-        "audio": "eat_normal.wav"
+        "audio": "eat_normal.wav",
+        "image": "actions_eat.png"
       },
       {
         "id": "drink",
         "name": "Drink",
         "nameZh": "喝",
         "emoji": "🥤",
-        "audio": "drink_normal.wav"
+        "audio": "drink_normal.wav",
+        "image": "actions_drink.png"
       },
       {
         "id": "sleep",
         "name": "Sleep",
         "nameZh": "睡",
         "emoji": "😴",
-        "audio": "sleep_normal.wav"
+        "audio": "sleep_normal.wav",
+        "image": "actions_sleep.png"
       },
       {
         "id": "wash",
         "name": "Wash",
         "nameZh": "洗",
         "emoji": "🧼",
-        "audio": "wash_normal.wav"
+        "audio": "wash_normal.wav",
+        "image": "actions_wash.png"
       },
       {
         "id": "brush",
         "name": "Brush",
         "nameZh": "刷牙",
         "emoji": "🪥",
-        "audio": "brush_normal.wav"
+        "audio": "brush_normal.wav",
+        "image": "actions_brush.png"
       },
       {
         "id": "play",
         "name": "Play",
         "nameZh": "玩",
         "emoji": "🎮",
-        "audio": "play_normal.wav"
+        "audio": "play_normal.wav",
+        "image": "actions_play.png"
       },
       {
         "id": "listen",
         "name": "Listen",
         "nameZh": "听",
         "emoji": "👂",
-        "audio": "listen_normal.wav"
+        "audio": "listen_normal.wav",
+        "image": "actions_listen.png"
       }
     ]
   },
@@ -1126,84 +1266,96 @@
         "name": "Red",
         "nameZh": "红色",
         "emoji": "🔴",
-        "audio": "red_normal.wav"
+        "audio": "red_normal.wav",
+        "image": "colors_red.png"
       },
       {
         "id": "blue",
         "name": "Blue",
         "nameZh": "蓝色",
         "emoji": "🔵",
-        "audio": "blue_normal.wav"
+        "audio": "blue_normal.wav",
+        "image": "colors_blue.png"
       },
       {
         "id": "yellow",
         "name": "Yellow",
         "nameZh": "黄色",
         "emoji": "🟡",
-        "audio": "yellow_normal.wav"
+        "audio": "yellow_normal.wav",
+        "image": "colors_yellow.png"
       },
       {
         "id": "green",
         "name": "Green",
         "nameZh": "绿色",
         "emoji": "🟢",
-        "audio": "green_normal.wav"
+        "audio": "green_normal.wav",
+        "image": "colors_green.png"
       },
       {
         "id": "orange",
         "name": "Orange",
         "nameZh": "橙子",
         "emoji": "🟠",
-        "audio": "orange_normal.wav"
+        "audio": "orange_normal.wav",
+        "image": "colors_orange.png"
       },
       {
         "id": "purple",
         "name": "Purple",
         "nameZh": "紫色",
         "emoji": "🟣",
-        "audio": "purple_normal.wav"
+        "audio": "purple_normal.wav",
+        "image": "colors_purple.png"
       },
       {
         "id": "black",
         "name": "Black",
         "nameZh": "黑色",
         "emoji": "⚫",
-        "audio": "black_normal.wav"
+        "audio": "black_normal.wav",
+        "image": "colors_black.png"
       },
       {
         "id": "white",
         "name": "White",
         "nameZh": "白色",
         "emoji": "⚪",
-        "audio": "white_normal.wav"
+        "audio": "white_normal.wav",
+        "image": "colors_white.png"
       },
       {
         "id": "circle",
         "name": "Circle",
         "nameZh": "圆形",
         "emoji": "⭕",
-        "audio": "circle_normal.wav"
+        "audio": "circle_normal.wav",
+        "image": "colors_circle.png"
       },
       {
         "id": "square",
         "name": "Square",
         "nameZh": "正方形",
         "emoji": "🟥",
-        "audio": "square_normal.wav"
+        "audio": "square_normal.wav",
+        "image": "colors_square.png"
       },
       {
         "id": "star",
         "name": "Star",
         "nameZh": "星星",
         "emoji": "⭐",
-        "audio": "star_normal.wav"
+        "audio": "star_normal.wav",
+        "image": "colors_star.png"
       },
       {
         "id": "heart",
         "name": "Heart",
         "nameZh": "爱心",
         "emoji": "❤️",
-        "audio": "heart_normal.wav"
+        "audio": "heart_normal.wav",
+        "image": "colors_heart.png"
       }
     ]
   },
@@ -1218,112 +1370,128 @@
         "name": "Sun",
         "nameZh": "太阳",
         "emoji": "☀️",
-        "audio": "sun_normal.wav"
+        "audio": "sun_normal.wav",
+        "image": "nature_sun.png"
       },
       {
         "id": "moon",
         "name": "Moon",
         "nameZh": "月亮",
         "emoji": "🌙",
-        "audio": "moon_normal.wav"
+        "audio": "moon_normal.wav",
+        "image": "nature_moon.png"
       },
       {
         "id": "star",
         "name": "Star",
         "nameZh": "星星",
         "emoji": "⭐",
-        "audio": "star_normal.wav"
+        "audio": "star_normal.wav",
+        "image": "nature_star.png"
       },
       {
         "id": "cloud",
         "name": "Cloud",
         "nameZh": "云",
         "emoji": "☁️",
-        "audio": "cloud_normal.wav"
+        "audio": "cloud_normal.wav",
+        "image": "nature_cloud.png"
       },
       {
         "id": "rain",
         "name": "Rain",
         "nameZh": "下雨",
         "emoji": "🌧️",
-        "audio": "rain_normal.wav"
+        "audio": "rain_normal.wav",
+        "image": "nature_rain.png"
       },
       {
         "id": "snow",
         "name": "Snow",
         "nameZh": "雪",
         "emoji": "❄️",
-        "audio": "snow_normal.wav"
+        "audio": "snow_normal.wav",
+        "image": "nature_snow.png"
       },
       {
         "id": "rainbow",
         "name": "Rainbow",
         "nameZh": "彩虹",
         "emoji": "🌈",
-        "audio": "rainbow_normal.wav"
+        "audio": "rainbow_normal.wav",
+        "image": "nature_rainbow.png"
       },
       {
         "id": "flower",
         "name": "Flower",
         "nameZh": "花",
         "emoji": "🌸",
-        "audio": "flower_normal.wav"
+        "audio": "flower_normal.wav",
+        "image": "nature_flower.png"
       },
       {
         "id": "tree",
         "name": "Tree",
         "nameZh": "树",
         "emoji": "🌳",
-        "audio": "tree_normal.wav"
+        "audio": "tree_normal.wav",
+        "image": "nature_tree.png"
       },
       {
         "id": "leaf",
         "name": "Leaf",
         "nameZh": "叶子",
         "emoji": "🍃",
-        "audio": "leaf_normal.wav"
+        "audio": "leaf_normal.wav",
+        "image": "nature_leaf.png"
       },
       {
         "id": "grass",
         "name": "Grass",
         "nameZh": "草",
         "emoji": "🌿",
-        "audio": "grass_normal.wav"
+        "audio": "grass_normal.wav",
+        "image": "nature_grass.png"
       },
       {
         "id": "mountain",
         "name": "Mountain",
         "nameZh": "山",
         "emoji": "⛰️",
-        "audio": "mountain_normal.wav"
+        "audio": "mountain_normal.wav",
+        "image": "nature_mountain.png"
       },
       {
         "id": "river",
         "name": "River",
         "nameZh": "河流",
-        "image": "river.png",
-        "audio": "river_normal.wav"
+        "emoji": "🏞️",
+        "audio": "river_normal.wav",
+        "image": "nature_river.png"
       },
       {
         "id": "sea",
         "name": "Sea",
         "nameZh": "大海",
         "emoji": "🌊",
-        "audio": "sea_normal.wav"
+        "audio": "sea_normal.wav",
+        "image": "nature_sea.png"
       },
       {
         "id": "fire",
         "name": "Fire",
         "nameZh": "火",
         "emoji": "🔥",
-        "audio": "fire_normal.wav"
+        "audio": "fire_normal.wav",
+        "image": "nature_fire.png"
       },
       {
         "id": "stone",
         "name": "Stone",
         "nameZh": "石头",
         "emoji": "🪨",
-        "audio": "stone_normal.wav"
+        "audio": "stone_normal.wav",
+        "image": "nature_stone.png"
       }
     ]
   },
@@ -1338,77 +1506,88 @@
         "name": "Home",
         "nameZh": "家",
         "emoji": "🏠",
-        "audio": "home_normal.wav"
+        "audio": "home_normal.wav",
+        "image": "places_home.png"
       },
       {
         "id": "school",
         "name": "School",
         "nameZh": "学校",
         "emoji": "🏫",
-        "audio": "school_normal.wav"
+        "audio": "school_normal.wav",
+        "image": "places_school.png"
       },
       {
         "id": "park",
         "name": "Park",
         "nameZh": "公园",
         "emoji": "🏞️",
-        "audio": "park_normal.wav"
+        "audio": "park_normal.wav",
+        "image": "places_park.png"
       },
       {
         "id": "playground",
         "name": "Playground",
         "nameZh": "游乐场",
         "emoji": "🎢",
-        "audio": "playground_normal.wav"
+        "audio": "playground_normal.wav",
+        "image": "places_playground.png"
       },
       {
         "id": "zoo",
         "name": "Zoo",
         "nameZh": "动物园",
         "emoji": "🦁",
-        "audio": "zoo_normal.wav"
+        "audio": "zoo_normal.wav",
+        "image": "places_zoo.png"
       },
       {
         "id": "shop",
         "name": "Shop",
         "nameZh": "商店",
         "emoji": "🏪",
-        "audio": "shop_normal.wav"
+        "audio": "shop_normal.wav",
+        "image": "places_shop.png"
       },
       {
         "id": "supermarket",
         "name": "Supermarket",
         "nameZh": "超市",
         "emoji": "🛒",
-        "audio": "supermarket_normal.wav"
+        "audio": "supermarket_normal.wav",
+        "image": "places_supermarket.png"
       },
       {
         "id": "hospital",
         "name": "Hospital",
         "nameZh": "医院",
         "emoji": "🏥",
-        "audio": "hospital_normal.wav"
+        "audio": "hospital_normal.wav",
+        "image": "places_hospital.png"
       },
       {
         "id": "library",
         "name": "Library",
         "nameZh": "图书馆",
         "emoji": "📚",
-        "audio": "library_normal.wav"
+        "audio": "library_normal.wav",
+        "image": "places_library.png"
       },
       {
         "id": "farm",
         "name": "Farm",
         "nameZh": "农场",
         "emoji": "🚜",
-        "audio": "farm_normal.wav"
+        "audio": "farm_normal.wav",
+        "image": "places_farm.png"
       },
       {
         "id": "beach",
         "name": "Beach",
         "nameZh": "海滩",
         "emoji": "🏖️",
-        "audio": "beach_normal.wav"
+        "audio": "beach_normal.wav",
+        "image": "places_beach.png"
       }
     ]
   },
@@ -1423,84 +1602,96 @@
         "name": "Doctor",
         "nameZh": "医生",
         "emoji": "👨‍⚕️",
-        "audio": "doctor_normal.wav"
+        "audio": "doctor_normal.wav",
+        "image": "jobs_doctor.png"
       },
       {
         "id": "nurse",
         "name": "Nurse",
         "nameZh": "护士",
         "emoji": "👩‍⚕️",
-        "audio": "nurse_normal.wav"
+        "audio": "nurse_normal.wav",
+        "image": "jobs_nurse.png"
       },
       {
         "id": "police_officer",
         "name": "Police Officer",
         "nameZh": "警察",
         "emoji": "👮",
-        "audio": "police_officer_normal.wav"
+        "audio": "police_officer_normal.wav",
+        "image": "jobs_police_officer.png"
       },
       {
         "id": "firefighter",
         "name": "Firefighter",
         "nameZh": "消防员",
         "emoji": "👨‍🚒",
-        "audio": "firefighter_normal.wav"
+        "audio": "firefighter_normal.wav",
+        "image": "jobs_firefighter.png"
       },
       {
         "id": "teacher",
         "name": "Teacher",
         "nameZh": "老师",
         "emoji": "👩‍🏫",
-        "audio": "teacher_normal.wav"
+        "audio": "teacher_normal.wav",
+        "image": "jobs_teacher.png"
       },
       {
         "id": "student",
         "name": "Student",
         "nameZh": "学生",
         "emoji": "🎒",
-        "audio": "student_normal.wav"
+        "audio": "student_normal.wav",
+        "image": "jobs_student.png"
       },
       {
         "id": "chef",
         "name": "Chef",
         "nameZh": "厨师",
         "emoji": "👨‍🍳",
-        "audio": "chef_normal.wav"
+        "audio": "chef_normal.wav",
+        "image": "jobs_chef.png"
       },
       {
         "id": "farmer",
         "name": "Farmer",
         "nameZh": "农民",
         "emoji": "👩‍🌾",
-        "audio": "farmer_normal.wav"
+        "audio": "farmer_normal.wav",
+        "image": "jobs_farmer.png"
       },
       {
         "id": "artist",
         "name": "Artist",
         "nameZh": "画家",
         "emoji": "🎨",
-        "audio": "artist_normal.wav"
+        "audio": "artist_normal.wav",
+        "image": "jobs_artist.png"
       },
       {
         "id": "singer",
         "name": "Singer",
         "nameZh": "歌手",
         "emoji": "🎤",
-        "audio": "singer_normal.wav"
+        "audio": "singer_normal.wav",
+        "image": "jobs_singer.png"
       },
       {
         "id": "pilot",
         "name": "Pilot",
         "nameZh": "飞行员",
         "emoji": "👨‍✈️",
-        "audio": "pilot_normal.wav"
+        "audio": "pilot_normal.wav",
+        "image": "jobs_pilot.png"
       },
       {
         "id": "astronaut",
         "name": "Astronaut",
         "nameZh": "宇航员",
         "emoji": "👨‍🚀",
-        "audio": "astronaut_normal.wav"
+        "audio": "astronaut_normal.wav",
+        "image": "jobs_astronaut.png"
       }
     ]
   },
@@ -1515,70 +1706,80 @@
         "name": "Drum",
         "nameZh": "鼓",
         "emoji": "🥁",
-        "audio": "drum_normal.wav"
+        "audio": "drum_normal.wav",
+        "image": "music_drum.png"
       },
       {
         "id": "piano",
         "name": "Piano",
         "nameZh": "钢琴",
         "emoji": "🎹",
-        "audio": "piano_normal.wav"
+        "audio": "piano_normal.wav",
+        "image": "music_piano.png"
       },
       {
         "id": "guitar",
         "name": "Guitar",
         "nameZh": "吉他",
         "emoji": "🎸",
-        "audio": "guitar_normal.wav"
+        "audio": "guitar_normal.wav",
+        "image": "music_guitar.png"
       },
       {
         "id": "violin",
         "name": "Violin",
         "nameZh": "小提琴",
         "emoji": "🎻",
-        "audio": "violin_normal.wav"
+        "audio": "violin_normal.wav",
+        "image": "music_violin.png"
       },
       {
         "id": "trumpet",
         "name": "Trumpet",
         "nameZh": "小号",
         "emoji": "🎺",
-        "audio": "trumpet_normal.wav"
+        "audio": "trumpet_normal.wav",
+        "image": "music_trumpet.png"
       },
       {
         "id": "bell",
         "name": "Bell",
         "nameZh": "铃铛",
         "emoji": "🔔",
-        "audio": "bell_normal.wav"
+        "audio": "bell_normal.wav",
+        "image": "music_bell.png"
       },
       {
         "id": "microphone",
         "name": "Microphone",
         "nameZh": "麦克风",
         "emoji": "🎤",
-        "audio": "microphone_normal.wav"
+        "audio": "microphone_normal.wav",
+        "image": "music_microphone.png"
       },
       {
         "id": "headphone",
         "name": "Headphone",
         "nameZh": "耳机",
         "emoji": "🎧",
-        "audio": "headphone_normal.wav"
+        "audio": "headphone_normal.wav",
+        "image": "music_headphone.png"
       },
       {
         "id": "radio",
         "name": "Radio",
         "nameZh": "收音机",
         "emoji": "📻",
-        "audio": "radio_normal.wav"
+        "audio": "radio_normal.wav",
+        "image": "music_radio.png"
       },
       {
         "id": "song",
         "name": "Song",
         "nameZh": "歌曲",
         "emoji": "🎶",
-        "audio": "song_normal.wav"
+        "audio": "song_normal.wav",
+        "image": "music_song.png"
       }
     ]
   }
