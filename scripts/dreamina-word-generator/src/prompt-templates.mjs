@@ -107,6 +107,33 @@ export function buildPrompt(task, override = {}) {
   ].filter(Boolean).join('\n\n');
 }
 
+export function buildCategoryIconPrompt(task, override) {
+  const chromaKey = override.chromaKey ?? '#FF00FF';
+  const mustHave = listBlock('必须包含', override.mustHave);
+  const forbid = listBlock('特别禁止', override.forbid);
+  const background = `
+背景必须是完全均匀的纯色 ${chromaKey}，画布四角到主体边缘都保持同一纯色。
+背景不得有渐变、纹理、噪点、光晕、地面或阴影；主体内部避免使用 ${chromaKey}。
+纯色背景仅用于后续抠图，不得影响主体固有颜色。
+`.trim();
+  return [
+    `
+为一款面向2至5岁幼儿的英语学习 App 制作一个“${task.name}”分类入口图标。
+统一采用柔和扁平 2.5D 儿童绘本贴纸插画风格，圆润几何造型，清爽、明亮、友好，中高明度和中等偏高饱和度。
+仅使用轻微同色系渐变和柔和高光，必要的内部结构细节使用暖深灰色细线。
+所有代表元素必须紧密组合成一个完整、连贯、居中的图标轮廓，整体外缘添加细而均匀的纯白色贴纸边。
+图标连同白色贴纸边只占正方形画布约58%，四周保留非常宽且均匀的安全边距，在48像素缩略图下仍能一眼辨认。
+优先使用幼儿最熟悉、最典型的真实固有色，不统一使用 App 的橙色主题色。
+不要文字、字母、数字、Logo、画布边框、粗白边、彩色外轮廓、双层轮廓、复杂场景、照片效果、写实材质、黏土、水彩、动漫、颗粒噪点、地面、投影或强烈阴影。
+`.trim(),
+    `语义限定：这是“${task.name}”学习分类的入口图标，不是其中某一个单词的单独配图。`,
+    override.subject,
+    mustHave,
+    forbid,
+    background,
+  ].filter(Boolean).join('\n\n');
+}
+
 function listBlock(label, values) {
   if (!Array.isArray(values) || values.length === 0) return '';
   return `${label}：${values.join('；')}。`;

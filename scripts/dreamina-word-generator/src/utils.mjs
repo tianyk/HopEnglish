@@ -48,6 +48,7 @@ export function parseArgs(argv) {
     candidate: false,
     acceptCandidates: false,
     applyImages: false,
+    categoryIcons: false,
     limit: undefined,
     category: undefined,
     words: [],
@@ -59,6 +60,7 @@ export function parseArgs(argv) {
     else if (value === '--candidate') options.candidate = true;
     else if (value === '--accept-candidates') options.acceptCandidates = true;
     else if (value === '--apply-images') options.applyImages = true;
+    else if (value === '--category-icons') options.categoryIcons = true;
     else if (value === '--limit') options.limit = parsePositiveInt(argv[++index], '--limit');
     else if (value.startsWith('--limit=')) options.limit = parsePositiveInt(value.split('=')[1], '--limit');
     else if (value === '--category') options.category = requiredValue(argv[++index], '--category');

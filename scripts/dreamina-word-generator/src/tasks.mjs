@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { buildPrompt, chooseChromaKey } from './prompt-templates.mjs';
+import { buildCategoryIconPrompt, buildPrompt, chooseChromaKey } from './prompt-templates.mjs';
 import { PATHS } from './config.mjs';
 import { readJson } from './utils.mjs';
 
@@ -45,6 +45,36 @@ export async function buildTaskManifest() {
   return { categories, tasks };
 }
 
+export async function buildCategoryIconManifest() {
+  const [categories, overrides] = await Promise.all([
+    readJson(PATHS.categories),
+    readJson(PATHS.categoryOverrides),
+  ]);
+  validateCategories(categories);
+  const tasks = categories.map((category) => {
+    const override = overrides[category.id];
+    if (!override?.subject) throw new Error(`分类 ${category.id} 缺少图标提示词`);
+    const filename = `${safeName(category.id)}.png`;
+    const task = {
+      jobKey: `category-icon/${category.id}`,
+      categoryId: category.id,
+      categoryName: category.name,
+      wordId: category.id,
+      name: category.name,
+      nameZh: '',
+      filename,
+      outputPath: path.join(PATHS.categoryImages, filename),
+      originalPath: path.join(PATHS.categoryOriginals, filename),
+      candidatePath: path.join(PATHS.categoryCandidates, filename),
+      candidateOriginalPath: path.join(PATHS.categoryCandidateOriginals, filename),
+    };
+    task.chromaKey = override.chromaKey ?? '#FF00FF';
+    task.prompt = buildCategoryIconPrompt(task, override);
+    return task;
+  });
+  return { categories, tasks };
+}
+
 export function selectTasks(tasks, options) {
   let selected = tasks;
   if (options.category) selected = selected.filter((task) => task.categoryId === options.category);
@@ -65,6 +95,18 @@ export function selectTasks(tasks, options) {
   return selected;
 }
 
+export function selectCategoryIconTasks(tasks, options) {
+  let selected = tasks;
+  if (options.category) {
+    selected = selected.filter((task) => task.categoryId === options.category);
+  }
+  if (options.limit) selected = selected.slice(0, options.limit);
+  if (options.category && selected.length === 0) {
+    throw new Error(`没有匹配到分类：${options.category}`);
+  }
+  return selected;
+}
+
 export function applyImagesToCategories(categories, tasks, successfulJobKeys, allowPartial = false) {
   const byKey = new Map(tasks.map((task) => [task.jobKey, task]));
   const missing = tasks.filter((task) => !successfulJobKeys.has(task.jobKey));
@@ -81,6 +123,15 @@ export function applyImagesToCategories(categories, tasks, successfulJobKeys, al
       return { ...word, image: task.filename };
     }),
   }));
+}
+
+export function applyCategoryImages(categories, tasks, successfulJobKeys) {
+  const byCategory = new Map(tasks.map((task) => [task.categoryId, task]));
+  return categories.map((category) => {
+    const task = byCategory.get(category.id);
+    if (!task || !successfulJobKeys.has(task.jobKey)) return category;
+    return { ...category, image: task.filename };
+  });
 }
 
 function validateCategories(categories) {

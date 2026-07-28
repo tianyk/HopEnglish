@@ -277,7 +277,8 @@
         "audio": "lion_normal.wav",
         "image": "animals_lion.png"
       }
-    ]
+    ],
+    "image": "animals.png"
   },
   {
     "id": "foods",
@@ -589,7 +590,8 @@
         "audio": "soup_normal.wav",
         "image": "foods_soup.png"
       }
-    ]
+    ],
+    "image": "foods.png"
   },
   {
     "id": "vehicles",
@@ -733,7 +735,8 @@
         "audio": "ship_normal.wav",
         "image": "vehicles_ship.png"
       }
-    ]
+    ],
+    "image": "vehicles.png"
   },
   {
     "id": "body",
@@ -861,7 +864,8 @@
         "audio": "hug_normal.wav",
         "image": "body_hug.png"
       }
-    ]
+    ],
+    "image": "body.png"
   },
   {
     "id": "clothes",
@@ -957,7 +961,8 @@
         "audio": "glasses_normal.wav",
         "image": "clothes_glasses.png"
       }
-    ]
+    ],
+    "image": "clothes.png"
   },
   {
     "id": "home",
@@ -1117,7 +1122,8 @@
         "audio": "house_normal.wav",
         "image": "home_house.png"
       }
-    ]
+    ],
+    "image": "home.png"
   },
   {
     "id": "actions",
@@ -1253,7 +1259,8 @@
         "audio": "listen_normal.wav",
         "image": "actions_listen.png"
       }
-    ]
+    ],
+    "image": "actions.png"
   },
   {
     "id": "colors",
@@ -1357,7 +1364,8 @@
         "audio": "heart_normal.wav",
         "image": "colors_heart.png"
       }
-    ]
+    ],
+    "image": "colors.png"
   },
   {
     "id": "nature",
@@ -1493,7 +1501,8 @@
         "audio": "stone_normal.wav",
         "image": "nature_stone.png"
       }
-    ]
+    ],
+    "image": "nature.png"
   },
   {
     "id": "places",
@@ -1589,7 +1598,8 @@
         "audio": "beach_normal.wav",
         "image": "places_beach.png"
       }
-    ]
+    ],
+    "image": "places.png"
   },
   {
     "id": "jobs",
@@ -1693,7 +1703,8 @@
         "audio": "astronaut_normal.wav",
         "image": "jobs_astronaut.png"
       }
-    ]
+    ],
+    "image": "jobs.png"
   },
   {
     "id": "music",
@@ -1781,6 +1792,7 @@
         "audio": "song_normal.wav",
         "image": "music_song.png"
       }
-    ]
+    ],
+    "image": "music.png"
   }
 ]

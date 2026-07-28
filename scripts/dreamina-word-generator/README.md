@@ -31,6 +31,13 @@ npm run generate -- --words=nature/moon,actions/swim --candidate
 # 人工验收后采用候选图
 npm run generate -- --words=nature/moon,actions/swim --accept-candidates
 
+# 生成全部分类入口图标到候选目录
+npm run generate -- --category-icons --candidate --force
+
+# 验收后采用分类图标并写入 categories.json
+npm run generate -- --category-icons --accept-candidates
+npm run generate -- --category-icons --apply-images
+
 # 全部任务成功后写入 categories.json
 npm run generate -- --apply-images
 ```
@@ -48,6 +55,7 @@ npm run generate -- --apply-images
 --candidate
 --accept-candidates
 --apply-images
+--category-icons
 ```
 
 运行状态与 Dreamina 2K 原图保存在 gitignored 的 `.state/` 中。最终图片

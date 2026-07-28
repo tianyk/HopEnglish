@@ -6,7 +6,14 @@ import { GENERATION, PATHS, STATUS } from './config.mjs';
 import { DreaminaClient, findMatchingRemoteTask, interpretQueryResult } from './dreamina-client.mjs';
 import { downloadOriginal, processOriginal, validateFinalImage } from './image-processor.mjs';
 import { canSubmit, StateStore } from './state-store.mjs';
-import { applyImagesToCategories, buildTaskManifest, selectTasks } from './tasks.mjs';
+import {
+  applyCategoryImages,
+  applyImagesToCategories,
+  buildCategoryIconManifest,
+  buildTaskManifest,
+  selectCategoryIconTasks,
+  selectTasks,
+} from './tasks.mjs';
 import { parseArgs, pathExists, sleep, writeJsonAtomic } from './utils.mjs';
 
 let stopping = false;
@@ -23,8 +30,12 @@ main().catch((error) => {
 
 async function main() {
   const options = parseArgs(process.argv.slice(2));
-  const manifest = await buildTaskManifest();
-  const selected = selectTasks(manifest.tasks, options);
+  const manifest = options.categoryIcons
+    ? await buildCategoryIconManifest()
+    : await buildTaskManifest();
+  const selected = options.categoryIcons
+    ? selectCategoryIconTasks(manifest.tasks, options)
+    : selectTasks(manifest.tasks, options);
   validateMode(options);
 
   if (options.acceptCandidates) {
@@ -35,8 +46,9 @@ async function main() {
   const tasks = options.candidate
     ? selected.map((task) => ({
         ...task,
-        outputPath: path.join(PATHS.candidates, task.filename),
-        originalPath: path.join(PATHS.candidateOriginals, task.filename),
+        outputPath: task.candidatePath ?? path.join(PATHS.candidates, task.filename),
+        originalPath: task.candidateOriginalPath ??
+          path.join(PATHS.candidateOriginals, task.filename),
       }))
     : selected;
   const store = await generate(manifest, tasks, options);
@@ -46,11 +58,9 @@ async function main() {
         .filter((task) => store.job(task.jobKey).status === STATUS.success)
         .map((task) => task.jobKey),
     );
-    const categories = applyImagesToCategories(
-      manifest.categories,
-      manifest.tasks,
-      successfulJobKeys,
-    );
+    const categories = options.categoryIcons
+      ? applyCategoryImages(manifest.categories, manifest.tasks, successfulJobKeys)
+      : applyImagesToCategories(manifest.categories, manifest.tasks, successfulJobKeys);
     await writeJsonAtomic(PATHS.categories, categories);
     console.log(`已更新 ${successfulJobKeys.size} 个图片映射`);
   }
@@ -85,7 +95,7 @@ async function generate(manifest, tasks, options) {
 
 function validateMode(options) {
   if ((options.candidate || options.acceptCandidates) &&
-      !options.category && !options.words.length && !options.limit) {
+      !options.categoryIcons && !options.category && !options.words.length && !options.limit) {
     throw new Error('候选模式必须使用 --word、--words、--category 或 --limit 限定范围');
   }
   if (options.candidate && options.acceptCandidates) {
@@ -98,12 +108,12 @@ function validateMode(options) {
 
 async function acceptCandidates(tasks) {
   for (const task of tasks) {
-    const candidatePath = path.join(PATHS.candidates, task.filename);
+    const candidatePath = task.candidatePath ?? path.join(PATHS.candidates, task.filename);
     const valid = await validateFinalImage(candidatePath);
     if (!valid.ok) throw new Error(`${task.jobKey} 候选图无效：${valid.error}`);
   }
   for (const task of tasks) {
-    const candidatePath = path.join(PATHS.candidates, task.filename);
+    const candidatePath = task.candidatePath ?? path.join(PATHS.candidates, task.filename);
     const tempPath = `${task.outputPath}.candidate`;
     await fs.copyFile(candidatePath, tempPath);
     await fs.rename(tempPath, task.outputPath);

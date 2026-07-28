@@ -6,13 +6,18 @@ export const REPO_ROOT = path.resolve(TOOL_DIR, '../..');
 
 export const PATHS = Object.freeze({
   categories: path.join(REPO_ROOT, 'assets/data/categories.json'),
+  categoryImages: path.join(REPO_ROOT, 'assets/images/categories'),
   words: path.join(REPO_ROOT, 'assets/images/words'),
   overrides: path.join(TOOL_DIR, 'prompt-overrides.json'),
+  categoryOverrides: path.join(TOOL_DIR, 'category-icon-overrides.json'),
   stateDir: path.join(TOOL_DIR, '.state'),
   state: path.join(TOOL_DIR, '.state/state.json'),
   originals: path.join(TOOL_DIR, '.state/originals'),
   candidates: path.join(TOOL_DIR, '.state/candidates'),
   candidateOriginals: path.join(TOOL_DIR, '.state/candidate-originals'),
+  categoryOriginals: path.join(TOOL_DIR, '.state/category-originals'),
+  categoryCandidates: path.join(TOOL_DIR, '.state/category-candidates'),
+  categoryCandidateOriginals: path.join(TOOL_DIR, '.state/category-candidate-originals'),
   promptPreview: path.join(TOOL_DIR, '.state/prompts.json'),
 });
 
