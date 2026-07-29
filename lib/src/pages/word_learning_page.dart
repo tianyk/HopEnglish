@@ -1,28 +1,29 @@
-import 'package:audioplayers/audioplayers.dart';
+import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
-import 'package:hopenglish/src/models/category.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hopenglish/src/models/lesson_plan.dart';
 import 'package:hopenglish/src/models/word.dart';
 import 'package:hopenglish/src/pages/celebration_page.dart';
+import 'package:hopenglish/src/services/audio_playback_service.dart';
 import 'package:hopenglish/src/services/learning_progress_service.dart';
+import 'package:hopenglish/src/services/lesson_session_service.dart';
 import 'package:hopenglish/src/theme/app_theme.dart';
-import 'package:hopenglish/src/widgets/word_directory_sheet.dart';
+import 'package:hopenglish/src/widgets/adaptive_image.dart';
 import 'package:hopenglish/src/widgets/word_icon.dart';
 
-/// 单词学习页 (Word Learning Page)
-///
-/// 核心学习页面，沉浸式展示单词
-class WordLearningPage extends StatefulWidget {
-  final Category category;
+enum _LessonPhase { learn, quiz }
 
-  /// 洗牌后的单词列表
-  /// 每次进入时由调用方洗牌，本次会话内顺序固定
-  final List<Word> words;
-  final int initialIndex;
+class WordLearningPage extends StatefulWidget {
+  final LessonPlan plan;
+  final int lessonSize;
+  final AudioPlaybackController? audio;
 
   const WordLearningPage({
-    required this.category,
-    required this.words,
-    this.initialIndex = 0,
+    required this.plan,
+    required this.lessonSize,
+    this.audio,
     super.key,
   });
 
@@ -31,184 +32,237 @@ class WordLearningPage extends StatefulWidget {
 }
 
 class _WordLearningPageState extends State<WordLearningPage>
-    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
-  late int _currentIndex;
-  late AnimationController _bounceController;
-  late Animation<double> _bounceAnimation;
-  late AudioPlayer _audioPlayer;
+    with TickerProviderStateMixin {
+  static const Duration _effectiveViewDelay = Duration(milliseconds: 1200);
+  static const Duration _answerAdvanceDelay = Duration(milliseconds: 900);
 
-  /// 学习进度记录（vNext）：记录"看到/听到 + 时间"，用于后续自适应排序。
-  final LearningProgressService _progressService =
-      LearningProgressService.instance;
+  final LearningProgressService _progress = LearningProgressService.instance;
+  late final AudioPlaybackController _audio;
+  late final bool _ownsAudio;
+  late final AnimationController _bounceController;
+  late final Animation<double> _bounceAnimation;
+  late final AnimationController _shakeController;
+  late final Animation<double> _shakeAnimation;
 
-  /// 记录切后台的时间戳（用于 30 分钟会话恢复阈值判断）。
-  int? _pausedAtMs;
-
-  /// 会话恢复阈值：切后台/锁屏超过该阈值后返回，视为新会话（用于久别/复习分档）。
-  static const Duration _sessionResumeThreshold = Duration(minutes: 30);
-
-  // 按钮冷却状态
-  bool _isNextButtonCooling = false;
-  static const _cooldownDuration = Duration(milliseconds: 500);
-
-  // 单词图标尺寸
-  static const double _wordIconSize = 180;
+  _LessonPhase _phase = _LessonPhase.learn;
+  int _learnIndex = 0;
+  int _quizIndex = 0;
+  bool _canContinue = false;
+  bool _answerLocked = false;
+  bool _firstAttemptPending = true;
+  String? _wrongOptionId;
+  String? _correctOptionId;
+  Timer? _effectiveViewTimer;
+  Timer? _manualPlaybackCooldownTimer;
+  int _presentationToken = 0;
 
   @override
   void initState() {
     super.initState();
-    _currentIndex = widget.initialIndex;
-    WidgetsBinding.instance.addObserver(this);
-
-    // 初始化音频播放器
-    _audioPlayer = AudioPlayer();
-
-    // Q弹动画控制器
+    _ownsAudio = widget.audio == null;
+    _audio = widget.audio ?? AudioPlaybackService();
     _bounceController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
     _bounceAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.9), weight: 1),
-      TweenSequenceItem(tween: Tween(begin: 0.9, end: 1.05), weight: 1),
-      TweenSequenceItem(tween: Tween(begin: 1.05, end: 1.0), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: 1, end: 0.92), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: 0.92, end: 1.05), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: 1.05, end: 1), weight: 1),
+    ]).animate(_bounceController);
+    _shakeController = AnimationController(
+      duration: const Duration(milliseconds: 420),
+      vsync: this,
+    );
+    _shakeAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0, end: -10), weight: 1),
+      TweenSequenceItem(tween: Tween(begin: -10, end: 10), weight: 2),
+      TweenSequenceItem(tween: Tween(begin: 10, end: -6), weight: 2),
+      TweenSequenceItem(tween: Tween(begin: -6, end: 0), weight: 1),
     ]).animate(CurvedAnimation(
-      parent: _bounceController,
+      parent: _shakeController,
       curve: Curves.easeInOut,
     ));
-
-    // 进入页面后：记录会话锚点 + 看到 + 听到
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _touchSession();
-      _recordView();
-      _playWordSound();
+      _progress.touchCategorySession(categoryId: widget.plan.category.id);
+      _presentLearningWord();
     });
   }
+
+  Word get _currentWord => widget.plan.words[_learnIndex];
+  LessonQuestion get _currentQuestion => widget.plan.questions[_quizIndex];
+
+  int get _totalSteps =>
+      widget.plan.words.length + widget.plan.questions.length;
+  int get _completedSteps => _phase == _LessonPhase.learn
+      ? _learnIndex
+      : widget.plan.words.length + _quizIndex;
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    // 记录离开时间，便于调试/统计（以及未来更稳的会话边界处理）
-    _progressService.saveCategoryExitedAt(categoryId: widget.category.id);
+    _effectiveViewTimer?.cancel();
+    _manualPlaybackCooldownTimer?.cancel();
+    _progress.saveCategoryExitedAt(categoryId: widget.plan.category.id);
+    if (_ownsAudio) unawaited(_audio.dispose());
     _bounceController.dispose();
-    _audioPlayer.dispose();
+    _shakeController.dispose();
     super.dispose();
   }
 
-  Word get _currentWord => widget.words[_currentIndex];
-  bool get _isLastWord => _currentIndex >= widget.words.length - 1;
+  Future<void> _presentLearningWord() async {
+    final token = ++_presentationToken;
+    _effectiveViewTimer?.cancel();
+    _manualPlaybackCooldownTimer?.cancel();
+    setState(() => _canContinue = false);
+    _effectiveViewTimer = Timer(_effectiveViewDelay, () {
+      if (!mounted ||
+          token != _presentationToken ||
+          _phase != _LessonPhase.learn) {
+        return;
+      }
+      _progress.recordEffectiveView(
+        category: widget.plan.category,
+        word: _currentWord,
+      );
+    });
+    await _playCurrentWord(slow: false, lockContinue: true, token: token);
+  }
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    final nowMs = DateTime.now().millisecondsSinceEpoch;
-    if (state == AppLifecycleState.paused) {
-      _pausedAtMs = nowMs;
+  Future<void> _playCurrentWord({
+    required bool slow,
+    bool lockContinue = false,
+    int? token,
+  }) async {
+    if (lockContinue && mounted) setState(() => _canContinue = false);
+    _bounceController.forward(from: 0);
+    final word =
+        _phase == _LessonPhase.learn ? _currentWord : _currentQuestion.target;
+    final played = await _audio.playWord(
+      word,
+      slow: slow,
+      waitForCompletion: lockContinue,
+    );
+    if (played && mounted) {
+      _progress.recordSuccessfulPlay(
+        category: widget.plan.category,
+        word: word,
+      );
+    }
+    if (lockContinue &&
+        mounted &&
+        (token == null || token == _presentationToken) &&
+        _phase == _LessonPhase.learn) {
+      setState(() => _canContinue = true);
+    }
+  }
+
+  void _playManually({required bool slow}) {
+    if (_phase != _LessonPhase.learn ||
+        (_manualPlaybackCooldownTimer?.isActive ?? false)) {
       return;
     }
-    if (state == AppLifecycleState.resumed) {
-      final pausedAtMs = _pausedAtMs;
-      _pausedAtMs = null;
-      if (pausedAtMs == null) return;
-      final deltaMs = nowMs - pausedAtMs;
-      // 超过阈值则认为新会话：更新主题 lastSessionAt（用于“日常/久别重启”判断）
-      if (deltaMs >= _sessionResumeThreshold.inMilliseconds) {
-        _touchSession();
-      }
-    }
-  }
-
-  void _touchSession() {
-    _progressService.touchCategorySession(categoryId: widget.category.id);
-  }
-
-  /// 记录"看到一次"（viewCount +1）。
-  void _recordView() {
-    _progressService.recordView(category: widget.category, word: _currentWord);
-  }
-
-  void _playWordSound() async {
-    // 记录"听到一次"：以"触发播放"为准（播放成功与否不影响口径），服务层做连点合并。
-    _progressService.recordPlay(category: widget.category, word: _currentWord);
-    // 播放Q弹动画
-    _bounceController.forward(from: 0);
-
-    // 播放单词音频
-    try {
-      await _audioPlayer.stop(); // 停止当前播放
-
-      if (_currentWord.isAudioNetwork) {
-        // 网络音频：直接使用完整 URL
-        await _audioPlayer.play(UrlSource(_currentWord.audioPath));
-      } else {
-        // 本地音频：使用相对于 assets/ 的路径（去掉 assets/ 前缀）
-        // audioPath = 'assets/audio/words/lion_normal.wav'
-        // AssetSource 需要 = 'audio/words/lion_normal.wav'
-        final assetPath = _currentWord.audioPath.replaceFirst('assets/', '');
-        await _audioPlayer.play(AssetSource(assetPath));
-      }
-    } catch (e) {
-      debugPrint('播放音频失败: $e');
-    }
-  }
-
-  void _goToNextWord() {
-    if (_isNextButtonCooling) return;
-
-    setState(() {
-      _isNextButtonCooling = true;
-    });
-
-    Future.delayed(_cooldownDuration, () {
-      if (mounted) {
-        setState(() {
-          _isNextButtonCooling = false;
-        });
-      }
-    });
-
-    if (_isLastWord) {
-      _startCelebration();
-    } else {
-      setState(() {
-        _currentIndex++;
-      });
-      _recordView();
-      _playWordSound();
-    }
-  }
-
-  void _goToWord(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-    _recordView();
-    _playWordSound();
-  }
-
-  void _startCelebration() {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => CelebrationPage(
-          words: widget.words,
-          themeColor: widget.category.color,
-        ),
+    _manualPlaybackCooldownTimer = Timer(AppTheme.buttonCooldown, () {});
+    final completesInitialListen = !_canContinue;
+    unawaited(
+      _playCurrentWord(
+        slow: slow,
+        lockContinue: completesInitialListen,
+        token: completesInitialListen ? _presentationToken : null,
       ),
     );
   }
 
-  void _showWordDirectory() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (context) => WordDirectorySheet(
-        category: widget.category,
-        words: widget.words,
-        currentIndex: _currentIndex,
-        onWordSelected: (index) {
-          Navigator.pop(context);
-          _goToWord(index);
-        },
+  void _nextLearningWord() {
+    if (!_canContinue) return;
+    if (_learnIndex + 1 < widget.plan.words.length) {
+      setState(() => _learnIndex++);
+      _presentLearningWord();
+      return;
+    }
+    _effectiveViewTimer?.cancel();
+    ++_presentationToken;
+    setState(() {
+      _phase = _LessonPhase.quiz;
+      _quizIndex = 0;
+      _firstAttemptPending = true;
+      _canContinue = false;
+    });
+    _playCurrentWord(slow: false);
+  }
+
+  Future<void> _selectAnswer(Word selected) async {
+    if (_answerLocked || _correctOptionId != null) return;
+    final isCorrect = selected.id == _currentQuestion.target.id;
+    if (!isCorrect) {
+      if (_firstAttemptPending) {
+        _firstAttemptPending = false;
+        _progress.recordQuizResult(
+          category: widget.plan.category,
+          word: _currentQuestion.target,
+          firstAttemptCorrect: false,
+        );
+      }
+      setState(() => _wrongOptionId = selected.id);
+      await _shakeController.forward(from: 0);
+      if (!mounted) return;
+      setState(() => _wrongOptionId = null);
+      await _playCurrentWord(slow: false);
+      return;
+    }
+
+    _answerLocked = true;
+    if (_firstAttemptPending) {
+      _progress.recordQuizResult(
+        category: widget.plan.category,
+        word: _currentQuestion.target,
+        firstAttemptCorrect: true,
+      );
+    }
+    setState(() => _correctOptionId = selected.id);
+    unawaited(_audio.playEncouragement());
+    await Future<void>.delayed(_answerAdvanceDelay);
+    if (!mounted) return;
+    if (_quizIndex + 1 < widget.plan.questions.length) {
+      setState(() {
+        _quizIndex++;
+        _answerLocked = false;
+        _firstAttemptPending = true;
+        _wrongOptionId = null;
+        _correctOptionId = null;
+      });
+      _playCurrentWord(slow: false);
+    } else {
+      _openCelebration();
+    }
+  }
+
+  void _openCelebration() {
+    final completedIds = widget.plan.words.map((word) => word.id).toSet();
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => CelebrationPage(
+          words: widget.plan.words,
+          themeColor: widget.plan.category.color,
+          onHome: (pageContext) {
+            Navigator.of(pageContext).popUntil((route) => route.isFirst);
+          },
+          onMore: (pageContext) async {
+            final nextPlan = await LessonSessionService.instance.buildLesson(
+              category: widget.plan.category,
+              lessonSize: widget.lessonSize,
+              excludeWordIds: completedIds,
+            );
+            if (!pageContext.mounted) return;
+            Navigator.of(pageContext).pushReplacement(
+              MaterialPageRoute(
+                builder: (_) => WordLearningPage(
+                  plan: nextPlan,
+                  lessonSize: widget.lessonSize,
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -217,15 +271,21 @@ class _WordLearningPageState extends State<WordLearningPage>
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.backgroundGradient,
-        ),
+        decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
         child: SafeArea(
           child: Column(
             children: [
               _buildHeader(),
-              Expanded(child: _buildWordDisplay()),
-              _buildBottomBar(),
+              _buildProgress(),
+              Expanded(
+                child: AnimatedSwitcher(
+                  duration: AppTheme.durationNormal,
+                  child: _phase == _LessonPhase.learn
+                      ? _buildLearningView()
+                      : _buildQuizView(),
+                ),
+              ),
+              if (_phase == _LessonPhase.learn) _buildNextButton(),
             ],
           ),
         ),
@@ -234,180 +294,393 @@ class _WordLearningPageState extends State<WordLearningPage>
   }
 
   Widget _buildHeader() {
+    final category = widget.plan.category;
     return Padding(
-      padding: const EdgeInsets.all(AppTheme.spacingMedium),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
       child: Row(
         children: [
-          _buildBackButton(),
-          const SizedBox(width: AppTheme.spacingSmall),
-          _buildCategoryIcon(),
-          const SizedBox(width: AppTheme.spacingSmall),
-          Expanded(child: _buildTitle()),
-          _buildDirectoryButton(),
+          _roundButton(
+            icon: Icons.arrow_back_rounded,
+            onTap: () => Navigator.of(context).pop(),
+          ),
+          const SizedBox(width: 12),
+          if (category.hasImage)
+            AdaptiveImage(
+              imagePath: category.imagePath,
+              width: 34,
+              height: 34,
+              errorWidget: Text(category.emoji ?? '',
+                  style: const TextStyle(fontSize: 28)),
+            )
+          else
+            Text(category.emoji ?? '', style: const TextStyle(fontSize: 28)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              _phase == _LessonPhase.learn ? category.name : 'Listen & Find',
+              style: AppTheme.headlineMedium,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildBackButton() {
-    return GestureDetector(
-      onTap: () => Navigator.of(context).pop(),
-      child: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          color: AppTheme.surface,
-          borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-          boxShadow: AppTheme.cardShadow,
-        ),
-        child: const Icon(
-          Icons.arrow_back_rounded,
-          color: AppTheme.primary,
+  Widget _buildProgress() {
+    final value = (_completedSteps + 1) / _totalSteps;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: LinearProgressIndicator(
+          minHeight: 10,
+          value: value.clamp(0, 1),
+          backgroundColor: AppTheme.backgroundWarm,
+          color: widget.plan.category.color,
         ),
       ),
     );
   }
 
-  Widget _buildCategoryIcon() {
-    if (widget.category.hasImage) {
-      return ClipRRect(
-        borderRadius: BorderRadius.circular(AppTheme.radiusSmall),
-        child: Image.asset(
-          widget.category.imagePath,
-          width: 32,
-          height: 32,
-          fit: BoxFit.cover,
-        ),
-      );
-    }
-    return Text(
-      widget.category.emoji ?? '',
-      style: const TextStyle(fontSize: 28),
-    );
-  }
-
-  Widget _buildTitle() {
-    return Text(
-      widget.category.name,
-      style: AppTheme.headlineMedium.copyWith(
-        color: AppTheme.primary,
-      ),
-      overflow: TextOverflow.ellipsis,
-    );
-  }
-
-  Widget _buildDirectoryButton() {
-    return GestureDetector(
-      onTap: _showWordDirectory,
-      child: Container(
-        width: 44,
-        height: 44,
-        decoration: BoxDecoration(
-          color: AppTheme.surface,
-          borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
-          boxShadow: AppTheme.cardShadow,
-        ),
-        child: const Icon(
-          Icons.grid_view_rounded,
-          color: AppTheme.primary,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildWordDisplay() {
-    return GestureDetector(
-      onTap: _playWordSound,
-      child: AnimatedBuilder(
-        animation: _bounceAnimation,
-        builder: (context, child) {
-          return Transform.scale(
-            scale: _bounceAnimation.value,
-            child: child,
-          );
-        },
-        child: Column(
+  Widget _buildLearningView() {
+    return LayoutBuilder(
+      key: ValueKey('learn-${_currentWord.id}'),
+      builder: (context, constraints) {
+        final compact = constraints.maxHeight < 480;
+        final iconSize = compact ? 135.0 : 190.0;
+        return Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildWordIcon(),
-            const SizedBox(height: AppTheme.spacingLarge),
-            _buildWordName(),
+            GestureDetector(
+              key: const ValueKey('learning-image'),
+              onTap: () => _playManually(slow: false),
+              child: ScaleTransition(
+                scale: _bounceAnimation,
+                child: WordIcon(word: _currentWord, size: iconSize),
+              ),
+            ),
+            SizedBox(height: compact ? 12 : 24),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: FittedBox(
+                child: Text(
+                  _currentWord.name,
+                  style:
+                      AppTheme.displayLarge.copyWith(color: AppTheme.primary),
+                  maxLines: 1,
+                ),
+              ),
+            ),
+            SizedBox(height: compact ? 14 : 28),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _audioButton(
+                  key: const ValueKey('listen-normal'),
+                  icon: const Icon(
+                    Icons.volume_up_rounded,
+                    color: AppTheme.primary,
+                    size: 30,
+                  ),
+                  label: 'Listen',
+                  onTap: () => _playManually(slow: false),
+                ),
+                const SizedBox(width: 16),
+                _audioButton(
+                  key: const ValueKey('listen-slow'),
+                  icon: SvgPicture.asset(
+                    'assets/images/icons/solid-slow.svg',
+                    width: 24,
+                    height: 19,
+                    colorFilter: const ColorFilter.mode(
+                      AppTheme.primary,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                  label: 'Slow',
+                  onTap: () => _playManually(slow: true),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildQuizView() {
+    final options = _currentQuestion.options;
+    if (options.length == 2) return _buildTwoChoiceQuiz(options);
+
+    return Column(
+      key: ValueKey('quiz-${_currentQuestion.target.id}'),
+      children: [
+        const SizedBox(height: 20),
+        GestureDetector(
+          onTap: () => _playCurrentWord(slow: false),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+            decoration: BoxDecoration(
+              color: AppTheme.primary,
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: AppTheme.buttonShadow,
+            ),
+            child: const Icon(Icons.volume_up_rounded,
+                color: Colors.white, size: 36),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text('Tap the picture', style: AppTheme.titleMedium),
+        const SizedBox(height: 28),
+        Expanded(
+          child: _buildFourChoiceLayout(options),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTwoChoiceQuiz(List<Word> options) {
+    return LayoutBuilder(
+      key: ValueKey('quiz-${_currentQuestion.target.id}'),
+      builder: (context, constraints) {
+        const gap = 16.0;
+        final usableWidth = math.min(constraints.maxWidth - 48, 360.0);
+        final cardWidth = (usableWidth - gap) / 2;
+        final desiredHeight = cardWidth / 0.86;
+        final cardHeight = math.min(
+          desiredHeight,
+          math.max(120.0, constraints.maxHeight - 160),
+        );
+        return Align(
+          alignment: const Alignment(0, -0.15),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              GestureDetector(
+                onTap: () => _playCurrentWord(slow: false),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary,
+                    borderRadius: BorderRadius.circular(28),
+                    boxShadow: AppTheme.buttonShadow,
+                  ),
+                  child: const Icon(
+                    Icons.volume_up_rounded,
+                    color: Colors.white,
+                    size: 36,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text('Tap the picture', style: AppTheme.titleMedium),
+              const SizedBox(height: 44),
+              SizedBox(
+                key: const ValueKey('two-choice-layout'),
+                width: usableWidth,
+                height: cardHeight,
+                child: Row(
+                  children: [
+                    for (var index = 0; index < options.length; index++) ...[
+                      if (index > 0) const SizedBox(width: gap),
+                      Expanded(child: _buildAnswerCard(options[index])),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildFourChoiceLayout(List<Word> options) {
+    return LayoutBuilder(
+      key: const ValueKey('four-choice-layout'),
+      builder: (context, constraints) {
+        const gap = 16.0;
+        final maxCardWidth = (constraints.maxWidth - 48 - gap) / 2;
+        final maxCardHeight = (constraints.maxHeight - 24 - gap) / 2;
+        final cardSize = math.max(
+          0.0,
+          math.min(maxCardWidth, maxCardHeight),
+        );
+        return Center(
+          child: SizedBox(
+            width: cardSize * 2 + gap,
+            height: cardSize * 2 + gap,
+            child: Column(
+              children: [
+                for (var row = 0; row < 2; row++) ...[
+                  if (row > 0) const SizedBox(height: gap),
+                  SizedBox(
+                    height: cardSize,
+                    child: Row(
+                      children: [
+                        for (var column = 0; column < 2; column++) ...[
+                          if (column > 0) const SizedBox(width: gap),
+                          SizedBox(
+                            width: cardSize,
+                            child: _buildAnswerCard(
+                              options[row * 2 + column],
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildAnswerCard(Word word) {
+    final isCorrect = _correctOptionId == word.id;
+    final isWrong = _wrongOptionId == word.id;
+    Widget card = GestureDetector(
+      key: ValueKey('answer-${word.id}'),
+      onTap: () => _selectAnswer(word),
+      child: AnimatedContainer(
+        duration: AppTheme.durationFast,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(AppTheme.radiusLarge),
+          border: Border.all(
+            color: isCorrect
+                ? AppTheme.success
+                : widget.plan.category.color.withValues(alpha: 0.28),
+            width: isCorrect ? 5 : 2,
+          ),
+          boxShadow: AppTheme.cardShadow,
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final iconSize = math
+                      .min(constraints.maxWidth, constraints.maxHeight)
+                      .clamp(72.0, 124.0);
+                  return Center(child: WordIcon(word: word, size: iconSize));
+                },
+              ),
+            ),
+            if (isCorrect)
+              const Positioned(
+                top: 10,
+                right: 12,
+                child:
+                    Icon(Icons.star_rounded, color: AppTheme.success, size: 34),
+              ),
           ],
         ),
       ),
     );
-  }
-
-  Widget _buildWordIcon() {
-    return WordIcon(
-      word: _currentWord,
-      size: _wordIconSize,
-    );
-  }
-
-  Widget _buildWordName() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingLarge),
-      child: FittedBox(
-        fit: BoxFit.scaleDown,
-        child: Text(
-          _currentWord.name,
-          style: AppTheme.displayLarge.copyWith(
-            color: AppTheme.primary,
-          ),
-          maxLines: 1,
+    if (isWrong) {
+      card = AnimatedBuilder(
+        animation: _shakeAnimation,
+        builder: (context, child) => Transform.translate(
+          offset: Offset(_shakeAnimation.value, 0),
+          child: child,
         ),
-      ),
-    );
-  }
-
-  Widget _buildBottomBar() {
-    return Padding(
-      padding: const EdgeInsets.all(AppTheme.spacingLarge),
-      child: _buildNextButton(),
-    );
+        child: card,
+      );
+    }
+    return card;
   }
 
   Widget _buildNextButton() {
-    final buttonColor = _isNextButtonCooling
-        ? AppTheme.primary.withValues(alpha: 0.5)
-        : AppTheme.primary;
-
-    return GestureDetector(
-      onTap: _goToNextWord,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 20),
-        decoration: BoxDecoration(
-          color: buttonColor,
-          borderRadius: BorderRadius.circular(AppTheme.radiusXLarge),
-          boxShadow: [
-            BoxShadow(
-              color: buttonColor.withValues(alpha: 0.3),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Next',
-              style: AppTheme.headlineMedium.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: GestureDetector(
+        key: const ValueKey('lesson-next'),
+        onTap: _canContinue ? _nextLearningWord : null,
+        child: AnimatedContainer(
+          duration: AppTheme.durationFast,
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 19),
+          decoration: BoxDecoration(
+            color: _canContinue
+                ? AppTheme.primary
+                : AppTheme.primary.withValues(alpha: 0.4),
+            borderRadius: BorderRadius.circular(AppTheme.radiusXLarge),
+            boxShadow: _canContinue ? AppTheme.buttonShadow : null,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                _learnIndex + 1 == widget.plan.words.length
+                    ? 'Practice'
+                    : 'Next',
+                style: AppTheme.headlineMedium.copyWith(color: Colors.white),
               ),
+              const SizedBox(width: 8),
+              const Icon(Icons.arrow_forward_rounded,
+                  color: Colors.white, size: 28),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _audioButton({
+    Key? key,
+    required Widget icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      key: key,
+      onTap: onTap,
+      child: Container(
+        width: 112,
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(22),
+          border: Border.all(
+              color: AppTheme.primary.withValues(alpha: 0.35), width: 2),
+        ),
+        child: Column(
+          children: [
+            SizedBox(
+              height: 30,
+              child: Center(child: icon),
             ),
-            const SizedBox(width: AppTheme.spacingSmall),
-            const Icon(
-              Icons.arrow_forward_rounded,
-              color: Colors.white,
-              size: 28,
-            ),
+            const SizedBox(height: 2),
+            Text(label, style: AppTheme.titleMedium),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _roundButton({
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+          boxShadow: AppTheme.cardShadow,
+        ),
+        child: Icon(icon, color: AppTheme.primary),
       ),
     );
   }

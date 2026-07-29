@@ -28,7 +28,8 @@ class LearningModeResolver {
   ///
   /// - [lastSessionAtMs]：上次进入该主题的时间（epoch ms），null 表示首次学习
   /// - [nowMs]：当前时间（epoch ms）
-  static LearningMode resolve({required int? lastSessionAtMs, required int nowMs}) {
+  static LearningMode resolve(
+      {required int? lastSessionAtMs, required int nowMs}) {
     if (lastSessionAtMs == null) {
       // 首次学习，视为久别重启
       return LearningMode.restart;

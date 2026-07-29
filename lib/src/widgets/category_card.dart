@@ -19,26 +19,31 @@ class CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final outerRadius = BorderRadius.circular(AppTheme.radiusLarge);
-    final innerRadius = BorderRadius.circular(AppTheme.radiusLarge - _borderWidth);
-    return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: outerRadius,
-        boxShadow: AppTheme.cardShadow,
-        border: Border.all(
-          color: category.color.withValues(alpha: 0.3),
-          width: _borderWidth,
+    final innerRadius =
+        BorderRadius.circular(AppTheme.radiusLarge - _borderWidth);
+    return Semantics(
+      button: true,
+      label: category.name,
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppTheme.surface,
+          borderRadius: outerRadius,
+          boxShadow: AppTheme.cardShadow,
+          border: Border.all(
+            color: AppTheme.cardBorder,
+            width: _borderWidth,
+          ),
         ),
-      ),
-      child: ClipRRect(
-        borderRadius: innerRadius,
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            splashColor: category.color.withValues(alpha: 0.2),
-            highlightColor: category.color.withValues(alpha: 0.1),
-            onTap: onTap,
-            child: _buildContent(),
+        child: ClipRRect(
+          borderRadius: innerRadius,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              splashColor: category.color.withValues(alpha: 0.2),
+              highlightColor: category.color.withValues(alpha: 0.1),
+              onTap: onTap,
+              child: _buildContent(),
+            ),
           ),
         ),
       ),
@@ -60,10 +65,14 @@ class CategoryCard extends StatelessWidget {
     if (category.hasImage) {
       return AdaptiveImage(
         imagePath: category.imagePath,
-        width: 48,
-        height: 48,
+        width: 72,
+        height: 72,
+        errorWidget: Text(
+          category.emoji ?? '',
+          style: const TextStyle(fontSize: 58),
+        ),
       );
     }
-    return Text(category.emoji ?? '', style: const TextStyle(fontSize: 48));
+    return Text(category.emoji ?? '', style: const TextStyle(fontSize: 58));
   }
 }

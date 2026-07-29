@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hopenglish/src/constants/app_strings.dart';
@@ -11,8 +13,8 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-  await LearningProgressService.instance.ping();
   runApp(const HopEnglishApp());
+  unawaited(LearningProgressService.instance.ping());
 }
 
 /// HopEnglish 应用入口
@@ -25,7 +27,21 @@ class HopEnglishApp extends StatelessWidget {
       title: AppStrings.appName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.theme,
+      builder: (context, child) => AppTextScaleBoundary(
+        child: child ?? const SizedBox.shrink(),
+      ),
       home: const HomePage(),
     );
+  }
+}
+
+class AppTextScaleBoundary extends StatelessWidget {
+  final Widget child;
+
+  const AppTextScaleBoundary({required this.child, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MediaQuery.withNoTextScaling(child: child);
   }
 }

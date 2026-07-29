@@ -1,4 +1,5 @@
 import 'package:path/path.dart' as p;
+import 'package:flutter/foundation.dart';
 import 'package:sqflite/sqflite.dart';
 
 /// 应用本地数据库（SQLite + sqflite）
@@ -14,7 +15,7 @@ class AppDatabase {
   /// 规则：
   /// - 每次“表结构变更”必须递增
   /// - 并在 [_onUpgrade] 中写增量迁移逻辑
-  static const int _schemaVersion = 1;
+  static const int _schemaVersion = 2;
 
   /// 全局单例连接（进程内缓存）。
   static Database? _database;
@@ -56,6 +57,17 @@ class AppDatabase {
     await db.rawQuery('SELECT 1');
   }
 
+  @visibleForTesting
+  static Future<String> databasePathForTesting() async {
+    return p.join(await getDatabasesPath(), _databaseFileName);
+  }
+
+  @visibleForTesting
+  static Future<void> closeForTesting() async {
+    await _database?.close();
+    _database = null;
+  }
+
   static Future<void> _onCreate(Database db) async {
     // 单词学习进度表（学习项粒度）：
     // - word_key = "$categoryId:$wordId"（稳定主键）
@@ -69,14 +81,21 @@ CREATE TABLE word_progress (
   word_name TEXT NOT NULL,
   view_count INTEGER NOT NULL DEFAULT 0,
   play_count INTEGER NOT NULL DEFAULT 0,
+  quiz_attempt_count INTEGER NOT NULL DEFAULT 0,
+  quiz_correct_count INTEGER NOT NULL DEFAULT 0,
+  correct_streak INTEGER NOT NULL DEFAULT 0,
   last_seen_at INTEGER NULL,
-  last_played_at INTEGER NULL
+  last_played_at INTEGER NULL,
+  last_quizzed_at INTEGER NULL,
+  last_correct_at INTEGER NULL
 )
 ''');
     // 主题索引：按主题批量读取/统计时更快。
-    await db.execute('CREATE INDEX idx_word_progress_category_id ON word_progress(category_id)');
+    await db.execute(
+        'CREATE INDEX idx_word_progress_category_id ON word_progress(category_id)');
     // 时间索引：后续按 last_seen_at 做 Overdue 桶筛选时更快。
-    await db.execute('CREATE INDEX idx_word_progress_last_seen_at ON word_progress(last_seen_at)');
+    await db.execute(
+        'CREATE INDEX idx_word_progress_last_seen_at ON word_progress(last_seen_at)');
 
     // 主题学习会话表（主题粒度）：
     // - last_session_at 用于判断日常/复习加强/久别重启
@@ -88,10 +107,37 @@ CREATE TABLE category_progress (
   last_exited_at INTEGER NULL
 )
 ''');
+    await db.execute('''
+CREATE TABLE app_settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+)
+''');
   }
 
   static Future<void> _onUpgrade(Database db, int from, int to) async {
-    // v1 -> vN: 在这里做增量迁移（add column / create table / backfill 等）
-    // 迁移策略与模板见 docs/learning_progress_vnext.md
+    if (from < 2) {
+      await db.execute(
+        'ALTER TABLE word_progress ADD COLUMN quiz_attempt_count INTEGER NOT NULL DEFAULT 0',
+      );
+      await db.execute(
+        'ALTER TABLE word_progress ADD COLUMN quiz_correct_count INTEGER NOT NULL DEFAULT 0',
+      );
+      await db.execute(
+        'ALTER TABLE word_progress ADD COLUMN correct_streak INTEGER NOT NULL DEFAULT 0',
+      );
+      await db.execute(
+        'ALTER TABLE word_progress ADD COLUMN last_quizzed_at INTEGER NULL',
+      );
+      await db.execute(
+        'ALTER TABLE word_progress ADD COLUMN last_correct_at INTEGER NULL',
+      );
+      await db.execute('''
+CREATE TABLE app_settings (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+)
+''');
+    }
   }
 }

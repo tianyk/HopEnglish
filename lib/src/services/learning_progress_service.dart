@@ -50,13 +50,16 @@ class LearningProgressService {
   }
 
   /// 构建学习项的稳定主键（`$categoryId:$wordId`）。
-  String buildWordKey({required String categoryId, required String wordId}) => '$categoryId:$wordId';
+  String buildWordKey({required String categoryId, required String wordId}) =>
+      '$categoryId:$wordId';
 
   /// 进入主题学习页时调用，用于记录主题级会话锚点（lastSessionAt）。
   void touchCategorySession({required String categoryId, DateTime? now}) {
     _logger.debug('touchCategorySession', {'categoryId': categoryId});
     _runSafely('touchCategorySession', () async {
-      await _dao.touchCategorySession(categoryId: categoryId, nowMs: (now ?? DateTime.now()).millisecondsSinceEpoch);
+      await _dao.touchCategorySession(
+          categoryId: categoryId,
+          nowMs: (now ?? DateTime.now()).millisecondsSinceEpoch);
     });
   }
 
@@ -64,15 +67,19 @@ class LearningProgressService {
   void saveCategoryExitedAt({required String categoryId, DateTime? now}) {
     _logger.debug('saveCategoryExitedAt', {'categoryId': categoryId});
     _runSafely('saveCategoryExitedAt', () async {
-      await _dao.saveCategoryExitedAt(categoryId: categoryId, nowMs: (now ?? DateTime.now()).millisecondsSinceEpoch);
+      await _dao.saveCategoryExitedAt(
+          categoryId: categoryId,
+          nowMs: (now ?? DateTime.now()).millisecondsSinceEpoch);
     });
   }
 
-  /// 记录"看到"一次（viewCount +1，并刷新 lastSeenAt）。
-  void recordView({required Category category, required Word word, DateTime? now}) {
+  /// 有效停留达到 UI 设定阈值后记录一次曝光。
+  void recordEffectiveView(
+      {required Category category, required Word word, DateTime? now}) {
     final wordKey = buildWordKey(categoryId: category.id, wordId: word.id);
-    _logger.debug('recordView', {'wordKey': wordKey, 'wordName': word.name});
-    _runSafely('recordView', () async {
+    _logger.debug(
+        'recordEffectiveView', {'wordKey': wordKey, 'wordName': word.name});
+    _runSafely('recordEffectiveView', () async {
       await _dao.incrementView(
         wordKey: wordKey,
         categoryId: category.id,
@@ -86,7 +93,8 @@ class LearningProgressService {
   /// 记录"听到"一次（playCount +1，并刷新 lastPlayedAt）。
   ///
   /// 注意：服务层会对同一 wordKey 的短时间重复播放做合并计数（见 _playCountMergeWindow）。
-  void recordPlay({required Category category, required Word word, DateTime? now}) {
+  void recordSuccessfulPlay(
+      {required Category category, required Word word, DateTime? now}) {
     final wordKey = buildWordKey(categoryId: category.id, wordId: word.id);
     final nowMs = (now ?? DateTime.now()).millisecondsSinceEpoch;
     // 连点合并：同一词短时间内重复播放只计 1 次
@@ -94,7 +102,8 @@ class LearningProgressService {
     if (lastRecordedAtMs != null) {
       final deltaMs = nowMs - lastRecordedAtMs;
       if (deltaMs >= 0 && deltaMs < _playCountMergeWindow.inMilliseconds) {
-        _logger.debug('recordPlay skipped (merge window)', {'wordKey': wordKey, 'deltaMs': deltaMs});
+        _logger.debug('recordPlay skipped (merge window)',
+            {'wordKey': wordKey, 'deltaMs': deltaMs});
         return;
       }
     }
@@ -109,6 +118,37 @@ class LearningProgressService {
         nowMs: nowMs,
       );
     });
+  }
+
+  void recordQuizResult({
+    required Category category,
+    required Word word,
+    required bool firstAttemptCorrect,
+    DateTime? now,
+  }) {
+    final wordKey = buildWordKey(categoryId: category.id, wordId: word.id);
+    _runSafely('recordQuizResult', () async {
+      await _dao.recordQuizResult(
+        wordKey: wordKey,
+        categoryId: category.id,
+        wordId: word.id,
+        wordName: word.name,
+        firstAttemptCorrect: firstAttemptCorrect,
+        nowMs: (now ?? DateTime.now()).millisecondsSinceEpoch,
+      );
+    });
+  }
+
+  @Deprecated('Use recordEffectiveView after the dwell threshold')
+  void recordView(
+      {required Category category, required Word word, DateTime? now}) {
+    recordEffectiveView(category: category, word: word, now: now);
+  }
+
+  @Deprecated('Use recordSuccessfulPlay after playback starts successfully')
+  void recordPlay(
+      {required Category category, required Word word, DateTime? now}) {
+    recordSuccessfulPlay(category: category, word: word, now: now);
   }
 
   /// 安全执行异步操作（静默失败，仅记录日志）。

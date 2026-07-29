@@ -1,8 +1,7 @@
-import 'dart:async';
 import 'dart:math';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:hopenglish/src/models/word.dart';
+import 'package:hopenglish/src/services/audio_playback_service.dart';
 import 'package:hopenglish/src/theme/app_theme.dart';
 import 'package:hopenglish/src/widgets/adaptive_image.dart';
 
@@ -53,11 +52,13 @@ class _CelebrationParticle {
 /// 学习完成时展示：
 /// - 从底部喷射单词 emoji + 装饰 emoji
 /// - 中央 "Well done!" 大字（弹出动画）
-/// - Done 按钮 + 倒计时
+/// - Home / More 两个明确出口，不自动退出
 /// - 语音表扬
 class CelebrationPage extends StatefulWidget {
   final List<Word> words;
   final Color themeColor;
+  final void Function(BuildContext context) onHome;
+  final Future<void> Function(BuildContext context) onMore;
 
   /// 重力加速度
   /// 控制粒子下落的速度，值越大下落越快
@@ -84,6 +85,8 @@ class CelebrationPage extends StatefulWidget {
   const CelebrationPage({
     required this.words,
     required this.themeColor,
+    required this.onHome,
+    required this.onMore,
     this.gravity = 0.78,
     this.decay = 0.98,
     this.startVelocity = 0.035,
@@ -103,10 +106,8 @@ class _CelebrationPageState extends State<CelebrationPage>
   late Animation<double> _textScaleAnimation;
   late List<_CelebrationParticle> _particles;
   final Random _random = Random();
-
-  // 倒计时
-  int _countdown = 5;
-  Timer? _countdownTimer;
+  late final AudioPlaybackService _audio;
+  bool _loadingMore = false;
 
   /// 装饰 emoji 配置
   static const List<String> _decorEmojis = ['🎉', '✨', '🌟', '⭐', '🎊'];
@@ -134,46 +135,18 @@ class _CelebrationPageState extends State<CelebrationPage>
   @override
   void initState() {
     super.initState();
+    _audio = AudioPlaybackService();
     _initParticles();
     _initAnimations();
-    _playCelebrationAudio();
-    _startCountdown();
+    _audio.playCompletion();
   }
 
   @override
   void dispose() {
     _particleController.dispose();
     _textController.dispose();
-    _countdownTimer?.cancel();
+    _audio.dispose();
     super.dispose();
-  }
-
-  void _startCountdown() {
-    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_countdown > 1) {
-        setState(() {
-          _countdown--;
-        });
-      } else {
-        timer.cancel();
-        _navigateBack();
-      }
-    });
-  }
-
-  void _navigateBack() {
-    _countdownTimer?.cancel();
-
-    final route = ModalRoute.of(context);
-    if (route != null && route.isCurrent) {
-      Navigator.of(context).pop();
-    }
-  }
-
-  /// 播放表扬语音
-  void _playCelebrationAudio() {
-    final player = AudioPlayer();
-    player.play(AssetSource('audio/celebrations/well_done.wav'));
   }
 
   void _initParticles() {
@@ -293,12 +266,12 @@ class _CelebrationPageState extends State<CelebrationPage>
                 ),
               ),
 
-              // Done 按钮（底部）
+              // 后续操作（底部）
               Positioned(
                 left: AppTheme.spacingLarge,
                 right: AppTheme.spacingLarge,
                 bottom: AppTheme.spacingLarge,
-                child: _buildDoneButton(),
+                child: _buildActions(),
               ),
             ],
           ),
@@ -338,57 +311,73 @@ class _CelebrationPageState extends State<CelebrationPage>
     );
   }
 
-  Widget _buildDoneButton() {
+  Widget _buildActions() {
+    return Row(
+      children: [
+        Expanded(
+          child: _actionButton(
+            icon: Icons.home_rounded,
+            label: 'Home',
+            color: AppTheme.secondary,
+            onTap: _loadingMore ? null : () => widget.onHome(context),
+          ),
+        ),
+        const SizedBox(width: 14),
+        Expanded(
+          child: _actionButton(
+            icon: Icons.arrow_forward_rounded,
+            label: 'More',
+            color: AppTheme.primary,
+            loading: _loadingMore,
+            onTap: _loadingMore
+                ? null
+                : () async {
+                    setState(() => _loadingMore = true);
+                    await widget.onMore(context);
+                    if (mounted) setState(() => _loadingMore = false);
+                  },
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _actionButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback? onTap,
+    bool loading = false,
+  }) {
     return GestureDetector(
-      onTap: _navigateBack,
+      onTap: onTap,
       child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 20),
+        padding: const EdgeInsets.symmetric(vertical: 18),
         decoration: BoxDecoration(
-          color: AppTheme.primary,
+          color: color,
           borderRadius: BorderRadius.circular(AppTheme.radiusXLarge),
-          boxShadow: [
-            BoxShadow(
-              color: AppTheme.primary.withValues(alpha: 0.3),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
+          boxShadow: AppTheme.buttonShadow,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 2), // 微调视觉位置
-              child: Text(
-                'Done',
-                style: AppTheme.headlineMedium.copyWith(
+            if (loading)
+              const SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 3,
                   color: Colors.white,
-                  fontWeight: FontWeight.w600,
-                  height: 1.0, // 消除默认行高影响
                 ),
+              )
+            else ...[
+              Icon(icon, color: Colors.white, size: 27),
+              const SizedBox(width: 7),
+              Text(
+                label,
+                style: AppTheme.headlineMedium.copyWith(color: Colors.white),
               ),
-            ),
-            const SizedBox(width: AppTheme.spacingSmall),
-            Container(
-              constraints: const BoxConstraints(minWidth: 32),
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 8, vertical: 4), // 增加一点垂直padding
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.3),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                '$_countdown',
-                textAlign: TextAlign.center,
-                style: AppTheme.titleMedium.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  height: 1.0, // 消除默认行高影响
-                ),
-              ),
-            ),
+            ],
           ],
         ),
       ),

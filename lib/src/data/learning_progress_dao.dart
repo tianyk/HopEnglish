@@ -28,7 +28,8 @@ class LearningProgressDao {
   /// 获取主题下所有学习项的进度数据（按 wordKey 映射）。
   ///
   /// 用途：后续自适应排序（Overdue/Warm/Favorite 分桶）需要批量读取该主题的历史数据。
-  Future<Map<String, Map<String, Object?>>> getWordProgressByCategory({required String categoryId}) async {
+  Future<Map<String, Map<String, Object?>>> getWordProgressByCategory(
+      {required String categoryId}) async {
     final db = await _getDb();
     final rows = await db.query(
       'word_progress',
@@ -38,8 +39,30 @@ class LearningProgressDao {
     return {for (final row in rows) row['word_key'] as String: row};
   }
 
+  Future<String?> getSetting(String key) async {
+    final db = await _getDb();
+    final rows = await db.query(
+      'app_settings',
+      columns: ['value'],
+      where: 'key = ?',
+      whereArgs: [key],
+      limit: 1,
+    );
+    return rows.isEmpty ? null : rows.first['value'] as String?;
+  }
+
+  Future<void> setSetting(String key, String value) async {
+    final db = await _getDb();
+    await db.insert(
+      'app_settings',
+      {'key': key, 'value': value},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
   /// 进入主题学习页时更新主题会话锚点（last_session_at）。
-  Future<void> touchCategorySession({required String categoryId, required int nowMs}) async {
+  Future<void> touchCategorySession(
+      {required String categoryId, required int nowMs}) async {
     final db = await _getDb();
     await _upsertCategoryProgress(db, categoryId);
     await db.rawUpdate(
@@ -49,7 +72,8 @@ class LearningProgressDao {
   }
 
   /// 离开主题学习页时更新 last_exited_at（可选字段，便于调试/统计/会话边界更稳）。
-  Future<void> saveCategoryExitedAt({required String categoryId, required int nowMs}) async {
+  Future<void> saveCategoryExitedAt(
+      {required String categoryId, required int nowMs}) async {
     final db = await _getDb();
     await _upsertCategoryProgress(db, categoryId);
     await db.rawUpdate(
@@ -67,7 +91,11 @@ class LearningProgressDao {
     required int nowMs,
   }) async {
     final db = await _getDb();
-    await _upsertWordProgress(db, wordKey: wordKey, categoryId: categoryId, wordId: wordId, wordName: wordName);
+    await _upsertWordProgress(db,
+        wordKey: wordKey,
+        categoryId: categoryId,
+        wordId: wordId,
+        wordName: wordName);
     await db.rawUpdate(
       'UPDATE word_progress SET view_count = view_count + 1, last_seen_at = ? WHERE word_key = ?',
       [nowMs, wordKey],
@@ -85,11 +113,58 @@ class LearningProgressDao {
     required int nowMs,
   }) async {
     final db = await _getDb();
-    await _upsertWordProgress(db, wordKey: wordKey, categoryId: categoryId, wordId: wordId, wordName: wordName);
+    await _upsertWordProgress(db,
+        wordKey: wordKey,
+        categoryId: categoryId,
+        wordId: wordId,
+        wordName: wordName);
     await db.rawUpdate(
       'UPDATE word_progress SET play_count = play_count + 1, last_played_at = ? WHERE word_key = ?',
       [nowMs, wordKey],
     );
+  }
+
+  Future<void> recordQuizResult({
+    required String wordKey,
+    required String categoryId,
+    required String wordId,
+    required String wordName,
+    required bool firstAttemptCorrect,
+    required int nowMs,
+  }) async {
+    final db = await _getDb();
+    await _upsertWordProgress(
+      db,
+      wordKey: wordKey,
+      categoryId: categoryId,
+      wordId: wordId,
+      wordName: wordName,
+    );
+    if (firstAttemptCorrect) {
+      await db.rawUpdate(
+        '''
+UPDATE word_progress
+SET quiz_attempt_count = quiz_attempt_count + 1,
+    quiz_correct_count = quiz_correct_count + 1,
+    correct_streak = correct_streak + 1,
+    last_quizzed_at = ?,
+    last_correct_at = ?
+WHERE word_key = ?
+''',
+        [nowMs, nowMs, wordKey],
+      );
+    } else {
+      await db.rawUpdate(
+        '''
+UPDATE word_progress
+SET quiz_attempt_count = quiz_attempt_count + 1,
+    correct_streak = 0,
+    last_quizzed_at = ?
+WHERE word_key = ?
+''',
+        [nowMs, wordKey],
+      );
+    }
   }
 
   /// 确保 word_progress 行存在（首次遇到该词时插入，已存在则忽略）。
@@ -102,7 +177,12 @@ class LearningProgressDao {
   }) async {
     await db.insert(
       'word_progress',
-      {'word_key': wordKey, 'category_id': categoryId, 'word_id': wordId, 'word_name': wordName},
+      {
+        'word_key': wordKey,
+        'category_id': categoryId,
+        'word_id': wordId,
+        'word_name': wordName
+      },
       conflictAlgorithm: ConflictAlgorithm.ignore,
     );
   }

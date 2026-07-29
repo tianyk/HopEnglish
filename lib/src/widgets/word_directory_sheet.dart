@@ -108,10 +108,13 @@ class WordDirectorySheet extends StatelessWidget {
       onTap: () => onWordSelected(index),
       child: Container(
         decoration: BoxDecoration(
-          color: isCurrent ? category.color.withValues(alpha: 0.15) : Colors.white,
+          color:
+              isCurrent ? category.color.withValues(alpha: 0.15) : Colors.white,
           borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
           border: Border.all(
-            color: isCurrent ? category.color : category.color.withValues(alpha: 0.2),
+            color: isCurrent
+                ? category.color
+                : category.color.withValues(alpha: 0.2),
             width: isCurrent ? 2 : 1,
           ),
         ),

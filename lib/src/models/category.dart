@@ -60,7 +60,9 @@ class Category extends Equatable {
       image: json['image'] as String?,
       name: json['name'] as String,
       color: _parseColor(json['color'] as String),
-      words: (json['words'] as List<dynamic>).map((w) => Word.fromJson(w as Map<String, dynamic>)).toList(),
+      words: (json['words'] as List<dynamic>)
+          .map((w) => Word.fromJson(w as Map<String, dynamic>))
+          .toList(),
     );
   }
 

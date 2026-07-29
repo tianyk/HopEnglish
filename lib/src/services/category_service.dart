@@ -12,6 +12,8 @@ class CategoryService {
   static Future<List<Category>> loadCategories() async {
     final jsonString = await rootBundle.loadString(_dataPath);
     final jsonList = json.decode(jsonString) as List<dynamic>;
-    return jsonList.map((item) => Category.fromJson(item as Map<String, dynamic>)).toList();
+    return jsonList
+        .map((item) => Category.fromJson(item as Map<String, dynamic>))
+        .toList();
   }
 }

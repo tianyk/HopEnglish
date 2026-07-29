@@ -65,6 +65,9 @@ class AppTheme {
   /// 卡片/表面色 - 纯白
   static const Color surface = Color(0xFFFFFFFF);
 
+  /// 首页卡片统一描边，避免分类色争夺视觉注意力。
+  static const Color cardBorder = Color(0xFFF0DFC7);
+
   // ==================== 文字色 ====================
 
   /// 主要文字 - 深灰（避免纯黑）

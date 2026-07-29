@@ -46,15 +46,18 @@ class AdaptiveSortingService {
     final nowMs = (now ?? DateTime.now()).millisecondsSinceEpoch;
     if (words.isEmpty) return [];
     // 1. 判断学习模式
-    final lastSessionAtMs = await _dao.getCategoryLastSessionAt(categoryId: category.id);
-    final mode = LearningModeResolver.resolve(lastSessionAtMs: lastSessionAtMs, nowMs: nowMs);
+    final lastSessionAtMs =
+        await _dao.getCategoryLastSessionAt(categoryId: category.id);
+    final mode = LearningModeResolver.resolve(
+        lastSessionAtMs: lastSessionAtMs, nowMs: nowMs);
     _logger.debug('generateSessionOrder', {
       'categoryId': category.id,
       'mode': mode.name,
       'lastSessionAtMs': lastSessionAtMs,
     });
     // 2. 读取所有单词的进度数据
-    final progressMap = await _dao.getWordProgressByCategory(categoryId: category.id);
+    final progressMap =
+        await _dao.getWordProgressByCategory(categoryId: category.id);
     // 3. 对每个单词分桶
     final buckets = <WordBucket, List<Word>>{
       WordBucket.overdue: [],
@@ -65,7 +68,8 @@ class AdaptiveSortingService {
       final wordKey = '${category.id}:${word.id}';
       final row = progressMap[wordKey];
       final progress = row != null ? WordProgress.fromRow(row) : null;
-      final bucket = WordBucketClassifier.classify(progress: progress, nowMs: nowMs);
+      final bucket =
+          WordBucketClassifier.classify(progress: progress, nowMs: nowMs);
       buckets[bucket]!.add(word);
     }
     _logger.debug('buckets', {

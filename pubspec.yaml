@@ -1,7 +1,7 @@
 name: hopenglish
 description: "An immersive English learning app for children aged 2-5, using intuitive interactions and direct sound-image connections."
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.1.0+2
 
 environment:
   sdk: ^3.6.2
@@ -21,6 +21,7 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^5.0.0
   flutter_launcher_icons: ^0.13.1
+  sqflite_common_ffi: ^2.4.0+3
 
 flutter:
   uses-material-design: true
@@ -34,6 +35,8 @@ flutter:
     - assets/audio/words/
     # 分类主题图标
     - assets/images/categories/
+    # 功能图标
+    - assets/images/icons/
     # 单词插画
     - assets/images/words/
 

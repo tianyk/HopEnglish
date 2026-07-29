@@ -63,4 +63,3 @@ class WordIcon extends StatelessWidget {
     );
   }
 }
-

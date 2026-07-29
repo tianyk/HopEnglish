@@ -21,8 +21,13 @@ class WordProgress {
   final String wordName;
   final int viewCount;
   final int playCount;
+  final int quizAttemptCount;
+  final int quizCorrectCount;
+  final int correctStreak;
   final int? lastSeenAtMs;
   final int? lastPlayedAtMs;
+  final int? lastQuizzedAtMs;
+  final int? lastCorrectAtMs;
 
   const WordProgress({
     required this.wordKey,
@@ -31,8 +36,13 @@ class WordProgress {
     required this.wordName,
     required this.viewCount,
     required this.playCount,
+    this.quizAttemptCount = 0,
+    this.quizCorrectCount = 0,
+    this.correctStreak = 0,
     this.lastSeenAtMs,
     this.lastPlayedAtMs,
+    this.lastQuizzedAtMs,
+    this.lastCorrectAtMs,
   });
 
   /// 从数据库行映射构造
@@ -44,8 +54,13 @@ class WordProgress {
       wordName: row['word_name'] as String,
       viewCount: (row['view_count'] as int?) ?? 0,
       playCount: (row['play_count'] as int?) ?? 0,
+      quizAttemptCount: (row['quiz_attempt_count'] as int?) ?? 0,
+      quizCorrectCount: (row['quiz_correct_count'] as int?) ?? 0,
+      correctStreak: (row['correct_streak'] as int?) ?? 0,
       lastSeenAtMs: row['last_seen_at'] as int?,
       lastPlayedAtMs: row['last_played_at'] as int?,
+      lastQuizzedAtMs: row['last_quizzed_at'] as int?,
+      lastCorrectAtMs: row['last_correct_at'] as int?,
     );
   }
 
@@ -83,7 +98,8 @@ class WordBucketClassifier {
     }
     // 判定 Overdue：很久没见 或 曝光次数很低
     final daysSinceLastSeen = progress.daysSinceLastSeen(nowMs);
-    if (daysSinceLastSeen >= _overdueDaysThreshold || progress.viewCount <= _overdueViewCountThreshold) {
+    if (daysSinceLastSeen >= _overdueDaysThreshold ||
+        progress.viewCount <= _overdueViewCountThreshold) {
       return WordBucket.overdue;
     }
     // 判定 Favorite：孩子主动重复多
