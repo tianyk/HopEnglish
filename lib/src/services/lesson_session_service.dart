@@ -1,6 +1,9 @@
 import 'dart:math';
 
 import 'package:hopenglish/src/data/learning_progress_dao.dart';
+import 'package:hopenglish/src/learning/learning_engine.dart';
+import 'package:hopenglish/src/learning/learning_models.dart';
+import 'package:hopenglish/src/learning/learning_policy.dart';
 import 'package:hopenglish/src/models/category.dart';
 import 'package:hopenglish/src/models/lesson_plan.dart';
 import 'package:hopenglish/src/models/word.dart';
@@ -10,22 +13,24 @@ class LessonSessionService {
   static final LessonSessionService _instance = LessonSessionService._();
   static LessonSessionService get instance => _instance;
 
-  static const Duration _reviewDueAfter = Duration(days: 7);
-
   final LearningProgressDao _dao;
-  final Random _random;
+  final LearningPolicy _policy;
 
   LessonSessionService._({
     LearningProgressDao? dao,
-    Random? random,
+    LearningPolicy? policy,
   })  : _dao = dao ?? LearningProgressDao(),
-        _random = random ?? Random();
+        _policy = policy ?? LearningPolicyRegistry.active;
+
+  LearningPolicy get policy => _policy;
 
   Future<LessonPlan> buildLesson({
     required Category category,
     required int lessonSize,
     Set<String> excludeWordIds = const {},
   }) async {
+    final nowMs = DateTime.now().millisecondsSinceEpoch;
+    final seed = _seedFor(category.id, nowMs);
     final progressRows =
         await _dao.getWordProgressByCategory(categoryId: category.id);
     final progress = <String, WordProgress>{
@@ -37,6 +42,9 @@ class LessonSessionService {
       lessonSize: lessonSize,
       progress: progress,
       excludeWordIds: excludeWordIds,
+      nowMs: nowMs,
+      randomSeed: seed,
+      lessonId: '${category.id}:$nowMs:$seed',
     );
   }
 
@@ -45,147 +53,112 @@ class LessonSessionService {
     required int lessonSize,
     required Map<String, WordProgress> progress,
     Set<String> excludeWordIds = const {},
+    int? nowMs,
+    int? randomSeed,
+    String? lessonId,
   }) {
-    final size = min(lessonSize, category.words.length);
-    final reviewCount = switch (size) {
-      5 => 2,
-      6 => 2,
-      8 => 3,
-      _ => max(1, (size * 0.34).round()),
-    };
-    final selected = _selectWords(
-      words: category.words,
-      progress: progress,
-      size: size,
-      reviewCount: reviewCount,
-      excluded: excludeWordIds,
-    );
-    final questions = _buildQuestions(
-      category: category,
-      lessonWords: selected,
-      progress: progress,
-    );
+    final effectiveNow = nowMs ?? DateTime.now().millisecondsSinceEpoch;
+    final seed = randomSeed ?? _seedFor(category.id, effectiveNow);
+    final id = lessonId ?? '${category.id}:$effectiveNow:$seed';
+    final candidates = category.words.map((word) {
+      final item = progress['${category.id}:${word.id}'];
+      return LearningCandidate(
+        wordId: word.id,
+        stage: item?.masteryStage ?? MasteryStage.newWord,
+        reviewLevel: item?.reviewLevel ?? 0,
+        nextReviewAtMs: item?.nextReviewAtMs,
+        lastQuizzedAtMs: item?.lastQuizzedAtMs,
+        lastQuizCorrect: item?.lastQuizCorrect,
+        lastQuizLessonId: item?.lastQuizLessonId,
+        viewCount: item?.viewCount ?? 0,
+        playCount: item?.playCount ?? 0,
+        correctStreak: item?.correctStreak ?? 0,
+      );
+    }).toList();
+    final decision = LearningEngine(_policy).createPlan(LearningPlanInput(
+      candidates: candidates,
+      requestedSize: min(lessonSize, category.words.length),
+      nowMs: effectiveNow,
+      lessonId: id,
+      randomSeed: seed,
+      excludedWordIds: excludeWordIds,
+    ));
+    final wordsById = {for (final word in category.words) word.id: word};
+    final random = Random(seed);
+    final selectedWords =
+        decision.items.map((item) => wordsById[item.wordId]!).toList();
+    final studyWords = <Word>[];
+    if (decision.policyVersion == 1) {
+      studyWords.addAll(selectedWords);
+    } else {
+      final newWords = decision.items
+          .where((item) => item.role == LessonRole.newWord)
+          .map((item) => wordsById[item.wordId]!)
+          .toList();
+      final secondStudyPass = [...newWords]..shuffle(random);
+      studyWords.addAll([...newWords, ...secondStudyPass]);
+    }
+    final questionItems = [...decision.items]..shuffle(random);
+    final questions = questionItems.map((item) {
+      final target = wordsById[item.wordId]!;
+      final candidate =
+          candidates.firstWhere((value) => value.wordId == item.wordId);
+      return LessonQuestion(
+        target: target,
+        options: _buildOptions(
+          target: target,
+          selectedWords: selectedWords,
+          categoryWords: category.words,
+          requestedCount: item.optionCount,
+          random: random,
+        ),
+        kind: item.role == LessonRole.newWord
+            ? QuestionKind.initialRetrieval
+            : QuestionKind.scheduledReview,
+        role: item.role,
+        stage: candidate.stage,
+        reviewLevel: candidate.reviewLevel,
+        lastQuizLessonId: candidate.lastQuizLessonId,
+      );
+    }).toList();
     return LessonPlan(
       category: category,
-      words: List.unmodifiable(selected),
+      words: List.unmodifiable(selectedWords),
+      studyWords: List.unmodifiable(studyWords),
       questions: List.unmodifiable(questions),
+      lessonId: id,
+      policyVersion: decision.policyVersion,
+      randomSeed: seed,
     );
   }
 
-  List<Word> _selectWords({
-    required List<Word> words,
-    required Map<String, WordProgress> progress,
-    required int size,
-    required int reviewCount,
-    required Set<String> excluded,
+  List<Word> _buildOptions({
+    required Word target,
+    required List<Word> selectedWords,
+    required List<Word> categoryWords,
+    required int requestedCount,
+    required Random random,
   }) {
-    final nowMs = DateTime.now().millisecondsSinceEpoch;
-
-    int score(Word word) {
-      final item =
-          progress.values.where((value) => value.wordId == word.id).firstOrNull;
-      final exclusionPenalty = excluded.contains(word.id) ? 5 : 0;
-      if (item == null || item.quizAttemptCount == 0) {
-        return exclusionPenalty;
-      }
-      if (item.correctStreak == 0) return 1 + exclusionPenalty;
-      if (item.correctStreak < 2) return 2 + exclusionPenalty;
-      final lastQuiz = item.lastQuizzedAtMs ?? 0;
-      if (nowMs - lastQuiz >= _reviewDueAfter.inMilliseconds) {
-        return 3 + exclusionPenalty;
-      }
-      return 4 + exclusionPenalty;
+    final optionCount = min(requestedCount, categoryWords.length);
+    final lessonDistractors = selectedWords
+        .where((word) => word.id != target.id)
+        .toList()
+      ..shuffle(random);
+    final selectedIds = lessonDistractors.map((word) => word.id).toSet();
+    final categoryDistractors = categoryWords
+        .where((word) => word.id != target.id && !selectedIds.contains(word.id))
+        .toList()
+      ..shuffle(random);
+    final options = <Word>[target];
+    for (final distractor in [...lessonDistractors, ...categoryDistractors]) {
+      if (options.length >= optionCount) break;
+      options.add(distractor);
     }
-
-    final buckets = <int, List<Word>>{
-      for (var index = 0; index <= 9; index++) index: [],
-    };
-    for (final word in words) {
-      buckets[score(word)]!.add(word);
-    }
-    for (final entry in buckets.entries) {
-      if (entry.key == 3 ||
-          entry.key == 4 ||
-          entry.key == 8 ||
-          entry.key == 9) {
-        entry.value.sort((a, b) {
-          final aTime = _progressFor(a, progress)?.lastQuizzedAtMs ?? 0;
-          final bTime = _progressFor(b, progress)?.lastQuizzedAtMs ?? 0;
-          return aTime.compareTo(bTime);
-        });
-      } else {
-        entry.value.shuffle(_random);
-      }
-    }
-
-    final focusCount = size - reviewCount;
-    final result = <Word>[];
-    _takeUnique(buckets[0]!, focusCount, result);
-    _takeUnique(buckets[1]!, focusCount - result.length, result);
-    _takeUnique(buckets[2]!, focusCount - result.length, result);
-
-    final remainingReview = size - result.length;
-    _takeUnique(buckets[3]!, remainingReview, result);
-    _takeUnique(buckets[4]!, size - result.length, result);
-
-    for (final priority in [0, 1, 2, 3, 4]) {
-      _takeUnique(buckets[priority]!, size - result.length, result);
-    }
-    for (final priority in [5, 6, 7, 8, 9]) {
-      _takeUnique(buckets[priority]!, size - result.length, result);
-    }
-    return result.take(size).toList();
+    options.shuffle(random);
+    return List.unmodifiable(options);
   }
 
-  List<LessonQuestion> _buildQuestions({
-    required Category category,
-    required List<Word> lessonWords,
-    required Map<String, WordProgress> progress,
-  }) {
-    final targets = [...lessonWords]..shuffle(_random);
-    return targets.map((target) {
-      final item = progress.values
-          .where((value) => value.wordId == target.id)
-          .firstOrNull;
-      final requestedCount = (item?.correctStreak ?? 0) >= 2 ? 4 : 2;
-      final optionCount = min(requestedCount, category.words.length);
-      final lessonDistractors = lessonWords
-          .where((word) => word.id != target.id)
-          .toList()
-        ..shuffle(_random);
-      final categoryDistractors = category.words
-          .where((word) =>
-              word.id != target.id &&
-              !lessonDistractors.any((item) => item.id == word.id))
-          .toList()
-        ..shuffle(_random);
-      final options = <Word>[target];
-      for (final distractor in [...lessonDistractors, ...categoryDistractors]) {
-        if (options.length >= optionCount) break;
-        options.add(distractor);
-      }
-      options.shuffle(_random);
-      return LessonQuestion(
-          target: target, options: List.unmodifiable(options));
-    }).toList();
-  }
-
-  void _takeUnique(List<Word> source, int count, List<Word> target) {
-    if (count <= 0) return;
-    while (source.isNotEmpty && count > 0) {
-      final word = source.removeAt(0);
-      if (target.any((item) => item.id == word.id)) continue;
-      target.add(word);
-      count--;
-    }
-  }
-
-  WordProgress? _progressFor(
-    Word word,
-    Map<String, WordProgress> progress,
-  ) {
-    return progress.values
-        .where((value) => value.wordId == word.id)
-        .firstOrNull;
+  int _seedFor(String categoryId, int nowMs) {
+    return Object.hash(categoryId, nowMs) & 0x7fffffff;
   }
 }

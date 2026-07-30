@@ -1,3 +1,5 @@
+import 'package:hopenglish/src/learning/learning_models.dart';
+
 /// 单词分桶类型
 ///
 /// 用于自适应排序时将单词分到不同的桶，然后按配比混排。
@@ -28,6 +30,12 @@ class WordProgress {
   final int? lastPlayedAtMs;
   final int? lastQuizzedAtMs;
   final int? lastCorrectAtMs;
+  final MasteryStage masteryStage;
+  final int reviewLevel;
+  final int? nextReviewAtMs;
+  final String? lastQuizLessonId;
+  final bool? lastQuizCorrect;
+  final int lastPolicyVersion;
 
   const WordProgress({
     required this.wordKey,
@@ -43,6 +51,12 @@ class WordProgress {
     this.lastPlayedAtMs,
     this.lastQuizzedAtMs,
     this.lastCorrectAtMs,
+    this.masteryStage = MasteryStage.newWord,
+    this.reviewLevel = 0,
+    this.nextReviewAtMs,
+    this.lastQuizLessonId,
+    this.lastQuizCorrect,
+    this.lastPolicyVersion = 1,
   });
 
   /// 从数据库行映射构造
@@ -61,6 +75,17 @@ class WordProgress {
       lastPlayedAtMs: row['last_played_at'] as int?,
       lastQuizzedAtMs: row['last_quizzed_at'] as int?,
       lastCorrectAtMs: row['last_correct_at'] as int?,
+      masteryStage:
+          MasteryStage.fromStorage((row['mastery_stage'] as int?) ?? 0),
+      reviewLevel: (row['review_level'] as int?) ?? 0,
+      nextReviewAtMs: row['next_review_at'] as int?,
+      lastQuizLessonId: row['last_quiz_lesson_id'] as String?,
+      lastQuizCorrect: switch (row['last_quiz_result'] as int?) {
+        0 => false,
+        1 => true,
+        _ => null,
+      },
+      lastPolicyVersion: (row['last_policy_version'] as int?) ?? 1,
     );
   }
 

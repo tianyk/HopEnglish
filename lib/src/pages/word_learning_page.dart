@@ -3,11 +3,15 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:hopenglish/src/learning/learning_engine.dart';
+import 'package:hopenglish/src/learning/learning_models.dart';
+import 'package:hopenglish/src/learning/learning_policy.dart';
 import 'package:hopenglish/src/models/lesson_plan.dart';
 import 'package:hopenglish/src/models/word.dart';
 import 'package:hopenglish/src/pages/celebration_page.dart';
 import 'package:hopenglish/src/services/audio_playback_service.dart';
 import 'package:hopenglish/src/services/learning_progress_service.dart';
+import 'package:hopenglish/src/services/lesson_quiz_controller.dart';
 import 'package:hopenglish/src/services/lesson_session_service.dart';
 import 'package:hopenglish/src/theme/app_theme.dart';
 import 'package:hopenglish/src/widgets/adaptive_image.dart';
@@ -15,15 +19,22 @@ import 'package:hopenglish/src/widgets/word_icon.dart';
 
 enum _LessonPhase { learn, quiz }
 
+typedef AttemptRecorder = Future<LearningTransition> Function({
+  required LessonQuestion question,
+  required bool firstAttemptCorrect,
+});
+
 class WordLearningPage extends StatefulWidget {
   final LessonPlan plan;
   final int lessonSize;
   final AudioPlaybackController? audio;
+  final AttemptRecorder? attemptRecorder;
 
   const WordLearningPage({
     required this.plan,
     required this.lessonSize,
     this.audio,
+    this.attemptRecorder,
     super.key,
   });
 
@@ -35,6 +46,7 @@ class _WordLearningPageState extends State<WordLearningPage>
     with TickerProviderStateMixin {
   static const Duration _effectiveViewDelay = Duration(milliseconds: 1200);
   static const Duration _answerAdvanceDelay = Duration(milliseconds: 900);
+  static const Duration _finalAnswerAdvanceDelay = Duration(milliseconds: 400);
 
   final LearningProgressService _progress = LearningProgressService.instance;
   late final AudioPlaybackController _audio;
@@ -45,22 +57,33 @@ class _WordLearningPageState extends State<WordLearningPage>
   late final Animation<double> _shakeAnimation;
 
   _LessonPhase _phase = _LessonPhase.learn;
+  late final List<Word> _studyWords;
+  late final LessonQuizController _quizController;
   int _learnIndex = 0;
   int _quizIndex = 0;
   bool _canContinue = false;
   bool _answerLocked = false;
-  bool _firstAttemptPending = true;
   String? _wrongOptionId;
   String? _correctOptionId;
   Timer? _effectiveViewTimer;
   Timer? _manualPlaybackCooldownTimer;
   int _presentationToken = 0;
+  double _displayedProgress = 0;
 
   @override
   void initState() {
     super.initState();
     _ownsAudio = widget.audio == null;
     _audio = widget.audio ?? AudioPlaybackService();
+    _studyWords = List.of(widget.plan.studyWords);
+    _quizController = LessonQuizController(
+      policy: LearningPolicyRegistry.forVersion(widget.plan.policyVersion),
+      randomSeed: widget.plan.randomSeed,
+      lessonId: widget.plan.lessonId,
+      categoryWords: widget.plan.category.words,
+      initialQuestions: widget.plan.questions,
+    );
+    _phase = _studyWords.isEmpty ? _LessonPhase.quiz : _LessonPhase.learn;
     _bounceController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -85,18 +108,22 @@ class _WordLearningPageState extends State<WordLearningPage>
     ));
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _progress.touchCategorySession(categoryId: widget.plan.category.id);
-      _presentLearningWord();
+      if (_phase == _LessonPhase.learn) {
+        _presentLearningWord();
+      } else if (_questions.isNotEmpty) {
+        _playCurrentWord(slow: false);
+      }
     });
   }
 
-  Word get _currentWord => widget.plan.words[_learnIndex];
-  LessonQuestion get _currentQuestion => widget.plan.questions[_quizIndex];
+  Word get _currentWord => _studyWords[_learnIndex];
+  List<LessonQuestion> get _questions => _quizController.questions;
+  LessonQuestion get _currentQuestion => _questions[_quizIndex];
 
-  int get _totalSteps =>
-      widget.plan.words.length + widget.plan.questions.length;
+  int get _totalSteps => _studyWords.length + _questions.length;
   int get _completedSteps => _phase == _LessonPhase.learn
       ? _learnIndex
-      : widget.plan.words.length + _quizIndex;
+      : _studyWords.length + _quizIndex;
 
   @override
   void dispose() {
@@ -174,7 +201,7 @@ class _WordLearningPageState extends State<WordLearningPage>
 
   void _nextLearningWord() {
     if (!_canContinue) return;
-    if (_learnIndex + 1 < widget.plan.words.length) {
+    if (_learnIndex + 1 < _studyWords.length) {
       setState(() => _learnIndex++);
       _presentLearningWord();
       return;
@@ -184,7 +211,6 @@ class _WordLearningPageState extends State<WordLearningPage>
     setState(() {
       _phase = _LessonPhase.quiz;
       _quizIndex = 0;
-      _firstAttemptPending = true;
       _canContinue = false;
     });
     _playCurrentWord(slow: false);
@@ -192,51 +218,133 @@ class _WordLearningPageState extends State<WordLearningPage>
 
   Future<void> _selectAnswer(Word selected) async {
     if (_answerLocked || _correctOptionId != null) return;
+    _answerLocked = true;
     final isCorrect = selected.id == _currentQuestion.target.id;
+    final practiceOnly = _currentQuestion.kind == QuestionKind.errorRetry ||
+        _currentQuestion.kind == QuestionKind.reinforcementRetrieval;
     if (!isCorrect) {
-      if (_firstAttemptPending) {
-        _firstAttemptPending = false;
-        _progress.recordQuizResult(
-          category: widget.plan.category,
-          word: _currentQuestion.target,
-          firstAttemptCorrect: false,
-        );
-      }
       setState(() => _wrongOptionId = selected.id);
       await _shakeController.forward(from: 0);
       if (!mounted) return;
-      setState(() => _wrongOptionId = null);
+      LearningTransition? transition;
+      if (!practiceOnly) {
+        transition = await _recordAttempt(
+          question: _currentQuestion,
+          firstAttemptCorrect: false,
+        );
+        if (!mounted || transition == null) {
+          if (mounted) {
+            setState(() {
+              _answerLocked = false;
+              _wrongOptionId = null;
+            });
+          }
+          return;
+        }
+      }
+      setState(() {
+        _wrongOptionId = null;
+        _correctOptionId = _currentQuestion.target.id;
+      });
       await _playCurrentWord(slow: false);
+      _scheduleRetry(_currentQuestion, transition);
+      await Future<void>.delayed(_answerAdvanceDelay);
+      if (!mounted) return;
+      await _advanceQuiz();
       return;
     }
 
-    _answerLocked = true;
-    if (_firstAttemptPending) {
-      _progress.recordQuizResult(
-        category: widget.plan.category,
-        word: _currentQuestion.target,
+    if (!practiceOnly) {
+      final transition = await _recordAttempt(
+        question: _currentQuestion,
         firstAttemptCorrect: true,
       );
+      if (!mounted || transition == null) {
+        if (mounted) setState(() => _answerLocked = false);
+        return;
+      }
     }
     setState(() => _correctOptionId = selected.id);
-    unawaited(_audio.playEncouragement());
-    await Future<void>.delayed(_answerAdvanceDelay);
+    final isLastQuestion = _quizIndex + 1 >= _questions.length;
+    if (isLastQuestion) {
+      await Future<void>.delayed(_finalAnswerAdvanceDelay);
+    } else {
+      await _audio.playEncouragement();
+    }
     if (!mounted) return;
-    if (_quizIndex + 1 < widget.plan.questions.length) {
+    await _advanceQuiz();
+  }
+
+  Future<LearningTransition?> _recordAttempt({
+    required LessonQuestion question,
+    required bool firstAttemptCorrect,
+  }) async {
+    try {
+      final recorder = widget.attemptRecorder;
+      if (recorder != null) {
+        return await recorder(
+          question: question,
+          firstAttemptCorrect: firstAttemptCorrect,
+        );
+      }
+      if (widget.plan.lessonId == 'legacy') {
+        _progress.recordQuizResult(
+          category: widget.plan.category,
+          word: question.target,
+          firstAttemptCorrect: firstAttemptCorrect,
+        );
+        return LearningEngine(
+          LearningPolicyRegistry.forVersion(widget.plan.policyVersion),
+        ).applyAttempt(AttemptInput(
+          currentStage: question.stage,
+          currentReviewLevel: question.reviewLevel,
+          lessonId: widget.plan.lessonId,
+          lastQuizLessonId: question.lastQuizLessonId,
+          questionKind: question.kind,
+          firstAttemptCorrect: firstAttemptCorrect,
+          nowMs: DateTime.now().millisecondsSinceEpoch,
+        ));
+      }
+      return await _progress.recordLearningAttempt(
+        category: widget.plan.category,
+        question: question,
+        lessonId: widget.plan.lessonId,
+        policyVersion: widget.plan.policyVersion,
+        firstAttemptCorrect: firstAttemptCorrect,
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  void _scheduleRetry(
+    LessonQuestion question,
+    LearningTransition? transition,
+  ) {
+    _quizController.scheduleRetry(
+      currentIndex: _quizIndex,
+      question: question,
+      transition: transition,
+    );
+  }
+
+  Future<void> _advanceQuiz() async {
+    if (_quizIndex + 1 < _questions.length) {
       setState(() {
         _quizIndex++;
         _answerLocked = false;
-        _firstAttemptPending = true;
         _wrongOptionId = null;
         _correctOptionId = null;
       });
       _playCurrentWord(slow: false);
     } else {
-      _openCelebration();
+      await _openCelebration();
     }
   }
 
-  void _openCelebration() {
+  Future<void> _openCelebration() async {
+    await _audio.stop();
+    if (!mounted) return;
     final completedIds = widget.plan.words.map((word) => word.id).toSet();
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
@@ -328,14 +436,16 @@ class _WordLearningPageState extends State<WordLearningPage>
   }
 
   Widget _buildProgress() {
-    final value = (_completedSteps + 1) / _totalSteps;
+    final rawValue =
+        _totalSteps == 0 ? 1.0 : (_completedSteps + 1) / _totalSteps;
+    _displayedProgress = math.max(_displayedProgress, rawValue);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(8),
         child: LinearProgressIndicator(
           minHeight: 10,
-          value: value.clamp(0, 1),
+          value: _displayedProgress.clamp(0, 1),
           backgroundColor: AppTheme.backgroundWarm,
           color: widget.plan.category.color,
         ),
@@ -619,9 +729,7 @@ class _WordLearningPageState extends State<WordLearningPage>
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                _learnIndex + 1 == widget.plan.words.length
-                    ? 'Practice'
-                    : 'Next',
+                _learnIndex + 1 == _studyWords.length ? 'Practice' : 'Next',
                 style: AppTheme.headlineMedium.copyWith(color: Colors.white),
               ),
               const SizedBox(width: 8),

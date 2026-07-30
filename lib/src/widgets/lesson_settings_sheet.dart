@@ -20,6 +20,7 @@ class _LessonSettingsSheetState extends State<LessonSettingsSheet> {
   late int _selected;
 
   static const _minutes = {5: 2, 6: 3, 8: 5};
+  static const _labels = {5: '轻松', 6: '标准', 8: '充分'};
 
   @override
   void initState() {
@@ -57,7 +58,7 @@ class _LessonSettingsSheetState extends State<LessonSettingsSheet> {
               ),
             ),
             const SizedBox(height: 18),
-            const Text('每课学习几个单词', style: AppTheme.headlineMedium),
+            const Text('每课练习节奏', style: AppTheme.headlineMedium),
             const SizedBox(height: 6),
             const Text('选择适合孩子的学习节奏', style: AppTheme.bodyMedium),
             const SizedBox(height: 20),
@@ -75,7 +76,7 @@ class _LessonSettingsSheetState extends State<LessonSettingsSheet> {
                     child: Semantics(
                       button: true,
                       selected: selected,
-                      label: '$count 个单词，约 ${_minutes[count]} 分钟',
+                      label: '${_labels[count]}节奏，约 ${_minutes[count]} 分钟',
                       child: InkWell(
                         onTap: () => _select(count),
                         borderRadius:
@@ -99,14 +100,14 @@ class _LessonSettingsSheetState extends State<LessonSettingsSheet> {
                           child: Column(
                             children: [
                               Text(
-                                '$count',
+                                _labels[count]!,
                                 style: AppTheme.displayMedium.copyWith(
                                   color: selected
                                       ? AppTheme.primary
                                       : AppTheme.textPrimary,
                                 ),
                               ),
-                              Text('个单词', style: AppTheme.titleMedium),
+                              Text('$count 规模', style: AppTheme.titleMedium),
                               const SizedBox(height: 4),
                               Text(
                                 '约 ${_minutes[count]} 分钟',

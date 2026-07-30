@@ -1,7 +1,11 @@
 import 'package:hopenglish/src/data/app_database.dart';
 import 'package:hopenglish/src/data/learning_progress_dao.dart';
 import 'package:hopenglish/src/libs/logger.dart';
+import 'package:hopenglish/src/learning/learning_engine.dart';
+import 'package:hopenglish/src/learning/learning_models.dart';
+import 'package:hopenglish/src/learning/learning_policy.dart';
 import 'package:hopenglish/src/models/category.dart';
+import 'package:hopenglish/src/models/lesson_plan.dart';
 import 'package:hopenglish/src/models/word.dart';
 
 final _logger = Logger.getLogger();
@@ -137,6 +141,64 @@ class LearningProgressService {
         nowMs: (now ?? DateTime.now()).millisecondsSinceEpoch,
       );
     });
+  }
+
+  Future<LearningTransition> recordLearningAttempt({
+    required Category category,
+    required LessonQuestion question,
+    required String lessonId,
+    required int policyVersion,
+    required bool firstAttemptCorrect,
+    DateTime? now,
+  }) async {
+    final nowMs = (now ?? DateTime.now()).millisecondsSinceEpoch;
+    final word = question.target;
+    final wordKey = buildWordKey(categoryId: category.id, wordId: word.id);
+    if (policyVersion == 1) {
+      await _dao.recordQuizResult(
+        wordKey: wordKey,
+        categoryId: category.id,
+        wordId: word.id,
+        wordName: word.name,
+        firstAttemptCorrect: firstAttemptCorrect,
+        nowMs: nowMs,
+      );
+      return LearningTransition(
+        nextStage: question.stage,
+        nextReviewLevel: question.reviewLevel,
+        nextReviewAtMs: nowMs + const Duration(days: 7).inMilliseconds,
+        shouldRetryInLesson: false,
+        stageChanged: false,
+      );
+    }
+    final transition =
+        LearningEngine(LearningPolicyRegistry.forVersion(policyVersion))
+            .applyAttempt(AttemptInput(
+      currentStage: question.stage,
+      currentReviewLevel: question.reviewLevel,
+      lessonId: lessonId,
+      lastQuizLessonId: question.lastQuizLessonId,
+      questionKind: question.kind,
+      firstAttemptCorrect: firstAttemptCorrect,
+      nowMs: nowMs,
+    ));
+    try {
+      await _dao.recordLearningAttempt(
+        wordKey: wordKey,
+        categoryId: category.id,
+        wordId: word.id,
+        wordName: word.name,
+        firstAttemptCorrect: firstAttemptCorrect,
+        lessonId: lessonId,
+        policyVersion: policyVersion,
+        transition: transition,
+        nowMs: nowMs,
+      );
+      return transition;
+    } catch (e, st) {
+      _logger.error('recordLearningAttempt failed', error: e, stackTrace: st);
+      rethrow;
+    }
   }
 
   @Deprecated('Use recordEffectiveView after the dwell threshold')

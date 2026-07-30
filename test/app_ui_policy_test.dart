@@ -36,9 +36,11 @@ void main() {
       ),
     );
 
-    expect(find.text('每课学习几个单词'), findsOneWidget);
+    expect(find.text('每课练习节奏'), findsOneWidget);
     expect(find.text('选择适合孩子的学习节奏'), findsOneWidget);
-    expect(find.text('个单词'), findsNWidgets(3));
+    expect(find.text('轻松'), findsOneWidget);
+    expect(find.text('标准'), findsOneWidget);
+    expect(find.text('充分'), findsOneWidget);
     expect(find.text('约 3 分钟'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });

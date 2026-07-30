@@ -15,7 +15,7 @@ class AppDatabase {
   /// 规则：
   /// - 每次“表结构变更”必须递增
   /// - 并在 [_onUpgrade] 中写增量迁移逻辑
-  static const int _schemaVersion = 2;
+  static const int _schemaVersion = 3;
 
   /// 全局单例连接（进程内缓存）。
   static Database? _database;
@@ -87,7 +87,13 @@ CREATE TABLE word_progress (
   last_seen_at INTEGER NULL,
   last_played_at INTEGER NULL,
   last_quizzed_at INTEGER NULL,
-  last_correct_at INTEGER NULL
+  last_correct_at INTEGER NULL,
+  mastery_stage INTEGER NOT NULL DEFAULT 0,
+  review_level INTEGER NOT NULL DEFAULT 0,
+  next_review_at INTEGER NULL,
+  last_quiz_lesson_id TEXT NULL,
+  last_quiz_result INTEGER NULL,
+  last_policy_version INTEGER NOT NULL DEFAULT 1
 )
 ''');
     // 主题索引：按主题批量读取/统计时更快。
@@ -96,6 +102,8 @@ CREATE TABLE word_progress (
     // 时间索引：后续按 last_seen_at 做 Overdue 桶筛选时更快。
     await db.execute(
         'CREATE INDEX idx_word_progress_last_seen_at ON word_progress(last_seen_at)');
+    await db.execute(
+        'CREATE INDEX idx_word_progress_next_review_at ON word_progress(next_review_at)');
 
     // 主题学习会话表（主题粒度）：
     // - last_session_at 用于判断日常/复习加强/久别重启
@@ -138,6 +146,53 @@ CREATE TABLE app_settings (
   value TEXT NOT NULL
 )
 ''');
+    }
+    if (from < 3) {
+      await db.execute(
+        'ALTER TABLE word_progress ADD COLUMN mastery_stage INTEGER NOT NULL DEFAULT 0',
+      );
+      await db.execute(
+        'ALTER TABLE word_progress ADD COLUMN review_level INTEGER NOT NULL DEFAULT 0',
+      );
+      await db.execute(
+        'ALTER TABLE word_progress ADD COLUMN next_review_at INTEGER NULL',
+      );
+      await db.execute(
+        'ALTER TABLE word_progress ADD COLUMN last_quiz_lesson_id TEXT NULL',
+      );
+      await db.execute(
+        'ALTER TABLE word_progress ADD COLUMN last_quiz_result INTEGER NULL',
+      );
+      await db.execute(
+        'ALTER TABLE word_progress ADD COLUMN last_policy_version INTEGER NOT NULL DEFAULT 1',
+      );
+      await db.rawUpdate('''
+UPDATE word_progress
+SET mastery_stage = CASE
+      WHEN quiz_attempt_count = 0 OR correct_streak = 0 THEN 0
+      WHEN correct_streak = 1 THEN 1
+      ELSE 2
+    END,
+    review_level = 0,
+    next_review_at = CASE
+      WHEN last_quizzed_at IS NULL THEN NULL
+      WHEN correct_streak = 1 THEN last_quizzed_at + ?
+      WHEN correct_streak >= 2 THEN last_quizzed_at + ?
+      ELSE last_quizzed_at
+    END,
+    last_quiz_result = CASE
+      WHEN quiz_attempt_count = 0 THEN NULL
+      WHEN correct_streak = 0 THEN 0
+      ELSE 1
+    END,
+    last_policy_version = 1
+''', [
+        const Duration(days: 1).inMilliseconds,
+        const Duration(days: 3).inMilliseconds,
+      ]);
+      await db.execute(
+        'CREATE INDEX idx_word_progress_next_review_at ON word_progress(next_review_at)',
+      );
     }
   }
 }

@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:hopenglish/src/data/app_database.dart';
+import 'package:hopenglish/src/learning/learning_models.dart';
 
 /// 学习进度 DAO（SQLite + sqflite）
 ///
@@ -167,9 +168,69 @@ WHERE word_key = ?
     }
   }
 
+  Future<void> recordLearningAttempt({
+    required String wordKey,
+    required String categoryId,
+    required String wordId,
+    required String wordName,
+    required bool firstAttemptCorrect,
+    required String lessonId,
+    required int policyVersion,
+    required LearningTransition transition,
+    required int nowMs,
+  }) async {
+    final db = await _getDb();
+    await db.transaction((txn) async {
+      await _upsertWordProgress(
+        txn,
+        wordKey: wordKey,
+        categoryId: categoryId,
+        wordId: wordId,
+        wordName: wordName,
+      );
+      await txn.rawUpdate(
+        '''
+UPDATE word_progress
+SET quiz_attempt_count = quiz_attempt_count + 1,
+    quiz_correct_count = quiz_correct_count + ?,
+    correct_streak = CASE
+      WHEN ? = 1 THEN correct_streak + 1
+      ELSE 0
+    END,
+    last_quizzed_at = ?,
+    last_correct_at = CASE
+      WHEN ? = 1 THEN ?
+      ELSE last_correct_at
+    END,
+    mastery_stage = ?,
+    review_level = ?,
+    next_review_at = ?,
+    last_quiz_lesson_id = ?,
+    last_quiz_result = ?,
+    last_policy_version = ?
+WHERE word_key = ?
+''',
+        [
+          firstAttemptCorrect ? 1 : 0,
+          firstAttemptCorrect ? 1 : 0,
+          nowMs,
+          firstAttemptCorrect ? 1 : 0,
+          nowMs,
+          transition.nextStage.index,
+          transition.nextReviewLevel,
+          transition.nextReviewAtMs,
+          lessonId,
+          firstAttemptCorrect ? 1 : 0,
+          policyVersion,
+          wordKey,
+        ],
+      );
+    });
+  }
+
   /// 确保 word_progress 行存在（首次遇到该词时插入，已存在则忽略）。
   Future<void> _upsertWordProgress(
-    Database db, {
+    DatabaseExecutor db, {
     required String wordKey,
     required String categoryId,
     required String wordId,

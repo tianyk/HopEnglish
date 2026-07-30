@@ -21,6 +21,15 @@ abstract class AudioPlaybackController {
 }
 
 class AudioPlaybackService implements AudioPlaybackController {
+  static const Map<String, int> encouragementWeights = {
+    'great.wav': 7,
+    'good_job.wav': 3,
+  };
+  static const Map<String, int> completionWeights = {
+    'well_done.wav': 7,
+    'yay.wav': 3,
+  };
+
   final AudioPlayer _player;
   final Random _random;
   int _playbackToken = 0;
@@ -63,30 +72,37 @@ class AudioPlaybackService implements AudioPlaybackController {
 
   @override
   Future<void> playEncouragement() async {
-    const files = ['awesome.wav', 'good_job.wav', 'great.wav', 'yay.wav'];
-    await _playCelebration(files[_random.nextInt(files.length)]);
+    await _playCelebration(_selectWeighted(encouragementWeights));
   }
 
   @override
   Future<void> playCompletion() async {
-    const files = [
-      'awesome.wav',
-      'good_job.wav',
-      'great.wav',
-      'well_done.wav',
-      'yay.wav',
-    ];
-    await _playCelebration(files[_random.nextInt(files.length)]);
+    await _playCelebration(_selectWeighted(completionWeights));
   }
 
   Future<void> _playCelebration(String filename) async {
-    ++_playbackToken;
+    final token = ++_playbackToken;
     try {
       await _player.stop();
       await _player.play(AssetSource('audio/celebrations/$filename'));
+      await _player.onPlayerComplete.first.timeout(
+        const Duration(seconds: 3),
+      );
+      if (token != _playbackToken) return;
     } catch (_) {
       // Audio feedback must never block the lesson.
     }
+  }
+
+  String _selectWeighted(Map<String, int> weights) {
+    final totalWeight =
+        weights.values.fold<int>(0, (sum, value) => sum + value);
+    var selection = _random.nextInt(totalWeight);
+    for (final entry in weights.entries) {
+      selection -= entry.value;
+      if (selection < 0) return entry.key;
+    }
+    return weights.keys.last;
   }
 
   String _assetPath(Word word, {required bool slow}) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hopenglish/src/models/category.dart';
+import 'package:hopenglish/src/learning/learning_models.dart';
 import 'package:hopenglish/src/models/word.dart';
 import 'package:hopenglish/src/models/word_bucket.dart';
 import 'package:hopenglish/src/services/lesson_session_service.dart';
@@ -23,21 +24,28 @@ void main() {
       ),
     );
 
-    test('builds exact 5, 6, and 8 word lessons', () {
-      for (final size in [5, 6, 8]) {
+    test('caps new words and gives them two study passes', () {
+      for (final entry in const {5: 3, 6: 3, 8: 4}.entries) {
         final plan = LessonSessionService.instance.buildLessonFromProgress(
           category: category,
-          lessonSize: size,
+          lessonSize: entry.key,
           progress: const {},
+          nowMs: 1000,
+          randomSeed: 42,
+          lessonId: 'lesson',
         );
 
-        expect(plan.words, hasLength(size));
-        expect(plan.questions, hasLength(size));
+        expect(plan.words, hasLength(entry.value));
+        expect(plan.studyWords, hasLength(entry.value * 2));
+        expect(plan.questions, hasLength(entry.value));
         expect(
           plan.questions.every((question) => question.options.length == 2),
           isTrue,
         );
-        expect(plan.words.map((word) => word.id).toSet(), hasLength(size));
+        expect(
+          plan.words.map((word) => word.id).toSet(),
+          hasLength(entry.value),
+        );
       }
     });
 
@@ -77,6 +85,8 @@ void main() {
         quizCorrectCount: 2,
         correctStreak: 2,
         lastQuizzedAtMs: DateTime.now().millisecondsSinceEpoch,
+        masteryStage: MasteryStage.stable,
+        nextReviewAtMs: 0,
       );
       final plan = LessonSessionService.instance.buildLessonFromProgress(
         category: smallCategory,
@@ -87,6 +97,10 @@ void main() {
       final question = plan.questions
           .firstWhere((question) => question.target.id == 'word0');
       expect(question.options, hasLength(4));
+      expect(
+        plan.studyWords.map((word) => word.id),
+        isNot(contains('word0')),
+      );
     });
 
     test('fills focus slots with unseen words before mastered reviews', () {
@@ -103,6 +117,10 @@ void main() {
             quizCorrectCount: 3,
             correctStreak: 3,
             lastQuizzedAtMs: DateTime.now().millisecondsSinceEpoch,
+            masteryStage: MasteryStage.stable,
+            nextReviewAtMs: DateTime.now()
+                .add(const Duration(days: 7))
+                .millisecondsSinceEpoch,
           ),
       };
 
@@ -141,6 +159,17 @@ void main() {
                       _ => 1,
                     } *
                     day),
+            masteryStage: MasteryStage.stable,
+            nextReviewAtMs: index <= 5
+                ? now -
+                    (switch (index) {
+                          3 => 3,
+                          4 => 1,
+                          5 => 2,
+                          _ => 0,
+                        } *
+                        day)
+                : now + day,
           ),
       };
 
@@ -149,10 +178,10 @@ void main() {
         lessonSize: 5,
         progress: progress,
       );
-      final ids = plan.words.map((word) => word.id).toSet();
-
-      expect(ids, containsAll(const ['word3', 'word5']));
-      expect(ids, isNot(contains('word4')));
+      expect(
+        plan.words.take(3).map((word) => word.id),
+        orderedEquals(const ['word3', 'word5', 'word4']),
+      );
     });
   });
 }
