@@ -199,11 +199,11 @@ class _WordLearningPageState extends State<WordLearningPage>
     );
   }
 
-  void _nextLearningWord() {
+  Future<void> _nextLearningWord() async {
     if (!_canContinue) return;
     if (_learnIndex + 1 < _studyWords.length) {
       setState(() => _learnIndex++);
-      _presentLearningWord();
+      await _presentLearningWord();
       return;
     }
     _effectiveViewTimer?.cancel();
@@ -213,7 +213,7 @@ class _WordLearningPageState extends State<WordLearningPage>
       _quizIndex = 0;
       _canContinue = false;
     });
-    _playCurrentWord(slow: false);
+    await _playCurrentWord(slow: false);
   }
 
   Future<void> _selectAnswer(Word selected) async {
@@ -338,7 +338,7 @@ class _WordLearningPageState extends State<WordLearningPage>
         _wrongOptionId = null;
         _correctOptionId = null;
       });
-      _playCurrentWord(slow: false);
+      await _playCurrentWord(slow: false);
     } else {
       await _openCelebration();
     }

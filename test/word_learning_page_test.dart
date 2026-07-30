@@ -18,6 +18,7 @@ class _FakeAudioController implements AudioPlaybackController {
   int encouragementPlayCount = 0;
   int stopCount = 0;
   bool? lastSlow;
+  final List<String> playedWordIds = [];
   Completer<void>? pendingEncouragement;
 
   @override
@@ -27,6 +28,7 @@ class _FakeAudioController implements AudioPlaybackController {
     bool waitForCompletion = true,
   }) {
     wordPlayCount++;
+    playedWordIds.add(word.id);
     lastSlow = slow;
     if (wordPlayCount == 1) return firstPlayback.future;
     final pending = pendingPlayback;
@@ -322,6 +324,7 @@ void main() {
 
     expect(find.byKey(const ValueKey('quiz-cat')), findsOneWidget);
     expect(audio.wordPlayCount, 2);
+    expect(audio.playedWordIds, orderedEquals(const ['dog', 'cat']));
   });
 
   testWidgets('last quiz answer skips encouragement before celebration',

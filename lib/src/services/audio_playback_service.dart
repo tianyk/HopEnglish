@@ -2,7 +2,10 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:hopenglish/src/libs/logger.dart';
 import 'package:hopenglish/src/models/word.dart';
+
+final _logger = Logger.getLogger();
 
 abstract class AudioPlaybackController {
   Future<bool> playWord(
@@ -32,13 +35,16 @@ class AudioPlaybackService implements AudioPlaybackController {
 
   final AudioPlayer _player;
   final Random _random;
+  late final Future<void> _ready;
   int _playbackToken = 0;
 
   AudioPlaybackService({
     AudioPlayer? player,
     Random? random,
   })  : _player = player ?? AudioPlayer(),
-        _random = random ?? Random();
+        _random = random ?? Random() {
+    _ready = _player.setReleaseMode(ReleaseMode.stop);
+  }
 
   @override
   Future<bool> playWord(
@@ -48,19 +54,32 @@ class AudioPlaybackService implements AudioPlaybackController {
   }) async {
     final token = ++_playbackToken;
     final fallbackTimer = Stopwatch()..start();
+    final assetPath = _assetPath(word, slow: slow);
     try {
+      await _ready;
       await _player.stop();
-      final assetPath = _assetPath(word, slow: slow);
-      final completion = _player.onPlayerComplete.first;
+      final completion =
+          waitForCompletion ? _player.onPlayerComplete.first : null;
       if (word.isAudioNetwork && !slow) {
         await _player.play(UrlSource(word.audioPath));
       } else {
         await _player.play(AssetSource(assetPath));
       }
-      if (!waitForCompletion) return true;
+      if (completion == null) return token == _playbackToken;
       await completion.timeout(const Duration(seconds: 4));
       return token == _playbackToken;
-    } catch (_) {
+    } catch (error, stackTrace) {
+      _logger.error(
+        'playWord failed',
+        error: error,
+        stackTrace: stackTrace,
+        data: {
+          'wordId': word.id,
+          'assetPath': assetPath,
+          'slow': slow,
+          'playerState': _player.state.name,
+        },
+      );
       if (waitForCompletion) {
         const fallbackDelay = Duration(milliseconds: 1200);
         final remaining = fallbackDelay - fallbackTimer.elapsed;
@@ -83,14 +102,22 @@ class AudioPlaybackService implements AudioPlaybackController {
   Future<void> _playCelebration(String filename) async {
     final token = ++_playbackToken;
     try {
+      await _ready;
       await _player.stop();
+      final completion = _player.onPlayerComplete.first;
       await _player.play(AssetSource('audio/celebrations/$filename'));
-      await _player.onPlayerComplete.first.timeout(
-        const Duration(seconds: 3),
-      );
+      await completion.timeout(const Duration(seconds: 3));
       if (token != _playbackToken) return;
-    } catch (_) {
-      // Audio feedback must never block the lesson.
+    } catch (error, stackTrace) {
+      _logger.error(
+        'feedback playback failed',
+        error: error,
+        stackTrace: stackTrace,
+        data: {
+          'filename': filename,
+          'playerState': _player.state.name,
+        },
+      );
     }
   }
 
@@ -114,12 +141,18 @@ class AudioPlaybackService implements AudioPlaybackController {
   @override
   Future<void> stop() async {
     ++_playbackToken;
+    await _ready;
     await _player.stop();
   }
 
   @override
   Future<void> dispose() async {
     ++_playbackToken;
+    try {
+      await _ready;
+    } catch (_) {
+      // Dispose the player even if its initial configuration failed.
+    }
     await _player.dispose();
   }
 }
