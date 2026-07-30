@@ -8,7 +8,6 @@ audio/
     ├── great.wav
     ├── well_done.wav
     ├── good_job.wav
-    ├── awesome.wav
     └── yay.wav
 ```
 
@@ -250,20 +249,7 @@ WORD OVERRIDES (only if needed):
 语调温暖又有活力，充满鼓励，像在为小朋友竖大拇指。
 ```
 
-### 4. `awesome.mp3`
-
-| 项目 | 内容 |
-|------|------|
-| 文本 | "Awesome!" |
-| 情感 | 拉长、惊叹、佩服 |
-
-**提示词：**
-```
-用兴奋欢快的女声说 "Awesome!"，像游戏通关后的庆祝，
-"Awe-" 稍微拉长，"-some!" 上扬有力，充满惊叹，像看到了很厉害的事情。
-```
-
-### 5. `yay.mp3`
+### 4. `yay.mp3`
 
 | 项目 | 内容 |
 |------|------|

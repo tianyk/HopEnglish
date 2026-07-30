@@ -17,13 +17,5 @@ void main() {
         'yay.wav': 3,
       },
     );
-    expect(
-      AudioPlaybackService.encouragementWeights,
-      isNot(contains('awesome.wav')),
-    );
-    expect(
-      AudioPlaybackService.completionWeights,
-      isNot(contains('awesome.wav')),
-    );
   });
 }

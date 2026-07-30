@@ -346,7 +346,6 @@
 | `good_job.wav` | "Good job!" | 普通答对（30%） |
 | `well_done.wav` | "Well done!" | 完成分类庆祝（70%） |
 | `yay.wav` | "Yay!" | 完成分类庆祝（30%） |
-| `awesome.wav` | "Awesome!" | 停用，保留资源 |
 
 * **语调要求：** 兴奋欢快，像游戏通关后的庆祝
 * **播放策略：**

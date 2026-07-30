@@ -49,7 +49,6 @@ void main() {
     }
 
     for (final name in [
-      'awesome',
       'good_job',
       'great',
       'well_done',
