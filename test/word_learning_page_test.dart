@@ -192,6 +192,7 @@ void main() {
       words: [dog],
       questions: [
         LessonQuestion(target: dog, options: [dog, cat]),
+        LessonQuestion(target: cat, options: [cat, dog]),
       ],
     );
     final audio = _FakeAudioController();
@@ -216,10 +217,16 @@ void main() {
     expect(dogCard.top - instruction.bottom, inInclusiveRange(40, 52));
 
     await tester.tap(find.byKey(const ValueKey('answer-cat')));
-    await tester.pump(const Duration(milliseconds: 450));
+    await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('quiz-dog')), findsOneWidget);
     expect(find.byKey(const ValueKey('answer-cat')), findsOneWidget);
+    expect(find.byType(CelebrationPage), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('answer-dog')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('quiz-cat')), findsOneWidget);
   });
 
   testWidgets('four-choice questions use a 2 by 2 grid', (tester) async {
@@ -427,9 +434,11 @@ void main() {
     await tester.pump();
 
     await tester.tap(find.byKey(const ValueKey('answer-cat')));
-    for (var i = 0; i < 5; i++) {
-      await tester.pump(const Duration(milliseconds: 500));
-    }
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('quiz-dog')), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('answer-dog')));
+    await tester.pumpAndSettle();
     expect(find.byKey(const ValueKey('quiz-dog')), findsNothing);
 
     var interveningQuestions = 0;

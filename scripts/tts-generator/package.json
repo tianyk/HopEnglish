@@ -1,7 +1,7 @@
 {
   "name": "hopenglish-tts-generator",
-  "version": "1.0.0",
-  "description": "Batch generate word audio (Normal/Slow) using Gemini TTS API",
+  "version": "2.1.0",
+  "description": "Batch generate word audio (Normal/Slow) using OpenRouter TTS API",
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
@@ -21,10 +21,10 @@
   "keywords": [
     "tts",
     "gemini",
+    "openrouter",
     "audio",
     "generation"
   ],
   "author": "",
   "license": "MIT"
 }
-

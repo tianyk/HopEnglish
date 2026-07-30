@@ -45,7 +45,6 @@ class WordLearningPage extends StatefulWidget {
 class _WordLearningPageState extends State<WordLearningPage>
     with TickerProviderStateMixin {
   static const Duration _effectiveViewDelay = Duration(milliseconds: 1200);
-  static const Duration _answerAdvanceDelay = Duration(milliseconds: 900);
   static const Duration _finalAnswerAdvanceDelay = Duration(milliseconds: 400);
 
   final LearningProgressService _progress = LearningProgressService.instance;
@@ -63,6 +62,7 @@ class _WordLearningPageState extends State<WordLearningPage>
   int _quizIndex = 0;
   bool _canContinue = false;
   bool _answerLocked = false;
+  bool _firstAttemptPending = true;
   String? _wrongOptionId;
   String? _correctOptionId;
   Timer? _effectiveViewTimer;
@@ -227,34 +227,34 @@ class _WordLearningPageState extends State<WordLearningPage>
       await _shakeController.forward(from: 0);
       if (!mounted) return;
       LearningTransition? transition;
-      if (!practiceOnly) {
-        transition = await _recordAttempt(
-          question: _currentQuestion,
-          firstAttemptCorrect: false,
-        );
-        if (!mounted || transition == null) {
-          if (mounted) {
-            setState(() {
-              _answerLocked = false;
-              _wrongOptionId = null;
-            });
+      if (_firstAttemptPending) {
+        if (!practiceOnly) {
+          transition = await _recordAttempt(
+            question: _currentQuestion,
+            firstAttemptCorrect: false,
+          );
+          if (!mounted || transition == null) {
+            if (mounted) {
+              setState(() {
+                _answerLocked = false;
+                _wrongOptionId = null;
+              });
+            }
+            return;
           }
-          return;
         }
+        _firstAttemptPending = false;
+        _scheduleRetry(_currentQuestion, transition);
       }
       setState(() {
         _wrongOptionId = null;
-        _correctOptionId = _currentQuestion.target.id;
+        _answerLocked = false;
       });
       await _playCurrentWord(slow: false);
-      _scheduleRetry(_currentQuestion, transition);
-      await Future<void>.delayed(_answerAdvanceDelay);
-      if (!mounted) return;
-      await _advanceQuiz();
       return;
     }
 
-    if (!practiceOnly) {
+    if (_firstAttemptPending && !practiceOnly) {
       final transition = await _recordAttempt(
         question: _currentQuestion,
         firstAttemptCorrect: true,
@@ -264,6 +264,7 @@ class _WordLearningPageState extends State<WordLearningPage>
         return;
       }
     }
+    _firstAttemptPending = false;
     setState(() => _correctOptionId = selected.id);
     final isLastQuestion = _quizIndex + 1 >= _questions.length;
     if (isLastQuestion) {
@@ -333,6 +334,7 @@ class _WordLearningPageState extends State<WordLearningPage>
       setState(() {
         _quizIndex++;
         _answerLocked = false;
+        _firstAttemptPending = true;
         _wrongOptionId = null;
         _correctOptionId = null;
       });

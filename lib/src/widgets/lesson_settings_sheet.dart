@@ -101,7 +101,7 @@ class _LessonSettingsSheetState extends State<LessonSettingsSheet> {
                             children: [
                               Text(
                                 _labels[count]!,
-                                style: AppTheme.displayMedium.copyWith(
+                                style: AppTheme.headlineMedium.copyWith(
                                   color: selected
                                       ? AppTheme.primary
                                       : AppTheme.textPrimary,

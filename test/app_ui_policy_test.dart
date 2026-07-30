@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hopenglish/main.dart';
+import 'package:hopenglish/src/theme/app_theme.dart';
 import 'package:hopenglish/src/widgets/lesson_settings_sheet.dart';
 
 void main() {
@@ -42,6 +43,10 @@ void main() {
     expect(find.text('标准'), findsOneWidget);
     expect(find.text('充分'), findsOneWidget);
     expect(find.text('约 3 分钟'), findsOneWidget);
+    expect(
+      tester.widget<Text>(find.text('标准')).style?.fontSize,
+      AppTheme.headlineMedium.fontSize,
+    );
     expect(tester.takeException(), isNull);
   });
 }

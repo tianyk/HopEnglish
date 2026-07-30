@@ -24,7 +24,7 @@ void main() {
       ),
     );
 
-    test('caps new words and gives them two study passes', () {
+    test('caps new words and gives them one study pass', () {
       for (final entry in const {5: 3, 6: 3, 8: 4}.entries) {
         final plan = LessonSessionService.instance.buildLessonFromProgress(
           category: category,
@@ -36,7 +36,11 @@ void main() {
         );
 
         expect(plan.words, hasLength(entry.value));
-        expect(plan.studyWords, hasLength(entry.value * 2));
+        expect(plan.studyWords, hasLength(entry.value));
+        expect(
+          plan.studyWords.map((word) => word.id),
+          orderedEquals(plan.words.map((word) => word.id)),
+        );
         expect(plan.questions, hasLength(entry.value));
         expect(
           plan.questions.every((question) => question.options.length == 2),
@@ -99,7 +103,7 @@ void main() {
       expect(question.options, hasLength(4));
       expect(
         plan.studyWords.map((word) => word.id),
-        isNot(contains('word0')),
+        contains('word0'),
       );
     });
 

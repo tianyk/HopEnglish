@@ -19,18 +19,32 @@ audio/
 | 语速 | 稍慢，清晰 |
 | 语调 | 欢快、积极、夸张一点 |
 | 声音 | 温暖友好（女声/童声效果更好） |
-| 格式 | WAV 或 MP3，44.1kHz |
+| 格式 | WAV，24 kHz / 16-bit / mono |
 
 ## TTS 生成工具
 
-推荐使用 Google AI Studio 生成语音：
+项目中的批量生成脚本使用 OpenRouter TTS API：
 
-🔗 https://aistudio.google.com/generate-speech?hl=zh-cn
+```bash
+cd scripts/tts-generator
+OPENROUTER_API_KEY="your-key" node index.js
+```
+
+只生成某个单词：
+
+```bash
+OPENROUTER_API_KEY="your-key" node index.js --word banana
+```
+
+默认模型：`google/gemini-3.1-flash-tts-preview`
+
+OpenRouter 模型页面：https://openrouter.ai/google/gemini-3.1-flash-tts-preview
 
 ### 推荐配置
 
 | 参数 | 值 |
 |------|-----|
+| 模型 | **google/gemini-3.1-flash-tts-preview** |
 | 声音 | **Sulafat** |
 | 语言 | English |
 
@@ -45,13 +59,13 @@ audio/
   - **Normal**：自然语速、清晰、不刻意放慢或加停顿
   - **Slow**：明显更慢但仍自然；**不允许拖长元音/拖尾**，也不允许在词/短语内部插入可听见停顿
 - 建议固定同一个声音（如 **Sulafat**）与同一个口音（例如 “General American English”），全项目一致。
-- 建议把生成端的 `temperature` 调低（例如 `0.2–0.4`），减少风格漂移，提升 Normal/Slow 的可对照一致性。
+- OpenRouter 的专用 TTS 接口不暴露 `temperature`；Normal / Slow 的差异由两套固定提示词控制。
 
 ### 占位符说明
 
 | 占位符 | 含义 | 示例 | 建议 |
 |---|---|---|---|
-| `{WORD}` | 目标单词文本（模型只读这个词，不要加其它内容） | `banana` | 强烈建议用“明确边界”的包裹方式传入（例如 `<target_word>{WORD}</target_word>`），避免和正文混在一起 |
+| `{WORD}` | 目标单词文本（模型只读这个词，不要加其它内容） | `banana` | 放在短指令末尾的冒号之后 |
 | `{ACCENT}` | 口音/发音体系（决定用哪种英语在读） | `General American English` | 全项目固定一个，保证风格与发音一致性 |
 | `{STRESS}` |（可选）重音/音节拆分提示 | `ba-NA-na` | 仅在模型读错/重音不稳时添加 |
 | `{IPA}` |（可选）国际音标 | `/bəˈnænə/` | 仅对少数易错词使用，避免增加维护成本 |
@@ -78,123 +92,41 @@ audio/
 ### 模板（Normal）
 
 ```
-You are recording a single-word TTS clip for preschool kids (age 2-5).
+Synthesize speech for the transcript below.
+Read only the transcript. Do not speak the instructions or add any other words.
 
-Say ONLY the target word exactly once. No extra words. No repetition. No sound effects.
-Read ONLY the text inside <target_word>. Do NOT read the tags.
+### AUDIO PROFILE
+A warm, cheerful, friendly voice for preschool children aged 2–5.
 
-<target_word>{WORD}</target_word>
+### DIRECTOR'S NOTES
+Style: Encouraging, with a gentle vocal smile.
+Accent: {ACCENT}.
+Pronunciation: Clear consonants, clean vowels, and natural word stress.
+Pacing: Natural speaking rate, with no deliberate pauses between syllables.
+Delivery: Say the target word exactly once. No repetition or sound effects.
 
-Accent: {ACCENT}
-
-Delivery:
-- Voice timbre is set by the TTS voice parameter; keep delivery stable with steady mood and loudness.
-- Warm, cheerful, encouraging. A gentle "vocal smile".
-- Close-mic clarity. No background noise. No reverb.
-- Clear consonants, clean vowels. No mumbling.
-
-Pacing (NORMAL):
-- Natural speaking rate. One continuous utterance.
-- No deliberate pauses between syllables.
-
-Duration (HARD LIMITS):
-- Total audio MUST be <= 1.2 seconds (including silence).
-- Silence at start <= 0.08 seconds.
-- Silence at end <= 0.10 seconds.
-
-Output: audio only.
-```
-
-### 模板（Normal，中文提示词）
-
-```
-你正在为 2-5 岁幼儿录制“单词 TTS 音频”。
-
-只读目标单词，且只读一遍：不要添加其它词语、不要重复、不要音效。
-只读取 `<target_word>` 标签内的文本，不要读出标签本身。
-
-<target_word>{WORD}</target_word>
-
-口音：{ACCENT}
-
-声音与风格：
-- 音色由 TTS 的 voice 参数决定；这里仅约束情绪、语气与响度保持稳定，不要刻意变化。
-- 温暖、开心、鼓励，带“微笑音色”。
-- 近讲清晰：无背景噪音、无混响。
-- 辅音清晰、元音干净，不要含糊。
-
-语速（Normal）：
-- 自然语速，一口气连贯读完。
-- 不要刻意在音节之间停顿。
-
-时长（硬约束）：
-- 总音频时长必须 <= 1.2 秒（包含静音）。
-- 开头静音 <= 0.08 秒。
-- 结尾静音 <= 0.10 秒。
-
-输出：只输出音频。
+### TRANSCRIPT
+{WORD}
 ```
 
 ### 模板（Slow）
 
 ```
-You are recording a single-word (or short-phrase) TTS clip for preschool kids (age 2-5).
+Synthesize speech for the transcript below.
+Read only the transcript. Do not speak the instructions or audio tag, and do not add any other words.
 
-Say ONLY the target word exactly once. No extra words. No repetition. No sound effects.
-Read ONLY the text inside <target_word>. Do NOT read the tags.
+### AUDIO PROFILE
+A warm, cheerful, friendly voice for preschool children aged 2–5.
 
-<target_word>{WORD}</target_word>
+### DIRECTOR'S NOTES
+Style: Encouraging, with a gentle vocal smile.
+Accent: {ACCENT}.
+Pronunciation: Clear consonants, clean vowels, and natural word stress.
+Pacing: Noticeably slower than normal, but still natural. Do not stretch vowels or add pauses between syllables.
+Delivery: Say the target word exactly once. No repetition or sound effects.
 
-Accent: {ACCENT}
-
-Delivery:
-- Voice timbre is set by the TTS voice parameter; keep delivery stable with steady mood and loudness.
-- Warm, cheerful, encouraging. A gentle "vocal smile".
-- Close-mic clarity. No background noise. No reverb.
-- Clear consonants, clean vowels. No mumbling.
-
-Pacing (SLOW, controlled):
-- Clearly slower than a natural speaking rate (about 0.85x) but still natural.
-- One continuous utterance. Do NOT add pauses inside the word/phrase.
-- Do NOT stretch vowels or prolong any sound (no drawn-out ending).
-
-Duration (HARD LIMITS):
-- Total audio MUST be <= 1.6 seconds (including silence).
-- Silence at start <= 0.10 seconds.
-- Silence at end <= 0.12 seconds.
-
-Output: audio only.
-```
-
-### 模板（Slow，中文提示词）
-
-```
-你正在为 2-5 岁幼儿录制“单词/短语 TTS 音频（Slow 版）”。
-
-只读目标单词，且只读一遍：不要添加其它词语、不要重复、不要音效。
-只读取 `<target_word>` 标签内的文本，不要读出标签本身。
-
-<target_word>{WORD}</target_word>
-
-口音：{ACCENT}
-
-声音与风格：
-- 音色由 TTS 的 voice 参数决定；这里仅约束情绪、语气与响度保持稳定，不要刻意变化。
-- 温暖、开心、鼓励，带“微笑音色”。
-- 近讲清晰：无背景噪音、无混响。
-- 辅音清晰、元音干净，不要含糊。
-
-语速（Slow，受控）：
-- 比自然语速明显更慢（约 0.85x），但仍然自然。
-- 一口气连贯读完：不要在词/短语内部插入可听见停顿。
-- 严禁拖长元音或任何声音的尾巴（不要拖尾）。
-
-时长（硬约束）：
-- 总音频时长必须 <= 1.6 秒（包含静音）。
-- 开头静音 <= 0.10 秒。
-- 结尾静音 <= 0.12 秒。
-
-输出：只输出音频。
+### TRANSCRIPT
+[very slow] {WORD}
 ```
 
 ### （可选）词级覆盖：仅对少数“容易读错”的词启用

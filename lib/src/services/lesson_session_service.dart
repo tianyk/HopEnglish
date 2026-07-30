@@ -87,17 +87,7 @@ class LessonSessionService {
     final random = Random(seed);
     final selectedWords =
         decision.items.map((item) => wordsById[item.wordId]!).toList();
-    final studyWords = <Word>[];
-    if (decision.policyVersion == 1) {
-      studyWords.addAll(selectedWords);
-    } else {
-      final newWords = decision.items
-          .where((item) => item.role == LessonRole.newWord)
-          .map((item) => wordsById[item.wordId]!)
-          .toList();
-      final secondStudyPass = [...newWords]..shuffle(random);
-      studyWords.addAll([...newWords, ...secondStudyPass]);
-    }
+    final studyWords = selectedWords;
     final questionItems = [...decision.items]..shuffle(random);
     final questions = questionItems.map((item) {
       final target = wordsById[item.wordId]!;

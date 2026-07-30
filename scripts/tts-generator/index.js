@@ -4,6 +4,7 @@
  * 批量生成单词音频（Normal / Slow）
  * 
  * 特性：
+ * - 通过 OpenRouter 调用 TTS 模型
  * - 支持多个 API Key 轮换
  * - 智能错误处理，无人值守运行
  * - 自动重试，指数退避
@@ -21,10 +22,10 @@ const { HttpsProxyAgent } = require('hpagent');
 // ============================================================
 // 配置常量
 // ============================================================
-const DEFAULT_MODEL_ID = 'gemini-2.5-flash-preview-tts';
+const OPENROUTER_TTS_URL = 'https://openrouter.ai/api/v1/audio/speech';
+const DEFAULT_MODEL_ID = 'google/gemini-3.1-flash-tts-preview';
 const DEFAULT_VOICE_NAME = 'Sulafat';
 const DEFAULT_ACCENT = 'General American English';
-const DEFAULT_TEMPERATURE = 0.3;
 
 // 超时配置
 const REQUEST_TIMEOUT_MS = 120000;
@@ -58,17 +59,26 @@ const stats = {
 program
   .name('tts-generator')
   .description('批量生成单词音频（Normal / Slow）')
-  .version('1.0.0')
-  .requiredOption('--api-key <key>', 'Gemini API Key（多个用逗号分隔，或通过环境变量 GEMINI_API_KEY）', process.env.GEMINI_API_KEY)
+  .version('2.1.0')
+  .requiredOption('--api-key <key>', 'OpenRouter API Key（多个用逗号分隔，或通过环境变量 OPENROUTER_API_KEY）', process.env.OPENROUTER_API_KEY)
   .requiredOption('--input <path>', '输入 JSON 文件路径', '../../assets/data/categories.json')
-  .requiredOption('--output <path>', '输出目录路径', '../../assets/audio/words/v2')
+  .requiredOption('--output <path>', '输出目录路径', '../../assets/audio/words')
   .option('--model <id>', '模型 ID', DEFAULT_MODEL_ID)
   .option('--voice <name>', '语音名称', DEFAULT_VOICE_NAME)
   .option('--accent <desc>', '口音描述', DEFAULT_ACCENT)
-  .option('--temperature <n>', '温度', parseFloat, DEFAULT_TEMPERATURE);
+  .option('--word <id-or-name>', '只生成指定单词（按 id 或英文名称精确匹配，不区分大小写）')
+  .option('--variant <type>', '生成版本：normal、slow 或 both', 'both')
+  .option('--force', '覆盖已存在的音频文件', false);
 
 program.parse();
 const options = program.opts();
+
+const allowedVariants = new Set(['normal', 'slow', 'both']);
+options.variant = String(options.variant).toLowerCase();
+if (!allowedVariants.has(options.variant)) {
+  console.error(`错误：--variant 必须是 normal、slow 或 both，当前值为 "${options.variant}"`);
+  process.exit(1);
+}
 
 // 解析多个 API keys
 if (typeof options.apiKey === 'string') {
@@ -176,18 +186,19 @@ function calculateBackoffDelay(attempt) {
 // HTTP 请求
 // ============================================================
 
-async function postJson(url, jsonBody) {
+async function postAudio(url, jsonBody, apiKey) {
   const proxyUrl = getProxyFromEnv();
 
   const gotOptions = {
     json: jsonBody,
-    responseType: 'json',
+    responseType: 'buffer',
     timeout: {
       request: REQUEST_TIMEOUT_MS,
       connect: CONNECT_TIMEOUT_MS,
       socket: SOCKET_TIMEOUT_MS,
     },
     headers: {
+      Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
     },
     retry: { limit: 0 },
@@ -212,33 +223,41 @@ async function postJson(url, jsonBody) {
     const statusCode = response.statusCode;
 
     if (statusCode >= 200 && statusCode < 300) {
-      return response.body;
+      if (!Buffer.isBuffer(response.body) || response.body.length === 0) {
+        throw new RetryableError('OpenRouter 返回了空音频');
+      }
+      return {
+        audioBuffer: response.body,
+        mimeType: response.headers['content-type'] || 'audio/pcm',
+      };
     }
 
-    const errorBody = response.body;
-    const errorMsg = errorBody?.error?.message || JSON.stringify(errorBody);
+    let errorBody;
+    try {
+      errorBody = JSON.parse(response.body.toString('utf8'));
+    } catch {
+      errorBody = response.body.toString('utf8');
+    }
+    const errorMsg =
+      errorBody?.error?.message ||
+      (typeof errorBody === 'string' ? errorBody : JSON.stringify(errorBody)) ||
+      response.statusMessage ||
+      'OpenRouter 请求失败';
 
-    // 429 速率限制
     if (statusCode === 429) {
       throw new RateLimitError(errorMsg);
     }
-
-    // 5xx 服务器错误 - 可重试
     if (statusCode >= 500) {
       throw new RetryableError(`HTTP ${statusCode}: ${errorMsg.slice(0, 200)}`);
     }
-
-    // 4xx 客户端错误 - 致命（除了 429）
     if (statusCode >= 400) {
       throw new FatalError(`HTTP ${statusCode}: ${errorMsg.slice(0, 500)}`, statusCode);
     }
-
     throw new RetryableError(`HTTP ${statusCode}: ${errorMsg.slice(0, 200)}`);
   } catch (err) {
     if (err instanceof RateLimitError || err instanceof RetryableError || err instanceof FatalError) {
       throw err;
     }
-    // 网络错误、超时等 - 可重试
     throw new RetryableError(err.message || String(err), err);
   }
 }
@@ -248,60 +267,39 @@ async function postJson(url, jsonBody) {
 // ============================================================
 
 function buildNormalPromptInEnglish(word, accent) {
-  return `You are recording a single-word TTS clip for preschool kids (age 2-5).
+  return `Synthesize speech for the transcript below.
+Read only the transcript. Do not speak the instructions or add any other words.
 
-Say ONLY the target word exactly once. No extra words. No repetition. No sound effects.
-Read ONLY the text inside <target_word>. Do NOT read the tags.
+### AUDIO PROFILE
+A warm, cheerful, friendly voice for preschool children aged 2–5.
 
-<target_word>${word}</target_word>
+### DIRECTOR'S NOTES
+Style: Encouraging, with a gentle vocal smile.
+Accent: ${accent}.
+Pronunciation: Clear consonants, clean vowels, and natural word stress.
+Pacing: Natural speaking rate, with no deliberate pauses between syllables.
+Delivery: Say the target word exactly once. No repetition or sound effects.
 
-Accent: ${accent}
-
-Delivery:
-- Voice timbre is set by the TTS voice parameter; keep delivery stable with steady mood and loudness.
-- Warm, cheerful, encouraging. A gentle "vocal smile".
-- Close-mic clarity. No background noise. No reverb.
-- Clear consonants, clean vowels. No mumbling.
-
-Pacing (NORMAL):
-- Natural speaking rate. One continuous utterance.
-- No deliberate pauses between syllables.
-
-Duration (HARD LIMITS):
-- Total audio MUST be <= 1.2 seconds (including silence).
-- Silence at start <= 0.08 seconds.
-- Silence at end <= 0.10 seconds.
-
-Output: audio only.`;
+### TRANSCRIPT
+${word}`;
 }
 
 function buildSlowPromptInEnglish(word, accent) {
-  return `You are recording a single-word (or short-phrase) TTS clip for preschool kids (age 2-5).
+  return `Synthesize speech for the transcript below.
+Read only the transcript. Do not speak the instructions or audio tag, and do not add any other words.
 
-Say ONLY the target word exactly once. No extra words. No repetition. No sound effects.
-Read ONLY the text inside <target_word>. Do NOT read the tags.
+### AUDIO PROFILE
+A warm, cheerful, friendly voice for preschool children aged 2–5.
 
-<target_word>${word}</target_word>
+### DIRECTOR'S NOTES
+Style: Encouraging, with a gentle vocal smile.
+Accent: ${accent}.
+Pronunciation: Clear consonants, clean vowels, and natural word stress.
+Pacing: Noticeably slower than normal, but still natural. Do not stretch vowels or add pauses between syllables.
+Delivery: Say the target word exactly once. No repetition or sound effects.
 
-Accent: ${accent}
-
-Delivery:
-- Voice timbre is set by the TTS voice parameter; keep delivery stable with steady mood and loudness.
-- Warm, cheerful, encouraging. A gentle "vocal smile".
-- Close-mic clarity. No background noise. No reverb.
-- Clear consonants, clean vowels. No mumbling.
-
-Pacing (SLOW, controlled):
-- Clearly slower than a natural speaking rate (about 0.85x) but still natural.
-- One continuous utterance. Do NOT add pauses inside the word/phrase.
-- Do NOT stretch vowels or prolong any sound (no drawn-out ending).
-
-Duration (HARD LIMITS):
-- Total audio MUST be <= 1.6 seconds (including silence).
-- Silence at start <= 0.10 seconds.
-- Silence at end <= 0.12 seconds.
-
-Output: audio only.`;
+### TRANSCRIPT
+[very slow] ${word}`;
 }
 
 // ============================================================
@@ -313,36 +311,16 @@ async function requestTextToSpeech(args) {
 
   while (true) {
     const currentKey = getCurrentApiKey();
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${args.modelId}:generateContent?key=${currentKey}`;
 
     const body = {
-      contents: [{ role: 'user', parts: [{ text: args.text }] }],
-      generationConfig: {
-        responseModalities: ['AUDIO'],
-        temperature: args.temperature,
-        speech_config: {
-          voice_config: {
-            prebuilt_voice_config: { voice_name: args.voiceName },
-          },
-        },
-      },
+      model: args.modelId,
+      input: args.text,
+      voice: args.voiceName,
+      response_format: 'pcm',
     };
 
     try {
-      const responseData = await postJson(url, body);
-      const part = responseData?.candidates?.[0]?.content?.parts?.[0];
-      const inline = part?.inlineData ?? part?.inline_data;
-      const audioBase64 = inline?.data;
-      const mimeType =
-        typeof inline?.mimeType === 'string'
-          ? inline.mimeType
-          : (typeof inline?.mime_type === 'string' ? inline.mime_type : null);
-
-      if (typeof audioBase64 !== 'string' || audioBase64.length === 0) {
-        throw new RetryableError('API 返回缺少音频数据');
-      }
-
-      return { audioBase64, mimeType };
+      return await postAudio(OPENROUTER_TTS_URL, body, currentKey);
     } catch (err) {
       // ========== 429 速率限制 ==========
       if (err instanceof RateLimitError) {
@@ -432,11 +410,13 @@ function createWavHeader(dataLength, audioOptions) {
   return buffer;
 }
 
-function convertToWav(audioBase64, mimeType) {
+function convertToWav(audioBuffer, mimeType) {
+  if (audioBuffer.subarray(0, 4).toString('ascii') === 'RIFF') {
+    return audioBuffer;
+  }
   const audioOptions = parseAudioMimeType(mimeType);
-  const rawBuffer = Buffer.from(audioBase64, 'base64');
-  const header = createWavHeader(rawBuffer.length, audioOptions);
-  return Buffer.concat([header, rawBuffer]);
+  const header = createWavHeader(audioBuffer.length, audioOptions);
+  return Buffer.concat([header, audioBuffer]);
 }
 
 // ============================================================
@@ -460,6 +440,19 @@ function extractWords(jsonValue) {
   return words;
 }
 
+function selectWord(words, query) {
+  if (typeof query !== 'string' || query.trim().length === 0) return words;
+
+  const normalizedQuery = query.trim().toLowerCase();
+  const idMatch = words.find((word) => word.id.toLowerCase() === normalizedQuery);
+  if (idMatch) return [idMatch];
+
+  const nameMatch = words.find((word) => word.name.toLowerCase() === normalizedQuery);
+  if (nameMatch) return [nameMatch];
+
+  throw new Error(`词表中找不到单词 "${query}"（请使用单词 id 或完整英文名称）`);
+}
+
 async function isFileExists(filePath) {
   try {
     await fsp.access(filePath, fs.constants.F_OK);
@@ -480,7 +473,11 @@ async function main() {
 
   const categoriesRaw = await fsp.readFile(inputPath, 'utf8');
   const categoriesJson = JSON.parse(categoriesRaw);
-  const words = extractWords(categoriesJson);
+  const allWords = extractWords(categoriesJson);
+  const words = selectWord(allWords, options.word);
+  const generateNormal = options.variant === 'normal' || options.variant === 'both';
+  const generateSlow = options.variant === 'slow' || options.variant === 'both';
+  const requestedVariantCount = Number(generateNormal) + Number(generateSlow);
 
   await fsp.mkdir(outputPath, { recursive: true });
 
@@ -495,41 +492,61 @@ async function main() {
   console.log(`🤖 模型：${options.model}`);
   console.log(`🗣️  声音：${options.voice}`);
   console.log(`🌍 口音：${options.accent}`);
+  console.log(`🎚️  版本：${options.variant}`);
+  if (options.word) console.log(`🎯 指定单词：${words[0].id} / ${words[0].name}`);
+  if (options.force) console.log('♻️  覆盖模式：已启用');
   console.log('='.repeat(60));
   console.log('');
 
   const startTime = Date.now();
+  let lastRequestFinishedAt = 0;
+
+  async function generateSpeech(args) {
+    if (lastRequestFinishedAt > 0) {
+      const remainingDelay = REQUEST_DELAY_MS - (Date.now() - lastRequestFinishedAt);
+      if (remainingDelay > 0) await sleep(remainingDelay);
+    }
+    try {
+      return await requestTextToSpeech(args);
+    } finally {
+      lastRequestFinishedAt = Date.now();
+    }
+  }
 
   for (let index = 0; index < words.length; index += 1) {
     const word = words[index];
     const normalFilePath = path.join(outputPath, `${word.id}_normal.wav`);
     const slowFilePath = path.join(outputPath, `${word.id}_slow.wav`);
 
-    const normalExists = await isFileExists(normalFilePath);
-    const slowExists = await isFileExists(slowFilePath);
+    const normalExists =
+      generateNormal && !options.force ? await isFileExists(normalFilePath) : false;
+    const slowExists =
+      generateSlow && !options.force ? await isFileExists(slowFilePath) : false;
 
-    // 检查是否两个文件都已存在
-    if (normalExists && slowExists) {
-      console.log(`[${index + 1}/${words.length}] ⏭️  跳过 ${word.id}（Normal & Slow 已存在）`);
-      stats.skipped += 2;
+    // 检查所有请求的版本是否都已存在
+    if (
+      (!generateNormal || normalExists) &&
+      (!generateSlow || slowExists)
+    ) {
+      console.log(`[${index + 1}/${words.length}] ⏭️  跳过 ${word.id}（请求的音频版本已存在）`);
+      stats.skipped += requestedVariantCount;
       continue;
     }
 
     console.log(`[${index + 1}/${words.length}] 🎙️  生成 ${word.id} / ${word.name}`);
 
     // ========== 生成 Normal 版本 ==========
-    if (!normalExists) {
+    if (generateNormal && !normalExists) {
       try {
         console.log(`  → [Normal] 请求 API（使用 Key #${currentKeyIndex + 1}）...`);
         const prompt = buildNormalPromptInEnglish(word.name, options.accent);
-        const tts = await requestTextToSpeech({
+        const tts = await generateSpeech({
           modelId: options.model,
           text: prompt,
           voiceName: options.voice,
-          temperature: options.temperature,
         });
         
-        const wav = convertToWav(tts.audioBase64, tts.mimeType);
+        const wav = convertToWav(tts.audioBuffer, tts.mimeType);
         await fsp.writeFile(normalFilePath, wav);
         console.log(`  ✅ [Normal] 完成`);
         stats.success += 1;
@@ -538,27 +555,23 @@ async function main() {
         stats.failed += 1;
         stats.failedWords.push({ id: word.id, name: word.name, type: 'normal', error: err.message });
       }
-      
-      // 请求间隔
-      await sleep(REQUEST_DELAY_MS);
-    } else {
+    } else if (generateNormal) {
       console.log(`  ⏭️  [Normal] 跳过（已存在）`);
       stats.skipped += 1;
     }
 
     // ========== 生成 Slow 版本 ==========
-    if (!slowExists) {
+    if (generateSlow && !slowExists) {
       try {
         console.log(`  → [Slow] 请求 API（使用 Key #${currentKeyIndex + 1}）...`);
         const prompt = buildSlowPromptInEnglish(word.name, options.accent);
-        const tts = await requestTextToSpeech({
+        const tts = await generateSpeech({
           modelId: options.model,
           text: prompt,
           voiceName: options.voice,
-          temperature: options.temperature,
         });
         
-        const wav = convertToWav(tts.audioBase64, tts.mimeType);
+        const wav = convertToWav(tts.audioBuffer, tts.mimeType);
         await fsp.writeFile(slowFilePath, wav);
         console.log(`  ✅ [Slow] 完成`);
         stats.success += 1;
@@ -567,12 +580,7 @@ async function main() {
         stats.failed += 1;
         stats.failedWords.push({ id: word.id, name: word.name, type: 'slow', error: err.message });
       }
-      
-      // 请求间隔（如果不是最后一个单词）
-      if (index < words.length - 1) {
-        await sleep(REQUEST_DELAY_MS);
-      }
-    } else {
+    } else if (generateSlow) {
       console.log(`  ⏭️  [Slow] 跳过（已存在）`);
       stats.skipped += 1;
     }
