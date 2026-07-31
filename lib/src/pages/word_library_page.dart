@@ -230,28 +230,7 @@ class _WordExplorePageState extends State<WordExplorePage> {
         child: SafeArea(
           child: Column(
             children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    InkWell(
-                      onTap: () => Navigator.of(context).pop(),
-                      borderRadius: BorderRadius.circular(16),
-                      child: const SizedBox(
-                        width: 44,
-                        height: 44,
-                        child: Icon(Icons.arrow_back_rounded,
-                            color: AppTheme.primary),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(widget.category.name,
-                          style: AppTheme.headlineMedium),
-                    ),
-                  ],
-                ),
-              ),
+              _buildHeader(),
               Expanded(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -301,6 +280,61 @@ class _WordExplorePageState extends State<WordExplorePage> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    final category = widget.category;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      child: Row(
+        children: [
+          _roundButton(
+            icon: Icons.arrow_back_rounded,
+            onTap: () => Navigator.of(context).pop(),
+          ),
+          const SizedBox(width: 12),
+          if (category.hasImage)
+            AdaptiveImage(
+              imagePath: category.imagePath,
+              width: 34,
+              height: 34,
+              errorWidget: Text(
+                category.emoji ?? '',
+                style: const TextStyle(fontSize: 28),
+              ),
+            )
+          else
+            Text(category.emoji ?? '', style: const TextStyle(fontSize: 28)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              category.name,
+              style: AppTheme.headlineMedium,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _roundButton({
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(AppTheme.radiusMedium),
+          boxShadow: AppTheme.cardShadow,
+        ),
+        child: Icon(icon, color: AppTheme.primary),
       ),
     );
   }

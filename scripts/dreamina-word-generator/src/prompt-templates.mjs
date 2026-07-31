@@ -14,13 +14,13 @@ export const TEMPLATE_BY_CATEGORY = Object.freeze({
   foods: 'object',
   vehicles: 'vehicle',
   body: 'person',
+  feelings: 'person',
   clothes: 'object',
   home: 'object',
   actions: 'person',
   colors: 'symbol',
   nature: 'scene',
   places: 'scene',
-  jobs: 'person',
   music: 'object',
 });
 

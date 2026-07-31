@@ -42,7 +42,19 @@ void main() {
     expect(find.text('轻松'), findsOneWidget);
     expect(find.text('标准'), findsOneWidget);
     expect(find.text('充分'), findsOneWidget);
+    expect(find.text('5 个单词'), findsOneWidget);
+    expect(find.text('6 个单词'), findsOneWidget);
+    expect(find.text('8 个单词'), findsOneWidget);
+    expect(find.textContaining('规模'), findsNothing);
     expect(find.text('约 3 分钟'), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is Semantics &&
+            widget.properties.label == '标准节奏，每课练习 6 个单词，约 3 分钟',
+      ),
+      findsOneWidget,
+    );
     expect(
       tester.widget<Text>(find.text('标准')).style?.fontSize,
       AppTheme.headlineMedium.fontSize,

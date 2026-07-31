@@ -43,7 +43,12 @@ class _HomePageState extends State<HomePage> {
         decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(AppTheme.spacingLarge),
+            padding: const EdgeInsets.fromLTRB(
+              AppTheme.spacingLarge,
+              AppTheme.spacingLarge,
+              AppTheme.spacingLarge,
+              12,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

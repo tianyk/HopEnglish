@@ -8,15 +8,20 @@
 *   **Zero Translation**: Build direct "image = sound" connections without relying on Chinese explanations.
 *   **Consistent Causality**: Every tap provides instant, delightful feedback.
 
-## Learning Topics (MVP)
+## Learning Topics
 
-*   🦁 Animal World
-*   🍎 Delicious Food
-*   🚗 Transportation
-*   🏃 Actions & States
-*   🏠 Home Life
-*   🎵 Musical Instruments & Sounds
-*   🌤️ Weather & Nature
+*   🦁 Animals
+*   🍎 Food & Drink
+*   🙂 My Body
+*   🏃 Actions
+*   🚗 Vehicles
+*   🏠 Home & Family
+*   🎨 Colors & Shapes
+*   👕 Clothes
+*   😊 Feelings
+*   🌤️ Nature & Weather
+*   🏫 Places & People
+*   🎵 Music & Play
 
 ## Tech Stack
 

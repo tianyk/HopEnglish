@@ -8,15 +8,20 @@
 *   **零翻译**：建立“图像=声音”的直接联系，不依赖中文解释。
 *   **因果一致**：每一次点击都有即时、愉悦的反馈。
 
-## 学习主题 (MVP)
+## 学习主题
 
-*   🦁 动物世界
-*   🍎 美味食物
-*   🚗 交通工具
-*   🏃 动作与状态
-*   🏠 居家生活
-*   🎵 乐器与声音
-*   🌤️ 天气与自然
+*   🦁 Animals
+*   🍎 Food & Drink
+*   🙂 My Body
+*   🏃 Actions
+*   🚗 Vehicles
+*   🏠 Home & Family
+*   🎨 Colors & Shapes
+*   👕 Clothes
+*   😊 Feelings
+*   🌤️ Nature & Weather
+*   🏫 Places & People
+*   🎵 Music & Play
 
 ## 技术栈
 

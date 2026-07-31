@@ -620,7 +620,8 @@ class _WordLearningPageState extends State<WordLearningPage>
           0.0,
           math.min(maxCardWidth, maxCardHeight),
         );
-        return Center(
+        return Align(
+          alignment: Alignment.topCenter,
           child: SizedBox(
             width: cardSize * 2 + gap,
             height: cardSize * 2 + gap,

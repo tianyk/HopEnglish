@@ -271,6 +271,11 @@ void main() {
     expect(find.byKey(const ValueKey('answer-cat')), findsOneWidget);
     expect(find.byKey(const ValueKey('answer-fish')), findsOneWidget);
     expect(find.byKey(const ValueKey('answer-bird')), findsOneWidget);
+    final instruction = tester.getRect(find.text('Tap the picture'));
+    final firstCard = tester.getRect(
+      find.byKey(const ValueKey('answer-dog')),
+    );
+    expect(firstCard.top - instruction.bottom, inInclusiveRange(27, 29));
     expect(tester.takeException(), isNull);
   });
 

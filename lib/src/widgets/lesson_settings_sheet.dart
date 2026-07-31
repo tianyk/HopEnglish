@@ -76,7 +76,8 @@ class _LessonSettingsSheetState extends State<LessonSettingsSheet> {
                     child: Semantics(
                       button: true,
                       selected: selected,
-                      label: '${_labels[count]}节奏，约 ${_minutes[count]} 分钟',
+                      label:
+                          '${_labels[count]}节奏，每课练习 $count 个单词，约 ${_minutes[count]} 分钟',
                       child: InkWell(
                         onTap: () => _select(count),
                         borderRadius:
@@ -107,7 +108,10 @@ class _LessonSettingsSheetState extends State<LessonSettingsSheet> {
                                       : AppTheme.textPrimary,
                                 ),
                               ),
-                              Text('$count 规模', style: AppTheme.titleMedium),
+                              Text(
+                                '$count 个单词',
+                                style: AppTheme.titleMedium,
+                              ),
                               const SizedBox(height: 4),
                               Text(
                                 '约 ${_minutes[count]} 分钟',

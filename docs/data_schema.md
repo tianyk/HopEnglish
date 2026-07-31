@@ -137,19 +137,24 @@ assets/data/categories.json
 
 ---
 
-## 七、MVP 内容规划
+## 七、内容规划
 
 ### 7.1 分类列表
 
 | id | emoji | name | 单词数 |
 |----|-------|------|--------|
-| animals | 🦁 | Animals | 5 |
-| foods | 🍎 | Foods | 5 |
-| vehicles | 🚗 | Vehicles | 5 |
-| actions | 🏃 | Actions | 5 |
-| home | 🏠 | My Home | 5 |
-| music | 🎵 | Music | 5 |
-| nature | 🌤️ | Nature | 5 |
+| animals | 🦁 | Animals | 34 |
+| foods | 🍎 | Food & Drink | 38 |
+| body | 🙂 | My Body | 12 |
+| actions | 🏃 | Actions | 16 |
+| vehicles | 🚗 | Vehicles | 17 |
+| home | 🏠 | Home & Family | 24 |
+| colors | 🎨 | Colors & Shapes | 15 |
+| clothes | 👕 | Clothes | 11 |
+| feelings | 😊 | Feelings | 8 |
+| nature | 🌤️ | Nature & Weather | 16 |
+| places | 🏫 | Places & People | 23 |
+| music | 🎵 | Music & Play | 16 |
 
 ### 7.2 单词示例
 
@@ -172,4 +177,4 @@ assets/data/categories.json
 
 ---
 
-*文档版本：1.2 | 最后更新：2026-01-04*
+*文档版本：1.3 | 最后更新：2026-07-30*
