@@ -1,10 +1,15 @@
 # 音频资源
 
+路径与字段统一见 [内容 Schema](../../docs/data_schema.md)，生成/试听/采用见 [内容资源指南](../../docs/guide/content-assets.md)，运行时播放语义见 [音频指南](../../docs/guide/audio-lifecycle.md)。下文提示词是创作参考，不证明资源已试听验收。
+
 ## 目录结构
 
 ```
-audio/
-└── celebrations/     # 庆祝表扬语音
+assets/audio/
+├── words/
+│   ├── dog_normal.wav
+│   └── dog_slow.wav
+└── celebrations/
     ├── great.wav
     ├── well_done.wav
     ├── good_job.wav
@@ -142,7 +147,7 @@ WORD OVERRIDES (only if needed):
 
 ## 文件列表与提示词
 
-### 1. `great.mp3`
+### 1. `great.wav`
 
 | 项目 | 内容 |
 |------|------|
@@ -155,7 +160,7 @@ WORD OVERRIDES (only if needed):
 语调短促有力、上扬，充满惊喜，像在为小朋友欢呼喝彩。
 ```
 
-### 2. `well_done.mp3`
+### 2. `well_done.wav`
 
 | 项目 | 内容 |
 |------|------|
@@ -168,7 +173,7 @@ WORD OVERRIDES (only if needed):
 语调上扬，充满活力，像在为小朋友欢呼喝彩。
 ```
 
-### 3. `good_job.mp3`
+### 3. `good_job.wav`
 
 | 项目 | 内容 |
 |------|------|
@@ -181,7 +186,7 @@ WORD OVERRIDES (only if needed):
 语调温暖又有活力，充满鼓励，像在为小朋友竖大拇指。
 ```
 
-### 4. `yay.mp3`
+### 4. `yay.wav`
 
 | 项目 | 内容 |
 |------|------|

@@ -1,686 +1,97 @@
-# HopEnglish 设计语言规范
+# HopEnglish 设计系统
 
-> 专为 2-5 岁幼儿打造的温暖明亮设计系统
+状态：现行 Token 与实现约定，2026-10-18 核对。代码基准为 `lib/src/theme/app_theme.dart`，页面用法与能力缺口见 [实施状态](product_status.md)。本文件不宣称现有页面都已完成可访问性和设备验收。
 
----
+## 1. 设计目标与页面层级
 
-## 一、设计理念
+面向 2–5 岁儿童，以温暖、明亮、圆润的图音交互建立稳定联想。颜色与动画服务于操作反馈，不用装饰或文字说明争夺学习主体。
 
-### 1.1 核心原则
+| 场景 | 主视觉 | 次要信息 | 交互要求 |
+|---|---|---|---|
+| 首页 | 当前可达的分类入口 | Word Library、设置 | 主次清楚，不默认加入成绩和排行榜 |
+| 图音学习 | 单词图片、英语名称 | Listen/Slow、当前课进度 | 点击即时反馈，重复可预测 |
+| 听音选图 | 播放入口与选项 | 简短英语指引 | 不出现惩罚/红叉；选错温和纠正 |
+| 庆祝 | 语音与粒子 | Home/More 两个出口 | 现行实现不自动倒计时返回 |
+| 家长设置 | 中文选项与当前选择 | 节奏说明 | 与儿童英语图音画面分开 |
 
-| 原则 | 说明 | 实现方式 |
-|------|------|----------|
-| **温暖** | 营造安全、快乐的学习氛围 | 橙黄暖色系为主，避免冷硬色调 |
-| **明亮** | 吸引幼儿注意力，激发探索欲 | 高饱和度色彩 + 奶油白背景 |
-| **护眼** | 保护幼儿视力健康 | 避免纯白/纯黑强对比，柔和渐变 |
-| **友好** | 传递亲切感，无压力体验 | 大圆角、柔和阴影、无惩罚色 |
-| **清晰** | 便于幼儿识别交互元素 | 层次分明，主次明确 |
+首页去分类是专项需求，不能在实现主题时自动替换现有首页。主色与视觉不迁移 hdims 的医疗后台风格，借鉴的是规则、Token 和验收的对应关系。
 
-### 1.2 设计关键词
+## 2. 颜色 Token
 
-```
-温暖 · 明亮 · 圆润 · 快乐 · 安全 · 柔和 · 活力
-```
+| AppTheme 名称 | 当前值 | 语义 |
+|---|---|---|
+| primary / primaryLight / primaryDark | `#FFB347` / `#FFBB80` / `#E86A30` | 主交互与同系过渡/阴影 |
+| secondary / secondaryLight | `#4ECDC4` / `#7EEEE6` | 次操作和中性信息 |
+| accent / accentLight | `#FFE066` / `#FFF0A0` | 星星、成就和正向强调 |
+| success | `#7ED957` | 正确/完成反馈 |
+| warmAlert | `#FF6B6B` | 温和提醒；不能自动用于惩罚性错误 |
+| background / backgroundWarm | `#FFF9F0` / `#FFECD2` | 页面与弱层次背景 |
+| surface | `#FFFFFF` | 图片/选项/浮层表面 |
+| cardBorder | `#F0DFC7` | 当前首页分类卡片统一边框 |
+| textPrimary / textSecondary / textHint | `#4A4A4A` / `#7A7A7A` / `#B0B0B0` | 正文、次要信息、提示 |
+| textOnColor | `#FFFFFF` | 有色表面文字，需检查实际对比度 |
+| magic / magicLight | `#B388FF` / `#D4BBFF` | 保留 Token，不表示魔术棒功能已实现 |
 
-### 1.3 目标用户特征
+分类 color 存于 `assets/data/categories.json`，由 Category 解析；不存在 CategoryConfig。主题色用于主题识别、低透明度选中/水波纹等，不取代成功/提醒的统一语义。
 
-- **年龄**：2-5 岁幼儿
-- **视觉偏好**：高饱和度、明亮色彩
-- **认知特点**：形象思维，依赖视觉反馈
-- **交互习惯**：喜欢点按和重复
-- **使用场景**：白天为主，横屏使用
+Token 值变化必须同步本表和代码，并核对所有真实调用方。局部内容图案色不必强行变成全局 Token；禁止每个页面另起一套品牌/状态体系。
 
----
+## 3. 字体与文字样式
 
-## 二、色彩系统
+| 样式 | 字体/尺寸/字重 | 当前默认色 | 用途 |
+|---|---|---|---|
+| displayLarge | Fredoka / 64 / 700 | textPrimary | 单词与主展示 |
+| displayMedium | Fredoka / 40 / 600 | textPrimary | 次级强调 |
+| headlineMedium | Fredoka / 22 / 600 | primary | 页面/区块标题 |
+| titleMedium | Fredoka / 16 / 500 | primary | 卡片、操作标签 |
+| bodyMedium | Nunito / 14 / 默认常规 | textSecondary | 辅助说明 |
 
-### 2.1 主色调
+字体源在 `assets/fonts/`，由 pubspec 声明。优先使用现有 TextStyle，确需调整用 copyWith，不为相同层级反复定义新样式。
 
-| 名称 | 色值 | 预览 | 用途 |
-|------|------|------|------|
-| **暖橙色** | `#FFB347` | 🟠 | 主要按钮、品牌色、核心交互 |
-| 暖橙色-浅 | `#FFCB78` | 🟠 | 悬停状态、渐变起点 |
-| 暖橙色-深 | `#FF9A24` | 🟠 | 按下状态、阴影色 |
+AppTextScaleBoundary 当前使用 `MediaQuery.withNoTextScaling`。这是现行全局策略，不代表已完成可访问性评估；不能在普通页面修改中擅自取消。中文家长界面的实际字形回退和最小设备表现需要另外核对。
 
-### 2.2 辅助色
+## 4. 尺寸、圆角、阴影和渐变
 
-| 名称 | 色值 | 预览 | 用途 |
-|------|------|------|------|
-| **薄荷青** | `#4ECDC4` | 🔵 | 次要按钮、信息提示 |
-| 薄荷青-浅 | `#7EEEE6` | 🔵 | 悬停状态 |
+| 类别 | Token/数值 | 用法 |
+|---|---|---|
+| 间距 | small 8、medium 16、large 24、xlarge 32 | 统一基本节奏；页面局部几何可按明确布局计算 |
+| 圆角 | small 8、medium 16、large 24、xlarge 28 | 元素、按钮、卡片、浮层分层使用 |
+| cardShadow | textHint alpha 0.12，blur 12，offset 0/4 | 有交互层次的卡片 |
+| buttonShadow | primaryDark alpha 0.25，blur 8，offset 0/4 | 主操作 |
+| backgroundGradient | background → backgroundWarm，自上而下 | 当前页面背景 |
+| primaryGradient | primaryLight → primary，左上到右下 | 需要渐变的主色表达 |
+| magicGradient | magicLight → magic → accent | 保留配置，不能据此开放未实现交互 |
 
-### 2.3 强调色
+`radiusCircle` 不是当前 AppTheme 常量；圆形使用 CircleBorder/BoxShape.circle 或具体组件约定。不把所有容器默认卡片化：图片选项可以有边框和阴影，辅助提示和普通文本不需要套卡片。
 
-| 名称 | 色值 | 预览 | 用途 |
-|------|------|------|------|
-| **柠檬黄** | `#FFE066` | 🟡 | 星星、成就、粒子特效 |
-| 柠檬黄-浅 | `#FFF0A0` | 🟡 | 高亮背景 |
+ThemeData 的 Material 按钮/卡片样式与页面自绘按钮不是同一个实现。修改主题后需要检查实际页面使用方式，不能只改 ThemeData 就宣称所有按钮同步。
 
-### 2.4 功能色
+## 5. 组件与页面约定
 
-| 名称 | 色值 | 预览 | 用途 |
-|------|------|------|------|
-| **魔法紫** | `#B388FF` | 🟣 | 魔术棒、属性叠加 |
-| 魔法紫-浅 | `#D4BBFF` | 🟣 | 魔法渐变 |
-| **成长绿** | `#7ED957` | 🟢 | 完成标记、鼓励反馈 |
-| **珊瑚红** | `#FF6B6B` | 🔴 | 护眼休息提示（温和） |
+- 现有显示组件和限制见 [组件指南](guide/components.md)，不在此虚构统一按钮或组件预览页已经存在。
+- CategoryCard 当前统一 cardBorder，分类色主要用于水波纹/高亮；不要恢复旧文档的各色粗边框。
+- 当前学习页用 LayoutBuilder 收缩图像和间距；二选一/四选一布局由实际约束计算，不写死某个 iPhone 型号。
+- 进度条目前页面计算并保证不回退，颜色仍使用分类色；它表示课程推进，不是掌握率。
+- 儿童可交互元素的新建/改动目标为至少 48×48 逻辑像素；主要操作尽量更大。现有部分返回按钮为 44×44，是需在相关 UI 任务中核对的差异，不写成已全部符合。
+- 使用 Semantics 表达按钮含义与选择/禁用状态；仅视觉变灰不足以说明不可操作。
 
-### 2.5 背景色
+## 6. 动效与播放
 
-| 名称 | 色值 | 预览 | 用途 |
-|------|------|------|------|
-| **奶油白** | `#FFF9F0` | ⬜ | 主页面背景 |
-| **暖杏色** | `#FFECD2` | 🟨 | 卡片背景、分区 |
-| **纯白** | `#FFFFFF` | ⬜ | 卡片表面、弹窗 |
+基础时长：durationFast 150ms、durationNormal 300ms、durationSlow 500ms；buttonCooldown 500ms。特定动作有自己的真实时长，例如学习反弹 300ms、错误晃动 420ms、最后答对停留 400ms，不能把基础时长表当成所有动画已统一。
 
-### 2.6 文字色
+立即视觉反馈可以先于声音；等待播放的锁定、重播不重新锁 Next、鼓励与下题衔接按 [音频指南](guide/audio-lifecycle.md) 执行。冷却、错误和加载是不同状态，不机械地全部“变灰+抖动”。
 
-| 名称 | 色值 | 用途 |
-|------|------|------|
-| **深灰** | `#4A4A4A` | 主要文字（避免纯黑） |
-| **中灰** | `#7A7A7A` | 次要文字 |
-| **浅灰** | `#B0B0B0` | 提示文字 |
-| **纯白** | `#FFFFFF` | 按钮/深色背景上的文字 |
+## 7. 视觉验收
 
-### 2.7 分类主题色
+目前没有组件画廊或自动截图基准。修改视觉时至少比较本次受影响的真实画面，记录设备/窗口尺寸和内容状态：
 
-每个学习主题有专属代表色，帮助孩子形成视觉记忆。
+1. 首页分类卡片与长名称、学习词与长单词、二选一和四选一。
+2. 小高度、SafeArea、播放中/加载中/重试状态，确保主体与点击区域不被挤出。
+3. 家长设置中文字形、选择态，完成页粒子和 Home/More 操作。
+4. 正文和操作的实际对比度；暖色方案不自动等于达到 4.5:1。
 
-> **注意**：分类颜色属于业务配置，定义在 `CategoryConfig` 中（而非 `AppTheme`），便于动态新增分类。
+15 分钟休息、魔术棒和家长锁均不能以设计 Token/文字常量存在宣称已上线，具体状态见实施状态文档。
 
-| 主题 | 色值 | 预览 | 配置位置 |
-|------|------|------|----------|
-| 🦁 动物世界 | `#FFB347` | 🟠 | `CategoryConfig.categories` |
-| 🍎 美味食物 | `#FF5C7A` | 🔴 | `CategoryConfig.categories` |
-| 🚗 交通工具 | `#2EC4B6` | 🔵 | `CategoryConfig.categories` |
-| 🏃 动作状态 | `#FFD166` | 🟡 | `CategoryConfig.categories` |
-| 🏠 居家生活 | `#C3A6FF` | 🟣 | `CategoryConfig.categories` |
-| 🎵 乐器声音 | `#FF4081` | 🩷 | `CategoryConfig.categories` |
-| 🌤️ 天气自然 | `#4CBF8A` | 🟢 | `CategoryConfig.categories` |
+## 8. 应用图标
 
-### 2.8 颜色语义使用规范（重要）
-
-为符合产品需求中的“可预测性原则”（同样的动作永远产生同样的结果）与“无失败态原则”（不出现惩罚/错误暗示），颜色必须做到**同色同义**、**一义一色**：
-
-#### A. 功能色（语义色）——表示“状态/反馈”，不表示“主题”
-
-- **主交互/确认（Primary）**：`#FFB347`（暖橙色）  
-  用于主要按钮、核心交互（如 Next）。
-- **信息/次要（Secondary）**：`#4ECDC4`（薄荷青）  
-  用于次要按钮、提示信息等“中性状态”，避免用于奖励与警示。
-- **奖励/成就（Accent）**：`#FFE066`（柠檬黄）  
-  只用于星星、成就、粒子特效等“奖励反馈”。
-- **变化/叠加（Magic）**：`#B388FF`（魔法紫）  
-  只用于魔术棒与“属性叠加”相关的交互与动效。
-- **完成/鼓励（Success）**：`#7ED957`（成长绿）  
-  只用于完成标记、鼓励反馈，不用于主题识别。
-- **休息提醒（Warm Alert）**：`#FF6B6B`（珊瑚红）  
-  只用于护眼休息提示；避免用作“错误/失败”的表达。
-
-#### B. 分类主题色——表示“主题识别”，不承担“状态/反馈”语义
-
-- **推荐用法**（更舒适、统一、耐看）：
-  - 卡片边框、角标、标签色块
-  - 点击水波纹/高亮背景（低透明度）
-  - 主题入口插画的点缀色
-- **避免用法**（容易不舒适或语义混乱）：
-  - 用分类色作为正文/标题文字颜色（尤其黄/浅色在白底上对比不足）
-  - 用分类色表示成功/警示/奖励等状态（会与功能色冲突）
-
-#### C. 简单落地规则（开发检查清单）
-
-- “点了有奖励/成就感”的反馈 → 用 **Accent（柠檬黄）**
-- “发生了魔法变化/叠加状态” → 用 **Magic（魔法紫）**
-- “完成/已学会/达成” → 用 **Success（成长绿）**
-- “休息/护眼提醒” → 用 **Warm Alert（珊瑚红）**
-- “这是什么主题？” → 用 **分类主题色**（但文字优先用深灰）
-
----
-
-## 三、排版规范
-
-### 3.1 字体选择
-
-| 场景 | 字体 | 代码常量 | 说明 |
-|------|------|----------|------|
-| 单词/标题展示 | **Fredoka** | `AppTheme.fontFamilyDisplay` | 圆润童趣，适合幼儿 |
-| 正文/说明 | **Nunito** | `AppTheme.fontFamilyBody` | 简洁易读 |
-
-### 3.2 字体文件
-
-字体文件存放在 `assets/fonts/` 目录：
-
-```
-assets/fonts/
-├── Fredoka-Regular.ttf    (400)
-├── Fredoka-Medium.ttf     (500)
-├── Fredoka-SemiBold.ttf   (600)
-├── Fredoka-Bold.ttf       (700)
-├── Nunito-Regular.ttf     (400)
-├── Nunito-Medium.ttf      (500)
-├── Nunito-SemiBold.ttf    (600)
-└── Nunito-Bold.ttf        (700)
-```
-
-**下载来源**：[Google Fonts](https://fonts.google.com/)
-- Fredoka: https://fonts.google.com/specimen/Fredoka
-- Nunito: https://fonts.google.com/specimen/Nunito
-
-### 3.3 文字样式
-
-| 样式名称 | 字体 | 字号 | 字重 | 用途 |
-|----------|------|------|------|------|
-| `displayLarge` | Fredoka | 64px | Bold (700) | 超大展示标题（核心内容） |
-| `displayMedium` | Fredoka | 40px | SemiBold (600) | 大号展示标题（次要内容） |
-| `headlineMedium` | Fredoka | 22px | SemiBold (600) | 页面标题、区块标题 |
-| `titleMedium` | Fredoka | 16px | Medium (500) | 卡片标题、列表项标题 |
-| `bodyMedium` | Nunito | 14px | Regular (400) | 正文、说明文字 |
-
-### 3.4 文字层级示意
-
-```
-┌──────────────────────────────────────┐
-│                                      │
-│         Apple                        │  ← displayLarge (Fredoka 64px)
-│                                      │
-│      Big Apple                       │  ← displayMedium (Fredoka 40px)
-│                                      │
-│   🍎 Foods                           │  ← headlineMedium (Fredoka 22px)
-│                                      │
-│   Animals                            │  ← titleMedium (Fredoka 16px)
-│   点击图片听发音                       │  ← bodyMedium (Nunito 14px)
-│                                      │
-└──────────────────────────────────────┘
-```
-
-### 3.5 字体样式使用指南
-
-#### A. 样式选择决策树
-
-根据内容的重要性和层级选择合适的样式：
-
-```
-需要展示文字？
-    │
-    ├── 是页面的核心焦点吗？（用户第一眼看到）
-    │       │
-    │       ├── 是 → displayLarge（64px）
-    │       │        示例：大图学习仓的单词 "Apple"
-    │       │
-    │       └── 否，但仍需突出 → displayMedium（40px）
-    │                示例：短语展示 "Big Apple"
-    │
-    ├── 是页面/区块的标题吗？
-    │       │
-    │       └── 是 → headlineMedium（22px）
-    │                示例：首页标题 "HopEnglish"、分类名称
-    │
-    ├── 是卡片/列表项的标题吗？
-    │       │
-    │       └── 是 → titleMedium（16px）
-    │                示例：分类卡片上的 "Animals"
-    │
-    └── 是说明/描述文字吗？
-            │
-            └── 是 → bodyMedium（14px）
-                     示例：提示文字 "点击图片听发音"
-```
-
-#### B. 使用示例
-
-```dart
-import 'package:hopenglish/theme/app_theme.dart';
-
-// 1. 核心展示内容 - 使用 displayLarge
-Text(
-  'Apple',
-  style: AppTheme.displayLarge,
-)
-
-// 2. 次要展示内容 - 使用 displayMedium
-Text(
-  'Big Apple',
-  style: AppTheme.displayMedium,
-)
-
-// 3. 页面/区块标题 - 使用 headlineMedium
-Text(
-  'HopEnglish',
-  style: AppTheme.headlineMedium,
-)
-
-// 4. 卡片标题 - 使用 titleMedium
-Text(
-  'Animals',
-  style: AppTheme.titleMedium,
-)
-
-// 5. 说明文字 - 使用 bodyMedium
-Text(
-  '点击图片听发音',
-  style: AppTheme.bodyMedium,
-)
-```
-
-#### C. 自定义样式
-
-如需在基础样式上做微调，使用 `copyWith`：
-
-```dart
-// 修改颜色
-Text(
-  'Apple',
-  style: AppTheme.displayLarge.copyWith(
-    color: AppTheme.primary,
-  ),
-)
-
-// 修改字重
-Text(
-  'Important',
-  style: AppTheme.titleMedium.copyWith(
-    fontWeight: FontWeight.w700,
-  ),
-)
-
-// 修改多个属性
-Text(
-  'Special',
-  style: AppTheme.headlineMedium.copyWith(
-    color: AppTheme.magic,
-    letterSpacing: 1.5,
-  ),
-)
-```
-
-#### D. 使用规范
-
-| ✅ 推荐 | ❌ 避免 |
-|--------|--------|
-| 使用预定义样式 `AppTheme.displayLarge` | 直接写 `TextStyle(fontSize: 64)` |
-| 用 `copyWith` 微调样式 | 完全重写新的 TextStyle |
-| 保持层级一致性（标题用 display/headline） | 在正文中使用 display 样式 |
-| 同一层级内容使用相同样式 | 相似内容使用不同大小的字体 |
-
-#### E. 命名规范说明
-
-样式命名遵循 Material Design Typography 规范：
-
-| 前缀 | 含义 | 本项目用途 |
-|------|------|-----------|
-| `display*` | 最大、最醒目的展示文字 | 单词/短语展示 |
-| `headline*` | 页面级标题 | 页面标题、区块标题 |
-| `title*` | 组件级标题 | 卡片标题、列表项 |
-| `body*` | 正文内容 | 说明文字、提示 |
-| `label*` | 标签/按钮文字 | 按钮文字（待添加） |
-
-#### F. 常见场景速查
-
-| 场景 | 推荐样式 | 示例 |
-|------|----------|------|
-| 大图学习仓 - 单词 | `displayLarge` | Apple |
-| 大图学习仓 - 短语 | `displayMedium` | Big Apple |
-| 首页标题 | `headlineMedium` | HopEnglish |
-| 分类卡片名称 | `titleMedium` | Animals |
-| 单词矩阵列表 - 单词 | `titleMedium` | Lion |
-| 按钮文字 | `titleMedium` | Next → |
-| 提示/说明 | `bodyMedium` | 点击图片听发音 |
-| 完成提示 | `bodyMedium` | 太棒了！ |
-
----
-
-## 四、间距与圆角
-
-### 4.1 间距系统
-
-采用 8px 基准的间距系统：
-
-| 名称 | 数值 | 用途 |
-|------|------|------|
-| `spacingSmall` | 8px | 紧凑间距 |
-| `spacingMedium` | 16px | 标准间距 |
-| `spacingLarge` | 24px | 宽松间距 |
-| `spacingXLarge` | 32px | 区块间距 |
-
-### 4.2 圆角系统
-
-大圆角传递友好、安全的视觉感受：
-
-| 名称 | 数值 | 用途 |
-|------|------|------|
-| `radiusSmall` | 8px | 小型元素 |
-| `radiusMedium` | 16px | 标签、小按钮 |
-| `radiusLarge` | 24px | 卡片、弹窗 |
-| `radiusXLarge` | 28px | 主要按钮 |
-| `radiusCircle` | 999px | 圆形按钮/头像 |
-
----
-
-## 五、组件样式
-
-### 5.1 按钮
-
-#### 主要按钮（Primary Button）
-
-```
-┌─────────────────────────────────┐
-│                                 │
-│         下一个 →                 │
-│                                 │
-└─────────────────────────────────┘
-
-背景色: #FFB347 (暖橙色)
-文字色: #FFFFFF
-圆角: 28px
-内边距: 40px × 20px
-阴影: 0 4px 8px rgba(255, 179, 71, 0.25)
-```
-
-#### 分类卡片
-
-```
-┌─────────────────────────────────┐
-│                                 │
-│        🦁                       │
-│                                 │
-│     动物世界                     │
-│                                 │
-└─────────────────────────────────┘
-
-背景色: #FFFFFF
-边框: 主题色渐变边框
-圆角: 24px
-阴影: 0 4px 12px rgba(176, 176, 176, 0.12)
-```
-
-#### 魔术棒按钮
-
-```
-    ┌───────┐
-    │  ✨   │
-    └───────┘
-    
-常态背景: #B388FF (魔法紫)
-激活背景: 魔法渐变
-圆角: 圆形
-尺寸: 56px × 56px
-```
-
-### 5.2 卡片
-
-| 属性 | 值 |
-|------|-----|
-| 背景色 | `#FFFFFF` |
-| 圆角 | 24px |
-| 阴影 | `0 4px 12px rgba(176, 176, 176, 0.12)` |
-| 内边距 | 16px |
-
-### 5.3 进度指示
-
-| 属性 | 值 |
-|------|-----|
-| 轨道色 | `#FFECD2` (暖杏色) |
-| 进度色 | `#FF8A50` (蜜橘橙) |
-| 高度 | 8px |
-| 圆角 | 4px |
-
----
-
-## 六、应用图标设计规范
-
-### 6.1 设计提示词
-
-应用图标是品牌的第一印象，需要体现产品的核心特征：温暖、友好、童趣。
-
-```
-设计一个 iOS App 图标，主体是一只极简风格的 Q 版狮子头。
-
-画面内容：
-狮子正脸朝向前方，眼神与观众对视，表情友好微笑，看起来呆萌可爱。
-
-设计风格：
-扁平化矢量插画风格，线条极度圆润，没有任何尖角，呈现出一种软糯、Q 弹的几何感（类似软糖或 Fredoka 字体风格）。
-
-色彩规范：
-狮子脸部为主色调"暖橙色"（类似 #FFB347），鬃毛为稍深一点的橙色，背景必须是纯净的"奶油白"（类似 #FFF9F0），不要渐变背景。
-
-技术要求：
-图片必须是直角正方形，填满整个画布（不要留白边，不要自带圆角裁剪）。画面中严禁出现任何文字、字母或边框。画质清晰，8K 分辨率。
-```
-
-### 6.2 设计要点
-
-| 要素 | 要求 | 说明 |
-|------|------|------|
-| **主体** | Q 版狮子头 | 正脸，友好微笑，呆萌可爱 |
-| **风格** | 极简扁平化 | 圆润线条，无尖角，软糯 Q 弹 |
-| **主色调** | 暖橙色 `#FFB347` | 狮子脸部 |
-| **辅助色** | 深橙色 | 鬃毛部分 |
-| **背景色** | 奶油白 `#FFF9F0` | 纯净背景，无渐变 |
-| **形状** | 直角正方形 | 填满画布，不留白边 |
-| **禁止项** | 无文字、字母、边框 | 保持简洁 |
-| **分辨率** | 8K | 确保清晰度 |
-
-### 6.3 与设计系统的一致性
-
-应用图标的设计完全遵循 HopEnglish 设计系统的核心原则：
-
-- **温暖**：暖橙色主色调，符合品牌色 `#FFB347`
-- **友好**：Q 版狮子表情友好，传递亲切感
-- **圆润**：极度圆润的线条，与 Fredoka 字体风格一致
-- **明亮**：奶油白背景，符合主背景色 `#FFF9F0`
-- **童趣**：呆萌可爱的形象，适合 2-5 岁幼儿
-
-### 6.4 技术实现
-
-图标配置和生成流程请参考：[应用图标配置指南](./app_icon_setup.md)
-
----
-
-## 七、渐变系统
-
-### 6.1 背景渐变
-
-```
-backgroundGradient
-┌─────────────────────┐
-│  #FFF9F0 (奶油白)   │ ← 顶部
-│          ↓          │
-│  #FFECD2 (暖杏色)   │ ← 底部
-└─────────────────────┘
-
-方向: 从上到下
-用途: 主页面背景
-```
-
-### 6.2 主色渐变
-
-```
-primaryGradient
-┌─────────────────────┐
-│  #FFCB78            │ ← 左上
-│          ↘          │
-│            #FFB347  │ ← 右下
-└─────────────────────┘
-
-用途: 主要按钮、强调卡片
-```
-
-### 6.3 魔法渐变
-
-```
-magicGradient
-┌─────────────────────────────┐
-│ #D4BBFF → #B388FF → #FFE066 │
-└─────────────────────────────┘
-
-用途: 魔术棒激活状态、属性叠加动效
-```
-
-### 6.4 庆祝粒子色
-
-用于完成主题后的撒花动画：
-
-```
-celebrationColors = [
-  #FFE066  柠檬黄
-  #FFB347  暖橙色
-  #B388FF  魔法紫
-  #7ED957  成长绿
-  #4ECDC4  薄荷青
-  #FF4081  玫红粉
-]
-```
-
----
-
-## 八、阴影系统
-
-### 7.1 卡片阴影
-
-```css
-box-shadow: 0 4px 12px rgba(176, 176, 176, 0.12);
-```
-
-柔和、轻微的浮起效果，不喧宾夺主。
-
-### 7.2 按钮阴影
-
-```css
-box-shadow: 0 4px 8px rgba(255, 179, 71, 0.25);
-```
-
-使用主色调的阴影，增强品牌感和点击欲望。
-
----
-
-## 九、动效规范
-
-### 8.1 时长定义
-
-| 名称 | 时长 | 用途 |
-|------|------|------|
-| `durationFast` | 150ms | 微交互（按钮反馈） |
-| `durationNormal` | 300ms | 常规过渡 |
-| `durationSlow` | 500ms | 强调动效（撒花、完成） |
-
-### 8.2 核心动效
-
-| 场景 | 动效 | 说明 |
-|------|------|------|
-| 点击图片 | Q 弹缩放 | `scale: 1 → 0.95 → 1.05 → 1` |
-| 切换单词 | 淡入滑动 | 新内容从右侧淡入 |
-| 魔术棒激活 | 旋转发光 | 360° 旋转 + 光晕扩散 |
-| 完成主题 | 撒花粒子 | 多彩粒子从底部喷发 |
-| 星星获得 | 弹跳闪烁 | 放大弹跳 + 金光闪烁 |
-
-### 8.3 按钮冷却
-
-为防止幼儿连续快速点击导致页面混乱：
-
-- **冷却时间**：500ms
-- **视觉反馈**：冷却期间按钮轻微变灰 + 抖动
-
----
-
-## 十、无障碍与护眼
-
-### 9.1 对比度
-
-- 主要文字与背景对比度 ≥ 4.5:1
-- 避免纯白 `#FFFFFF` 与纯黑 `#000000` 的直接对比
-
-### 9.2 护眼设计
-
-- 背景使用奶油白 `#FFF9F0` 而非纯白
-- 文字使用深灰 `#4A4A4A` 而非纯黑
-- 提供 15 分钟护眼休息提醒
-
-### 9.3 点击区域
-
-- 所有可交互元素最小点击区域：48px × 48px
-- 主要按钮推荐尺寸：≥ 80px 高度
-
----
-
-## 十一、代码引用
-
-### 10.1 导入
-
-```dart
-import 'package:hopenglish/core/theme/app_theme.dart';
-```
-
-### 10.2 应用主题
-
-```dart
-MaterialApp(
-  theme: AppTheme.theme,
-  // ...
-)
-```
-
-### 10.3 使用示例
-
-```dart
-// 功能色（主题/状态/反馈）
-Container(color: AppTheme.primary)
-Container(color: AppTheme.accent)
-
-// 分类颜色（业务配置，在 CategoryConfig 中）
-import 'package:hopenglish/core/config/category_config.dart';
-final category = CategoryConfig.categories.first;
-Container(color: category.color)
-
-// 字体（已内置在文字样式中）
-// Fredoka: AppTheme.fontFamilyDisplay
-// Nunito: AppTheme.fontFamilyBody
-
-// 文字样式（自动应用对应字体）
-Text('Apple', style: AppTheme.displayLarge)      // Fredoka Bold 64px
-Text('Big Apple', style: AppTheme.displayMedium) // Fredoka SemiBold 40px
-Text('Animals', style: AppTheme.headlineMedium)  // Fredoka SemiBold 22px
-Text('Lion', style: AppTheme.titleMedium)        // Fredoka Medium 16px
-Text('点击听发音', style: AppTheme.bodyMedium)    // Nunito Regular 14px
-
-// 渐变
-Container(
-  decoration: BoxDecoration(
-    gradient: AppTheme.backgroundGradient,
-  ),
-)
-
-// 阴影
-Container(
-  decoration: BoxDecoration(
-    boxShadow: AppTheme.cardShadow,
-  ),
-)
-
-// 间距
-Padding(padding: EdgeInsets.all(AppTheme.spacingMedium))
-
-// 圆角
-BorderRadius.circular(AppTheme.radiusLarge)
-```
-
----
-
-## 附录：色彩情绪速查
-
-```
-🟠 暖橙色  →  快乐 · 活力 · 温暖 · 探索
-🔵 薄荷青  →  平静 · 信任 · 安全 · 放松
-🟡 柠檬黄  →  阳光 · 正向 · 成就 · 惊喜
-🟣 魔法紫  →  神奇 · 变化 · 想象力 · 期待
-🟢 成长绿  →  成长 · 鼓励 · 自然 · 健康
-🩷 玫红粉  →  活力 · 热情 · 音乐 · 愉悦
-🔴 珊瑚红  →  温和提醒 · 休息 · 关怀
-```
-
----
-
-*文档版本：1.0*  
-*最后更新：2024年*  
-*适用于：HopEnglish 幼儿英语启蒙 App*
-
+品牌图标保留友好狮子、暖色、无文字和边框的方向；iOS 源图为 1024×1024、无 alpha、无自带圆角裁剪，具体操作见 [图标指南](app_icon_setup.md)。图标源、启动页与课程插图是不同用途，不把生成原图直接当商店合格产物。

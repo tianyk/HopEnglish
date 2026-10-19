@@ -8,7 +8,7 @@
 
 ```bash
 cd scripts/tts-generator
-npm install
+pnpm install --frozen-lockfile
 ```
 
 ## 使用

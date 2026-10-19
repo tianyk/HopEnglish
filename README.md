@@ -2,6 +2,8 @@
 
 **一款面向 2-5 岁幼儿的沉浸式“因果反馈”英语启蒙工具。**
 
+开发从 [AGENTS.md](AGENTS.md) → [文档索引](docs/README.md) → [开发指南](docs/guide/README.md) 开始。当前功能与待实施需求见 [实施状态](docs/product_status.md)，工程优化进度见 [优化规划](docs/engineering_optimization_plan.md)。
+
 ## 核心理念
 
 *   **直觉交互**：无需学习，点一点就会玩。
@@ -25,20 +27,42 @@
 
 ## 技术栈
 
-*   Flutter 3.27.4
-*   Dart 3.6.2
+*   Flutter / Dart，原生 Widget 状态与 Navigator
+*   SQLite（sqflite）、audioplayers、flutter_svg、equatable
+*   SDK 与依赖约束以 `pubspec.yaml`、`pubspec.lock` 为准；当前锁文件要求 Flutter ≥3.38.4、Dart ≥3.11
+*   本次文档核对使用 Flutter 3.41.4 / Dart 3.11.1；仓库尚未固定 SDK，不能把该环境描述为已验证的发布工具链
 
 ## 系统要求
 
 ### iOS
 *   **最低版本**: iOS 15.0
-*   **支持设备**: iPhone、iPad
-*   **架构**: arm64（真机）、x86_64（模拟器）
+*   **当前工程目标**: iPhone；iPad 支持尚需明确配置并验证
+*   **架构**: 以当前 Flutter/Xcode 对目标设备的构建结果为准，模拟器也可能使用 arm64
 
 ### 开发环境
 *   macOS（用于 iOS 开发）
-*   Xcode 15.0+
+*   与所用 Flutter 兼容的 Xcode（本次核对环境为 26.3）
 *   CocoaPods
+
+## 快速上手与检查
+
+```bash
+flutter --version
+flutter pub get
+flutter run
+```
+
+应用主体使用随包词表、图片和音频，学习进度留在本地。当前流程是分类开课 → 图音学习 → 听音选图 → 庆祝；自由点读在 Word Library。首页 Let's Play 与分类轮换仍是 [专项需求](docs/homepage_declassification_prd.md)，尚未实施。
+
+```bash
+python3 tool/check_docs.py
+dart format --output=none --set-exit-if-changed lib test
+flutter analyze --no-pub
+flutter test --no-pub
+node --test scripts/dreamina-word-generator/test/*.test.mjs
+```
+
+按变更范围选择检查，详细证据边界和本地代理排查见 [验证指南](docs/guide/verification.md)。iOS 出包见 [发布指南](docs/ios_release.md)。目前尚未配置应用统一验证脚本与 CI。
 
 ## 资源
 

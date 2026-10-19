@@ -1,247 +1,70 @@
-# 项目结构说明
+# 项目结构与真实入口
 
-## 📁 目录结构
+状态：现行目录说明，2026-10-18 按工作区核对。工程约束归 [架构指南](guide/architecture.md)，能力与缺口归 [实施状态](product_status.md)。
 
-```
+## 1. 目录快照
+
+```text
 lib/
-├── main.dart                              # 应用入口
-│
-└── src/                                   # 源代码目录
-    ├── config/                            # 配置文件
-    │   └── category_config.dart           # 分类配置
-    │
-    ├── constants/                         # 常量定义
-    │   └── app_strings.dart               # 字符串常量
-    │
-    ├── libs/                              # 工具库
-    │   ├── logger.dart                    # 日志工具
-    │   └── utils.dart                     # 通用工具函数
-    │
-    ├── models/                            # 数据模型
-    │   ├── category.dart                  # 分类模型
-    │   ├── word.dart                      # 单词模型
-    │   ├── learning_mode.dart             # 学习模式枚举（日常/复习/久别）
-    │   ├── word_bucket.dart               # 单词分桶（Overdue/Warm/Favorite）
-    │   └── models.dart                    # 模型导出
-    │
-    ├── data/                              # 数据持久化（SQLite 等）
-    │   ├── app_database.dart              # SQLite 数据库（建表/迁移/连接管理）
-    │   └── learning_progress_dao.dart     # 学习进度 DAO（SQL 读写）
-    │
-    ├── pages/                             # 页面（路由入口）
-    │   ├── home_page.dart                 # 首页：分类画廊
-    │   ├── word_learning_page.dart        # 单词学习页
-    │   └── celebration_page.dart          # 完成庆祝页
-    │
-    ├── services/                          # 服务层
-    │   ├── category_service.dart          # 分类数据服务
-    │   ├── learning_progress_service.dart # 学习进度服务（口径/节流/会话）
-    │   └── adaptive_sorting_service.dart  # 自适应排序服务（分桶/混排）
-    │
-    ├── theme/                             # 主题样式
-    │   └── app_theme.dart                 # 应用主题
-    │
-    └── widgets/                           # 可复用组件
-        ├── category_card.dart             # 分类卡片
-        └── word_directory_sheet.dart      # 单词目录弹窗
+  main.dart
+  src/
+    constants/app_strings.dart
+    data/{app_database,learning_progress_dao}.dart
+    learning/{learning_engine,learning_policy,learning_models}.dart
+    libs/{logger,utils}.dart
+    models/{category,word,lesson_plan,word_bucket,learning_mode,models}.dart
+    pages/{home_page,word_learning_page,celebration_page,word_library_page}.dart
+    services/
+      category_service.dart
+      lesson_session_service.dart
+      lesson_quiz_controller.dart
+      learning_progress_service.dart
+      audio_playback_service.dart
+      app_settings_service.dart
+      adaptive_sorting_service.dart
+    theme/app_theme.dart
+    widgets/
+      adaptive_image.dart
+      word_icon.dart
+      category_card.dart
+      lesson_settings_sheet.dart
+      word_directory_sheet.dart
+assets/{data,images,audio,fonts}/
+scripts/{dreamina-word-generator,tts-generator}/
+ios/
+test/
+docs/guide/
+.agents/skills/
+.memory/
 ```
 
-## 🏗️ 架构说明
+花括号是列表简写。分类内容来自 `assets/data/categories.json`，当前不存在 `lib/src/config/category_config.dart` 或 `lib/core/`。
 
-### 1. main.dart - 应用入口
-- **职责**：应用初始化、屏幕方向设置、应用启动
-- **内容**：只包含 `main()` 函数和 `HopEnglishApp` 根组件
-- **原则**：保持简洁，不包含任何业务逻辑
+## 2. 主流程
 
-### 2. src/ - 源代码目录
-所有业务代码放在 `src/` 目录下，`main.dart` 是唯一在 `lib/` 根目录的文件。
+| 入口/步骤 | 当前实现 |
+|---|---|
+| 初始化 | main 请求竖屏、启动应用、异步预热进度数据库 |
+| 全局文本策略 | AppTextScaleBoundary 固定文字缩放 |
+| 首页 | HomePage 读分类和设置，按分类生成课程 |
+| 计划 | LessonSessionService 读取进度并调用纯 LearningEngine |
+| 学习与测验 | WordLearningPage 消费 LessonPlan，LessonQuizController 插入错误重试 |
+| 作答 | LearningProgressService 计算 transition，DAO 事务保存 |
+| 完成 | CelebrationPage，Home 返回首页，More 构造同分类后续课 |
+| 词库与探索 | `word_library_page.dart` 同时定义 WordLibraryPage 和 WordExplorePage |
 
-### 3. config/ - 配置模块
-存放业务配置数据：
-- 分类配置（`category_config.dart`）
+当前学习页需要 `plan` 和 `lessonSize`；`WordLearningPage(category: ..., initialIndex: ...)` 是旧接口，不能继续复制。
 
-**特点**：配置数据，可被任何模块引用
+## 3. 历史保留与复用边界
 
-### 4. constants/ - 常量模块
-存放全局常量：
-- 字符串常量（`app_strings.dart`）
-- 数值常量（如时长、尺寸等）
-- 枚举定义
+- `AdaptiveSortingService` 使用旧曝光/兴趣分桶，当前未找到主流程调用。
+- `WordDirectorySheet` 保留旧目录 UI，当前未找到生产入口。
+- Registry v1 是 LearningEngine 内的测验兼容策略，与旧曝光分桶不同。
+- `WordProgress` 位于 `word_bucket.dart`，仍被当前课程主线使用，不能连同旧桶逻辑直接删除。
+- 图片显示复用 AdaptiveImage/WordIcon；其他共用交互现状见 [组件清单](guide/components.md)。
 
-**特点**：纯常量，不包含逻辑
+## 4. 放置新代码
 
-### 5. libs/ - 工具库
-存放通用工具：
-- 日志工具（`logger.dart`）
-- 通用函数（`utils.dart`）
+根据职责沿用现有目录，不另建第二套 services/repositories/core 体系。页面专属部分先留在页面附近；SQL 进 data；纯学习决策进 learning；工具依赖留在所属 scripts 项目。
 
-**特点**：纯函数/工具类，无业务依赖
-
-### 6. models/ - 数据模型
-存放数据模型定义：
-- `Category` - 分类模型
-- `Word` - 单词模型
-
-**特点**：使用 `Equatable`，支持 JSON 序列化
-
-### 7. pages/ - 页面模块
-存放页面级组件（路由入口）：
-- `home_page.dart` - 首页分类画廊
-- `word_learning_page.dart` - 单词学习页
-- `celebration_page.dart` - 完成庆祝页
-
-**命名规范**：文件名以 `_page.dart` 结尾
-
-### 8. services/ - 服务层
-存放业务服务：
-- `category_service.dart` - 分类数据加载
-- `learning_progress_service.dart` - 学习进度记录与会话管理
-
-**特点**：封装数据获取逻辑，支持本地/网络切换
-
-### 9. theme/ - 主题模块
-存放 UI 样式定义：
-- 颜色系统
-- 字体样式
-- 间距、圆角、阴影等
-- 渐变定义
-
-**特点**：全局样式，遵循设计系统规范
-
-### 10. widgets/ - 可复用组件
-存放跨页面复用的 UI 组件：
-- `category_card.dart` - 分类卡片
-- `word_directory_sheet.dart` - 单词目录弹窗
-
-**命名规范**：组件名称描述其功能
-
-## 📋 文件命名规范
-
-### 1. 文件名
-- 使用 **snake_case**（小写 + 下划线）
-- 文件名应描述其内容/功能
-- 示例：
-  - `home_page.dart`（页面）
-  - `category_card.dart`（组件）
-  - `category_service.dart`（服务）
-
-### 2. 类名
-- 使用 **PascalCase**（大驼峰）
-- 组件类名应包含组件类型后缀
-- 示例：
-  - `HomePage`（页面）
-  - `CategoryCard`（组件）
-  - `CategoryService`（服务）
-
-### 3. 私有组件（页面内组件）
-- 如果组件仅在单个页面内使用，直接写在页面文件内作为私有类
-- 使用下划线前缀：`_CategoryCard`
-
-### 4. 公共组件（跨页面组件）
-- 如果组件在多个页面复用，提取到 `widgets/` 目录
-- 使用公开类名：`CategoryCard`
-
-## 🔗 导入规范
-
-### 1. 导入顺序
-```dart
-// 1. Dart SDK
-import 'dart:async';
-import 'dart:math';
-
-// 2. Flutter SDK
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-
-// 3. 第三方包（按字母排序）
-import 'package:audioplayers/audioplayers.dart';
-import 'package:equatable/equatable.dart';
-
-// 4. 项目内部导入（使用 package 路径，按字母排序）
-import 'package:hopenglish/src/models/category.dart';
-import 'package:hopenglish/src/pages/home_page.dart';
-import 'package:hopenglish/src/theme/app_theme.dart';
-```
-
-### 2. 路径规范
-- **使用 package 路径**（推荐）：`package:hopenglish/src/...`
-- **避免相对路径**：`../../models/...`（容易出错）
-
-**示例：**
-```dart
-// ✅ 正确
-import 'package:hopenglish/src/models/category.dart';
-import 'package:hopenglish/src/theme/app_theme.dart';
-
-// ❌ 错误
-import '../../models/category.dart';
-import '../theme/app_theme.dart';
-```
-
-## 🎯 代码组织原则
-
-### 1. 单一职责
-- 每个文件只做一件事
-- 每个类/组件只有一个变化的理由
-
-### 2. 依赖方向
-```
-pages/ widgets/ (页面和组件)
-    ↓ 可以引用
-services/ models/ (服务和模型)
-    ↓ 可以引用
-config/ constants/ theme/ libs/ (基础模块)
-```
-
-### 3. 组件拆分原则
-**何时提取为独立文件？**
-- 组件代码超过 50-100 行
-- 组件在多个页面被复用
-- 组件有独立的业务逻辑
-- 便于单独测试
-
-**何时保持在页面内？**
-- 组件仅在单个页面使用
-- 组件代码少于 50 行
-- 组件与页面逻辑紧密耦合
-
-## 📦 模块间通信
-
-### 1. 导航
-使用 Navigator 管理路由：
-```dart
-Navigator.of(context).push(
-  MaterialPageRoute(builder: (context) => WordLearningPage(category: category)),
-);
-```
-
-### 2. 数据传递
-通过构造函数传递数据：
-```dart
-WordLearningPage(category: category, initialIndex: 0)
-```
-
-### 3. 回调通信
-通过回调函数通信：
-```dart
-CategoryCard(
-  category: category,
-  onTap: () => handleTap(category),
-)
-```
-
-## ✅ 重构检查清单
-
-每次添加新功能时，检查：
-- [ ] 文件是否放在 `lib/src/` 的正确子目录下？
-- [ ] 文件名是否遵循 snake_case？
-- [ ] 类名是否遵循 PascalCase？
-- [ ] 导入是否使用 package 路径？
-- [ ] 导入是否按正确顺序排列？
-- [ ] 组件是否足够小（< 100 行）？
-- [ ] 是否遵循单一职责原则？
-- [ ] 依赖方向是否正确？
-
----
-
-*最后更新：2026-01-19*
+新增或迁移模块时核对导出、生产调用、测试、资源和文档引用。源码目录表说明当前事实，新增规则统一维护在根规范及 guide，避免两份互相冲突的命名和行数限制。

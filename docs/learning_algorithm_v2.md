@@ -1,5 +1,7 @@
 # 学习算法 v2
 
+状态：当前算法业务口径。工程边界、兼容路径和复现限制见 [学习指南](guide/learning.md)，Schema 与迁移见 [进度数据](learning_progress_vnext.md)，未实现保护见 [实施状态](product_status.md)。
+
 HopEnglish v2 将学习决策实现为纯 Dart `LearningEngine`。数据库和页面只提供事实并执行决策，不包含掌握、选词和间隔规则。
 
 ## 学习流程
@@ -22,7 +24,7 @@ flowchart TD
     L --> M
     M -->|"首次提取正确"| N["同课最多提升一级"]
     N --> O["安排下次复习：1 / 3 / 7 / 14 / 30 天"]
-    M -->|"答错"| P["展示正确图片并播放声音"]
+    M -->|"答错"| P["晃动错误选项并重播题目，留在本题直到选对"]
     P --> Q["保持或降级状态，并立即到期"]
     Q --> R{"本词重试次数少于 2 次？"}
     R -->|"是"| S["在 2–4 道题后插入二选一重试"]
@@ -55,6 +57,7 @@ flowchart TD
 ## 课程策略
 
 - 每课练习 5/6/8 个单词时，最多分别引入 3/3/4 个新词。
+- 5/6/8 是目标规模；没有足够旧词补位时，实际课词数可少于目标，不能为凑满而突破新词上限。
 - 本课选中的新词和旧词都在测验前进行一轮图音接触。
 - 选词优先级为：最近失败、到期 Acquired、到期 Consolidating、到期 Stable、新词、非到期补位词。
 - 答错后晃动错误卡片并重播题目，用户选对后才进入下一题；同时在 2–4 道题后安排二选一重试，每词每课最多两次。
@@ -64,7 +67,9 @@ flowchart TD
 
 - 默认策略版本为 v2。
 - 使用 `--dart-define=LEARNING_POLICY_VERSION=1` 可启用旧策略。
-- 每个 `LessonPlan` 保存 `lessonId`、`policyVersion` 和 `randomSeed`；同样输入、时间与 seed 会生成相同决策。
+- 每个 `LessonPlan` 保存 `lessonId`、`policyVersion` 和 `randomSeed`；在相同支持环境内，同样输入、时间、策略与 seed 会生成相同决策。
+- 固定 seed 是复现输入；当前自动 seed 使用 `Object.hash`，不承诺跨进程/SDK 仅凭分类和时间得到相同 seed，当前也没有完整课程恢复快照。
+- 兼容 v1 是引擎中的测验排序路径；历史 `AdaptiveSortingService` 的曝光分桶不是这条配置路径。
 
 ## 数据迁移
 

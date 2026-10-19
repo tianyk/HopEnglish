@@ -215,8 +215,14 @@ void main() {
     expect(find.byKey(const ValueKey('two-choice-layout')), findsOneWidget);
     final dogCard = tester.getRect(find.byKey(const ValueKey('answer-dog')));
     expect(dogCard.height, greaterThan(dogCard.width));
+    final audioButton =
+        tester.getRect(find.byKey(const ValueKey('quiz-audio-button')));
+    expect(audioButton.width, greaterThanOrEqualTo(96));
+    expect(audioButton.height, greaterThanOrEqualTo(64));
+    final progress = tester.getRect(find.byType(LinearProgressIndicator));
+    expect(audioButton.top - progress.bottom, inInclusiveRange(37, 39));
     final instruction = tester.getRect(find.text('Tap the picture'));
-    expect(dogCard.top - instruction.bottom, inInclusiveRange(40, 52));
+    expect(dogCard.top - instruction.bottom, inInclusiveRange(29, 31));
 
     await tester.tap(find.byKey(const ValueKey('answer-cat')));
     await tester.pumpAndSettle();
@@ -275,7 +281,13 @@ void main() {
     final firstCard = tester.getRect(
       find.byKey(const ValueKey('answer-dog')),
     );
-    expect(firstCard.top - instruction.bottom, inInclusiveRange(27, 29));
+    final audioButton =
+        tester.getRect(find.byKey(const ValueKey('quiz-audio-button')));
+    expect(audioButton.width, greaterThanOrEqualTo(96));
+    expect(audioButton.height, greaterThanOrEqualTo(64));
+    final progress = tester.getRect(find.byType(LinearProgressIndicator));
+    expect(audioButton.top - progress.bottom, inInclusiveRange(37, 39));
+    expect(firstCard.top - instruction.bottom, inInclusiveRange(29, 31));
     expect(tester.takeException(), isNull);
   });
 

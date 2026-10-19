@@ -523,86 +523,87 @@ class _WordLearningPageState extends State<WordLearningPage>
 
   Widget _buildQuizView() {
     final options = _currentQuestion.options;
-    if (options.length == 2) return _buildTwoChoiceQuiz(options);
-
-    return Column(
-      key: ValueKey('quiz-${_currentQuestion.target.id}'),
-      children: [
-        const SizedBox(height: 20),
-        GestureDetector(
-          onTap: () => _playCurrentWord(slow: false),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-            decoration: BoxDecoration(
-              color: AppTheme.primary,
-              borderRadius: BorderRadius.circular(28),
-              boxShadow: AppTheme.buttonShadow,
-            ),
-            child: const Icon(Icons.volume_up_rounded,
-                color: Colors.white, size: 36),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Text('Tap the picture', style: AppTheme.titleMedium),
-        const SizedBox(height: 28),
-        Expanded(
-          child: _buildFourChoiceLayout(options),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTwoChoiceQuiz(List<Word> options) {
     return LayoutBuilder(
       key: ValueKey('quiz-${_currentQuestion.target.id}'),
       builder: (context, constraints) {
+        final compact = constraints.maxHeight < 520;
+        final topSpacing = compact
+            ? 30.0
+            : (constraints.maxHeight * 0.06 + 12).clamp(48.0, 66.0);
+        final choiceSpacing = compact ? 30.0 : 42.0;
+
+        return Column(
+          children: [
+            SizedBox(height: topSpacing),
+            _buildQuizAudioButton(),
+            const SizedBox(height: 12),
+            Text('Tap the picture', style: AppTheme.titleMedium),
+            SizedBox(height: choiceSpacing),
+            Expanded(
+              child: options.length == 2
+                  ? _buildTwoChoiceLayout(options)
+                  : _buildFourChoiceLayout(options),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildQuizAudioButton() {
+    return Semantics(
+      button: true,
+      label: 'Play word',
+      child: GestureDetector(
+        key: const ValueKey('quiz-audio-button'),
+        behavior: HitTestBehavior.opaque,
+        onTap: () => _playCurrentWord(slow: false),
+        child: Container(
+          width: 96,
+          height: 68,
+          decoration: BoxDecoration(
+            color: AppTheme.primary,
+            borderRadius: BorderRadius.circular(30),
+            boxShadow: AppTheme.buttonShadow,
+          ),
+          child: const Icon(
+            Icons.volume_up_rounded,
+            color: Colors.white,
+            size: 36,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTwoChoiceLayout(List<Word> options) {
+    return LayoutBuilder(
+      key: const ValueKey('two-choice-layout'),
+      builder: (context, constraints) {
         const gap = 16.0;
-        final usableWidth = math.min(constraints.maxWidth - 48, 360.0);
-        final cardWidth = (usableWidth - gap) / 2;
+        final usableWidth = math.max(
+          0.0,
+          math.min(constraints.maxWidth - 48, 360.0),
+        );
+        final cardWidth = math.max(0.0, (usableWidth - gap) / 2);
         final desiredHeight = cardWidth / 0.86;
-        final cardHeight = math.min(
-          desiredHeight,
-          math.max(120.0, constraints.maxHeight - 160),
+        final cardHeight = math.max(
+          0.0,
+          math.min(desiredHeight, constraints.maxHeight),
         );
         return Align(
-          alignment: const Alignment(0, -0.15),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              GestureDetector(
-                onTap: () => _playCurrentWord(slow: false),
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                  decoration: BoxDecoration(
-                    color: AppTheme.primary,
-                    borderRadius: BorderRadius.circular(28),
-                    boxShadow: AppTheme.buttonShadow,
-                  ),
-                  child: const Icon(
-                    Icons.volume_up_rounded,
-                    color: Colors.white,
-                    size: 36,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text('Tap the picture', style: AppTheme.titleMedium),
-              const SizedBox(height: 44),
-              SizedBox(
-                key: const ValueKey('two-choice-layout'),
-                width: usableWidth,
-                height: cardHeight,
-                child: Row(
-                  children: [
-                    for (var index = 0; index < options.length; index++) ...[
-                      if (index > 0) const SizedBox(width: gap),
-                      Expanded(child: _buildAnswerCard(options[index])),
-                    ],
-                  ],
-                ),
-              ),
-            ],
+          alignment: Alignment.topCenter,
+          child: SizedBox(
+            width: usableWidth,
+            height: cardHeight,
+            child: Row(
+              children: [
+                for (var index = 0; index < options.length; index++) ...[
+                  if (index > 0) const SizedBox(width: gap),
+                  Expanded(child: _buildAnswerCard(options[index])),
+                ],
+              ],
+            ),
           ),
         );
       },
@@ -615,7 +616,7 @@ class _WordLearningPageState extends State<WordLearningPage>
       builder: (context, constraints) {
         const gap = 16.0;
         final maxCardWidth = (constraints.maxWidth - 48 - gap) / 2;
-        final maxCardHeight = (constraints.maxHeight - 24 - gap) / 2;
+        final maxCardHeight = (constraints.maxHeight - gap) / 2;
         final cardSize = math.max(
           0.0,
           math.min(maxCardWidth, maxCardHeight),
